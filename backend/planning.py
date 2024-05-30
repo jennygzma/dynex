@@ -1,7 +1,12 @@
 # This file handles brainstorming the design hypothesis and creating the task list.
 from openai import OpenAI
+from dotenv import load_dotenv
 
-client = OpenAI(api_key="")
+import os
+
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 def get_design_hypothesis(ui_prompt, data_model_prompt):
 	print("calling GPT for get_design_hypothesis...")

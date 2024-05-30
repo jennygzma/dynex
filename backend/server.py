@@ -2,21 +2,26 @@
 
 # Import flask and datetime module for showing date and time
 from flask import Flask, jsonify, request
-import openai
-
+from dotenv import load_dotenv
 from openai import OpenAI
+
+import os
 import datetime
 import uuid
 import json
 from planning import get_design_hypothesis, get_plan
 from code_generation import implement_plan, implement_plan_iterative, get_fake_data
 
+# Load variables from .env file
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+
 x = datetime.datetime.now()
 
 # Initializing flask app
 app = Flask(__name__)
 
-client = OpenAI(api_key="")
+client = OpenAI(api_key=api_key)
 
 prompt = None; # user provided prompt for what UI should look like
 faked_data = None; # GPT generated faked data

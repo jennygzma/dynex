@@ -1,7 +1,12 @@
 # This file handles saving mocked data, generating, and cleaning up the code based on the task list
 from openai import OpenAI
+from dotenv import load_dotenv
 
-client = OpenAI(api_key="")
+import os
+
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 def get_fake_data(data_model):
 	print("calling GPT for get_fake_data...")
