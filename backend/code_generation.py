@@ -1,12 +1,33 @@
 # This file handles saving mocked data, generating, and cleaning up the code based on the task list
-from openai import OpenAI
-from dotenv import load_dotenv
+import json
 
-import os
+import globals
+from utils import (
+    add_comment_to_html_file,
+    create_and_write_file,
+    create_folder,
+    read_file,
+)
 
-load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key)
+client = globals.client
+
+# HOW CODE GENERATION FOLDER WORKS
+# - They will all rest in generated/generations_[timestamp]_[uuid]
+# - They will all have a faked_data.json file
+
+# - for lock step
+# [code_folder_path]/index.html - main code that is changed and updated constantly
+# [code_folder_path]/checked.html - after all the steps, the final checked code
+# [code_folder_path]/cleaned.html - after all the steps, the final cleaned code
+# [code_folder_path]/[task_id]/index.html - initial generated code per task_id
+# [code_folder_path]/[task_id]/checked.html - checked generated code per task_id
+# [code_folder_path]/[task_id]/cleaned.html - cleaned generated code per task_id
+
+# for one shot
+# index.html - main code that is changed and updated constantly
+# initial.html - initial code
+# checked.html - checked code
+# cleaned.html - cleaned code
 
 def get_fake_data(data_model):
 	print("calling GPT for get_fake_data...")
@@ -66,15 +87,19 @@ def get_fake_data(data_model):
 	print("sucessfully called GPT for get_fake_data", res);
 	return res.choices[0].message.content
 
-# this code generated is not iterative  
-def implement_plan(prompt, plan, faked_data, design_hypothesis):
+# this code generated is one shot
+def implement_plan(prompt, plan, faked_data, design_hypothesis, code_folder_path):
 	print("calling GPT for implement_plan...")
-	code = get_ui_code(prompt, plan, faked_data, design_hypothesis)
-	code = overall_check(code, design_hypothesis)
-	code = cleanup_code(code, faked_data)
-	return code
+	checked_code_file_path = f"{code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
+	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+	initial_code_file_path = f"{code_folder_path}/initial.html"
+	main_code_file_path = f"{code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+	get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_path, main_code_file_path)
+	overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
+	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
+	return main_code_file_path
 
-def get_ui_code(prompt, plan, faked_data, design_hypothesis):
+def get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_path, main_code_file_path):
 	print("calling GPT for get_ui_code...")
 	this_prompt = f"This is the UI {prompt}. To build the UI, follow these steps {plan} it should use all this data: {faked_data}"
 	messages = [
@@ -94,34 +119,43 @@ def get_ui_code(prompt, plan, faked_data, design_hypothesis):
         {"role": "user", "content": this_prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
+	code = res.choices[0].message.content
+	create_and_write_file(initial_code_file_path, code)
+	create_and_write_file(main_code_file_path, code)
 	print("sucessfully called GPT for get_ui_code", res);
-	return res.choices[0].message.content
+	return code
 
-def implement_plan_iterative(design_hypothesis, plan, faked_data):
-	print("calling GPT for implement_plan_iterative...")
+def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_path):
+	print("calling GPT for implement_plan_lock_step...")
 	if len(plan) == 0 or plan is None:
 		print("ERROR: there was no plan...")
 		return ""
-	code_dict = {}
 	previous_tasks = []
+	checked_code_file_path = f"{code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
+	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+	main_code_file_path = f"{code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+
 	for step in plan:
 		print(f"for implement_plan, implementing task_id: {step["task_id"]}")
-		previous_code = code_dict[step["task_id"] - 1] if step["task_id"] > 1 else ""
-		code = implement_task(faked_data, design_hypothesis, step["task"], previous_tasks, previous_code)
-		check = check_code(step["task"], previous_tasks, design_hypothesis, code, previous_code)
-		code = code if check else check.modified_code
-		code = cleanup_code(code, faked_data)
-		previous_tasks.append(step["task"])
-		code_dict[step["task_id"]] = code
-	print(f"the generated code per each task is {code_dict}")
-	most_recent_code = list(code_dict.values())[-1]
-	checked_code = overall_check(most_recent_code, design_hypothesis)
-	cleaned_code = cleanup_code(checked_code, faked_data)
-	return cleaned_code
+		task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
+		create_folder(task_code_folder_path)
+		task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
+		task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+		task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+		previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}" if step["task_id"] > 1 else ""
 
-def implement_task(faked_data, design_hypothesis, task, previous_tasks, previous_code):
-	print("calling GPT for implement_plan...")
-	this_prompt = f"Please execute this task: {task}. This is the existing code: {previous_code}"
+		implement_task_per_lock_step(faked_data, design_hypothesis, step["task"], step["task_id"], previous_tasks, task_main_code_file_path, main_code_file_path)
+		check_code_per_lock_step(step["task"], previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path)
+		cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
+		previous_tasks.append(step["task"])
+	overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
+	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
+	return main_code_file_path
+
+def implement_task_per_lock_step(faked_data, design_hypothesis, task, task_id, previous_tasks, task_main_code_file_path, main_code_file_path):
+	print("calling GPT for implement_task_per_lock_step...")
+	existing_code = read_file(main_code_file_path) if task_id > 1 else ""
+	this_prompt = f"Please execute this task: {task}. This is the existing code: {existing_code}"
 	messages = [
         {
             "role": "system",
@@ -143,11 +177,15 @@ def implement_task(faked_data, design_hypothesis, task, previous_tasks, previous
         {"role": "user", "content": this_prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
-	print("sucessfully called GPT for implement_task", res);
-	return res.choices[0].message.content
+	code = res.choices[0].message.content
+	create_and_write_file(task_main_code_file_path, code)
+	create_and_write_file(main_code_file_path, code)
+	print("sucessfully called GPT for implement_task", res)
 
-def check_code(task, previous_tasks, design_hypothesis, code, previous_code):
-    print("calling GPT for check_code...")
+def check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path):
+    print("calling GPT for check_code_per_lock_step...")
+    previous_code = read_file(previous_task_main_code_file_path) if previous_task_main_code_file_path else ""
+    code = read_file(main_code_file_path)
     prompt=f"This is the code to check: {code}, with this task: {task}"
     messages = [
         {
@@ -159,10 +197,11 @@ def check_code(task, previous_tasks, design_hypothesis, code, previous_code):
 				If it is not, update the code to do what the tasks suggests, but ensure that the functionality from the previous tasks are preserved. These were the previous tasks: {previous_tasks}
 				If code was commented out, add the previous code's functionality into the current code. This is the previous code: {previous_code}
                 
-				The response should be formatted as follows: {{"approved": approved, "modified_code": modified_code}}, 
-				where "approved" is a boolean. If the original code does what the task wants, then approved should be true. If not, approved should be false,
-				and "task_id" is the task_id provided by the user. 
-				If "approved" is false, then "modified_code" should contain the modified code that does what the task wants. If "approved" is true, then "modified_code" should be null.
+				The response should be formatted as follows: {{"approved": approved, "modified_code": modified_code, "what_was_changed": what_was_changed}},
+				where "modified_code" is a the updated html wrapped in a string,
+				where "what_was_changed" describes what was updated wrapped in a string,
+				where "approved" is a boolean. If the original code does what the task wants, then approved should be true. If not, approved should be false.
+				If "approved" is false, then "modified_code" should contain the modified code that does what the task wants, and "what_was_changed" should describe what was changed. If "approved" is true, then "modified_code" and "what_was_changed" should be null.
 
 				Only return the json object as the response.   
             """,
@@ -170,11 +209,22 @@ def check_code(task, previous_tasks, design_hypothesis, code, previous_code):
         {"role": "user", "content": prompt}
     ]
     res = client.chat.completions.create(model="gpt-4", messages=messages)
-    print("sucessfully called GPT for check_code", res);
-    return res.choices[0].message.content
+    print("sucessfully called GPT for check_code", res)
+    try:
+        result = json.loads(res.choices[0].message.content)
+        checked_code = code if result["approved"] else result["modified_code"]
+        create_and_write_file(task_checked_code_file_path, checked_code)
+        create_and_write_file(main_code_file_path, checked_code)
+        if not result["approved"]:
+            add_comment_to_html_file(task_checked_code_file_path, result["what_was_changed"])
+        print("successfully parsed GPT response for check_code")
+    except json.JSONDecodeError:
+        print("JSON decoding failed. Retrying...")
+        check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path)
 
-def overall_check(code, design_hypothesis):
+def overall_check(design_hypothesis, checked_code_file_path, main_code_file_path):
 	print("calling GPT for overall_check...")
+	code = read_file(main_code_file_path)
 	prompt=f"This is the code: {code}"
 	messages = [
         {
@@ -189,11 +239,14 @@ def overall_check(code, design_hypothesis):
         {"role": "user", "content": prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
+	checked_code = res.choices[0].message.content
+	create_and_write_file(checked_code_file_path, checked_code)
+	create_and_write_file(main_code_file_path, checked_code)
 	print("sucessfully called GPT for overall_check", res)
-	return res.choices[0].message.content
 
-def cleanup_code(code, data):
+def cleanup_code(data, cleaned_code_file_path, main_code_file_path):
 	print("calling GPT for cleanup_code...")
+	code = read_file(main_code_file_path)
 	prompt = f'This is the code: \n {code} \n\n This is the data: {data}'
 	messages = [
         {
@@ -274,6 +327,6 @@ displayCharacter(currentIndex);
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	cleaned_code = res.choices[0].message.content
+	create_and_write_file(cleaned_code_file_path, cleaned_code)
+	create_and_write_file(main_code_file_path, cleaned_code)
 	print("successfully called gpt for cleanup_code: " + cleaned_code)
-	return cleaned_code
-	
