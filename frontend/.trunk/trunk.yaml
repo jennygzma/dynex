@@ -17,15 +17,15 @@ runtimes:
 # This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
 lint:
   enabled:
-    - checkov@3.2.74
+    - checkov@3.2.114
     - git-diff-check
-    - markdownlint@0.39.0
-    - osv-scanner@1.7.2
+    - markdownlint@0.41.0
+    - osv-scanner@1.7.4
     - oxipng@9.1.1
     - prettier@3.2.5
-    - svgo@3.2.0
-    - trivy@0.50.4
-    - trufflehog@3.71.0
+    - svgo@3.3.2
+    - trivy@0.51.4
+    - trufflehog@3.77.0
     - yamllint@1.35.1
 actions:
   disabled:

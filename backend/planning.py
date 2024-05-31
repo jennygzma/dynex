@@ -33,8 +33,12 @@ def get_design_hypothesis(ui_prompt, data_model_prompt):
 def get_plan(design_hypothesis):
 	print("calling GPT for get_plan...")
 	prompt = f"""I want to create a UI with this design: {design_hypothesis}. 
-	    Give me a detailed implementation plan based on this design - the plan should be a list of tasks. Assume all the code will exist in one index.html file, and that the UI will render in one page with no backend. There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
-		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
+	    Give me a detailed implementation plan based on this design - the plan should be a list of tasks. 
+		Assume all the code will exist in one index.html file, and that the UI will render in one page with no backend. 
+		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
+		The first step of the plan should be creating the HTML structure of the design hypothesis.
+		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
+		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		
 		Please limit the plan to three to six steps.
 		"""

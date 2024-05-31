@@ -1,9 +1,11 @@
 import { Button, Card, Paper, Stack, TextField } from "@mui/material";
 import React, { useState } from "react";
 import axios from "axios";
+import { usePlanContext } from "../hooks/plan-context";
 
 const CodeGeneration = () => {
-  const [plan, setPlan] = useState("");
+  const {plan, updatePlan} = usePlanContext();
+
   const [code, setCode] = useState("");
 
   const renderUI = () => {
@@ -17,20 +19,6 @@ const CodeGeneration = () => {
     doc.open();
     doc.write(code);
     doc.close();
-  };
-
-  const generatePlan = () => {
-    axios({
-      method: "POST",
-      url: "/generate_plan",
-    })
-      .then((response) => {
-        console.log("/generate_plan request successful:", response.data);
-        setPlan(response.data.plan);
-      })
-      .catch((error) => {
-        console.error("Error calling /generate_plan request:", error);
-      });
   };
 
   const generateCode = () => {
@@ -49,19 +37,8 @@ const CodeGeneration = () => {
 
   return (
     <Stack spacing="20px">
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={generatePlan}
-        sx={{ width: "100%" }}
-      >
-        Create Plan
-      </Button>
       {plan && (
         <>
-          <Card sx={{ padding: "40px", fontSize: "20px", lineHeight: "30px" }}>
-            {plan}
-          </Card>
           <Button
             variant="contained"
             color="primary"
