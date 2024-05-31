@@ -1,7 +1,8 @@
 # This file handles saving mocked data, generating, and cleaning up the code based on the task list
 from openai import OpenAI
 from dotenv import load_dotenv
-
+from utils import create_and_write_file, read_file
+import uuid
 import os
 
 load_dotenv()
@@ -67,14 +68,15 @@ def get_fake_data(data_model):
 	return res.choices[0].message.content
 
 # this code generated is not iterative  
-def implement_plan(prompt, plan, faked_data, design_hypothesis):
+def implement_plan(prompt, plan, faked_data, design_hypothesis, folder_path):
 	print("calling GPT for implement_plan...")
-	code = get_ui_code(prompt, plan, faked_data, design_hypothesis)
-	code = overall_check(code, design_hypothesis)
-	code = cleanup_code(code, faked_data)
-	return code
+	file_path = f"{folder_path}/one_shot_{uuid.uuid4()}"
+	get_ui_code(prompt, plan, faked_data, design_hypothesis, file_path)
+	overall_check(design_hypothesis, file_path)
+	cleanup_code(faked_data, file_path)
+	return f"{file_path}.html"
 
-def get_ui_code(prompt, plan, faked_data, design_hypothesis):
+def get_ui_code(prompt, plan, faked_data, design_hypothesis, file_path):
 	print("calling GPT for get_ui_code...")
 	this_prompt = f"This is the UI {prompt}. To build the UI, follow these steps {plan} it should use all this data: {faked_data}"
 	messages = [
@@ -94,8 +96,11 @@ def get_ui_code(prompt, plan, faked_data, design_hypothesis):
         {"role": "user", "content": this_prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
+	code = res.choices[0].message.content
+	create_and_write_file(f"{file_path}.html", code)
+	create_and_write_file(f"{file_path}_initial.html", code)
 	print("sucessfully called GPT for get_ui_code", res);
-	return res.choices[0].message.content
+	return code
 
 def implement_plan_iterative(design_hypothesis, plan, faked_data):
 	print("calling GPT for implement_plan_iterative...")
@@ -106,6 +111,7 @@ def implement_plan_iterative(design_hypothesis, plan, faked_data):
 	previous_tasks = []
 	for step in plan:
 		print(f"for implement_plan, implementing task_id: {step["task_id"]}")
+		# if step is 1 there is no previous code
 		previous_code = code_dict[step["task_id"] - 1] if step["task_id"] > 1 else ""
 		code = implement_task(faked_data, design_hypothesis, step["task"], previous_tasks, previous_code)
 		check = check_code(step["task"], previous_tasks, design_hypothesis, code, previous_code)
@@ -173,8 +179,9 @@ def check_code(task, previous_tasks, design_hypothesis, code, previous_code):
     print("sucessfully called GPT for check_code", res);
     return res.choices[0].message.content
 
-def overall_check(code, design_hypothesis):
+def overall_check(design_hypothesis, file_path):
 	print("calling GPT for overall_check...")
+	code = read_file(f"{file_path}.html")
 	prompt=f"This is the code: {code}"
 	messages = [
         {
@@ -189,11 +196,14 @@ def overall_check(code, design_hypothesis):
         {"role": "user", "content": prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
+	checked_code = res.choices[0].message.content
+	create_and_write_file(f"{file_path}.html", checked_code)
+	create_and_write_file(f"{file_path}_checked.txt", checked_code)
 	print("sucessfully called GPT for overall_check", res)
-	return res.choices[0].message.content
 
-def cleanup_code(code, data):
+def cleanup_code(data, file_path):
 	print("calling GPT for cleanup_code...")
+	code = read_file(f"{file_path}.html")
 	prompt = f'This is the code: \n {code} \n\n This is the data: {data}'
 	messages = [
         {
@@ -274,6 +284,6 @@ displayCharacter(currentIndex);
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	cleaned_code = res.choices[0].message.content
+	create_and_write_file(f"{file_path}.html", cleaned_code)
+	create_and_write_file(f"{file_path}_cleaned.html", cleaned_code)
 	print("successfully called gpt for cleanup_code: " + cleaned_code)
-	return cleaned_code
-	
