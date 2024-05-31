@@ -1,38 +1,35 @@
 # This file handles brainstorming the design hypothesis and creating the task list.
-from openai import OpenAI
-from dotenv import load_dotenv
+import globals
 
-import os
+client = globals.client
 
-load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key)
 
 def get_design_hypothesis(ui_prompt, data_model_prompt):
-	print("calling GPT for get_design_hypothesis...")
-	prompt = f"""
+    print("calling GPT for get_design_hypothesis...")
+    prompt = f"""
         This is the UI prompt: {ui_prompt}
         This is the data_model: {data_model_prompt}
     """
-	messages = [
-		{
-			"role": "system",
-			"content": """
+    messages = [
+        {
+            "role": "system",
+            "content": """
                 You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
 				Each design should detail the user interactions and design layout. It should not be more than 100 words long.
 				
 				For example, a response could be: To create an application where the user can store their notes app, I will create a gmail, table-like UI, that shows the "title" field of the note. The user can search for notes, delete notes, and add notes. When the user clicks on a row, they will be brought to the full note.
             """,
         },
-		{"role": "user", "content": prompt}
+        {"role": "user", "content": prompt},
     ]
-	res = client.chat.completions.create(model="gpt-4", messages=messages)
-	print("sucessfully called GPT for get_design_hypothesis", res);
-	return res.choices[0].message.content
+    res = client.chat.completions.create(model="gpt-4", messages=messages)
+    print("sucessfully called GPT for get_design_hypothesis", res)
+    return res.choices[0].message.content
+
 
 def get_plan(design_hypothesis):
-	print("calling GPT for get_plan...")
-	prompt = f"""I want to create a UI with this design: {design_hypothesis}. 
+    print("calling GPT for get_plan...")
+    prompt = f"""I want to create a UI with this design: {design_hypothesis}.
 	    Give me a detailed implementation plan based on this design - the plan should be a list of tasks. 
 		Assume all the code will exist in one index.html file, and that the UI will render in one page with no backend. 
 		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
@@ -42,25 +39,26 @@ def get_plan(design_hypothesis):
 		
 		Please limit the plan to three to six steps.
 		"""
-	messages = [
+    messages = [
         {
             "role": "system",
             "content": "You are a helpful software engineer to answer questions related to implementing this UI.",
         },
-        {"role": "user", "content": prompt}
+        {"role": "user", "content": prompt},
     ]
-	res = client.chat.completions.create(model="gpt-4", messages=messages)
-	plan = cleanup_plan(res.choices[0].message.content)
-	print("sucessfully called GPT for get_plan", res)
-	return plan
+    res = client.chat.completions.create(model="gpt-4", messages=messages)
+    plan = cleanup_plan(res.choices[0].message.content)
+    print("sucessfully called GPT for get_plan", res)
+    return plan
+
 
 def cleanup_plan(plan):
     print("calling GPT for cleanup_plan...")
     prompt = f"Please clean up the plan so it only returns the json array. This is the plan: {plan}"
     messages = [
-		{
-			"role": "system",
-			"content": """You are an assistant to clean up GPT responses into a json array.
+        {
+            "role": "system",
+            "content": """You are an assistant to clean up GPT responses into a json array.
 			The response should be as formatted: [
                 {
                     "task_id": 1,
@@ -73,9 +71,9 @@ def cleanup_plan(plan):
                     "dep": [1],
                 },
             ]
-            """
+            """,
         },
-		{ "role": "user","content": prompt }
+        {"role": "user", "content": prompt},
     ]
     res = client.chat.completions.create(model="gpt-4", messages=messages)
     print("sucessfully called GPT for cleanup_plan", res)
