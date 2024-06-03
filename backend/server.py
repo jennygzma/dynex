@@ -57,7 +57,7 @@ def generate_plan():
     globals.plan = json.loads(stringified_plan)
     return jsonify({"message": "Generated Plan", "plan": stringified_plan}), 200
 
-# For testing only. Run curl http://127.0.0.1:5000/generate_code
+# Run curl http://127.0.0.1:5000/generate_code
 @app.route("/generate_code", methods=["GET"])
 def generate_code():
     print("calling generate_code...")
