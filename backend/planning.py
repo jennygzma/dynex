@@ -52,6 +52,7 @@ def get_plan(design_hypothesis):
     return plan
 
 
+#  To do: make this recursive so that if the plan cannot be parsed into a json file, we recall GPT until its a valid JSON array
 def cleanup_plan(plan):
     print("calling GPT for cleanup_plan...")
     prompt = f"Please clean up the plan so it only returns the json array. This is the plan: {plan}"

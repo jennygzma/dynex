@@ -13,6 +13,7 @@ GENERATED_FOLDER_PATH = "generated"
 MAIN_CODE_FILE_NAME = "index.html"
 CHECKED_CODE_FILE_NAME = "checked.html"
 CLEANED_CODE_FILE_NAME = "cleaned.html"
+TASK_FILE_NAME = "task.html"
 
 # user provided prompt for what UI should look like
 prompt = None

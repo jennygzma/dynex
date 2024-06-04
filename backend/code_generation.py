@@ -139,52 +139,122 @@ def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_pa
 		print(f"for implement_plan, implementing task_id: {step["task_id"]}")
 		task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
 		create_folder(task_code_folder_path)
-		task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
+		# task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
 		task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
-		task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+		task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}" # merged code
+		task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
 		previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}" if step["task_id"] > 1 else ""
-
-		implement_task_per_lock_step(faked_data, design_hypothesis, step["task"], step["task_id"], previous_tasks, task_main_code_file_path, main_code_file_path)
-		check_code_per_lock_step(step["task"], previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path)
+		if step["task_id"] == 1:
+			implement_first_task(design_hypothesis, step["task"], faked_data, task_main_code_file_path, main_code_file_path)
+			cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
+			continue
+		implement_task_per_lock_step(step["task"],task_code_file_path, main_code_file_path)
+		merge_code(step["task"], previous_task_main_code_file_path, task_main_code_file_path, main_code_file_path)
+		# check_code_per_lock_step(step["task"], previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path)
 		cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
 		previous_tasks.append(step["task"])
 	overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
 	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
 	return main_code_file_path
 
-def implement_task_per_lock_step(faked_data, design_hypothesis, task, task_id, previous_tasks, task_main_code_file_path, main_code_file_path):
-	print("calling GPT for implement_task_per_lock_step...")
-	existing_code = read_file(main_code_file_path) if task_id > 1 else ""
-	this_prompt = f"Please execute this task: {task}. This is the existing code: {existing_code}"
+def implement_first_task(design_hypothesis, task, faked_data, task_main_code_file_path, main_code_file_path ):
+	print("calling GPT for implement_first_task...")
+	prompt = f"Please execute this task: {task}."
 	messages = [
         {
             "role": "system",
             "content": f"""
-                You are writing javascript, HTML, CSS for creating a UI given a data model.
-							
-				We want to iterate on the existing code by executing the task that the user specifies. 
-				Previously, the code performed these tasks: {previous_tasks}. Keep the functionality of the previous tasks. Do not leave out previous code and comment // existing code here
-				
-				For context, this is the goal: {design_hypothesis}. This is the faked_data: {faked_data}
-                
-                Please follow these rules while writing the code.
-                1. Please have the new code improve the existing code. Do not delete existing functionality in the code. Do not start completely from scratch.
-				2. Only write javascript, html, and css code.
-				3. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code. 
-				4. Please incorporate the faked_data to mock interactions
+                You are writing javascript, HTML, CSS for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
+				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task.
+
+				Idenfity each component of the UI and make sure to give it a logical id. For example, if the UI includes a search bar, the search bar id should be called "searchBar". If the UI has a table, the tableId should be called "table".
+
+                Follow these rules while writing the code.
+				1. Only write javascript, html, and css code.
+				2. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
             """,
         },
-        {"role": "user", "content": this_prompt}
+        {"role": "user", "content": prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	code = res.choices[0].message.content
+	print("called GPT for initial html file code", code)
+	create_and_write_file(main_code_file_path, code)
 	create_and_write_file(task_main_code_file_path, code)
+	messages = [
+        {
+            "role": "system",
+            "content": f"""
+                You are editing javascript, HTML, CSS for creating a UI given a data model.
+				Please edit the existing code to include a "let" variable called "data" that stores the faked_data {faked_data}
+
+                Please follow these rules while writing the code.
+				1. Only write javascript, html, and css code.
+				2. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
+            """,
+        },
+        {"role": "user", "content": f"This is the existing code {code}"}
+    ]
+	res = client.chat.completions.create(model="gpt-4", messages=messages)
+	print("called GPT for initial html file code")
+	code_with_data = res.choices[0].message.content
+	create_and_write_file(main_code_file_path, code_with_data)
+	create_and_write_file(task_main_code_file_path, code_with_data)
+	print("sucessfully called GPT for implement_first_task", res)
+
+def implement_task_per_lock_step(task, task_code_file_path, main_code_file_path):
+	print("calling GPT for implement_task_per_lock_step...")
+	prompt = f"Please execute this task: {task}."
+	messages = [
+        {
+            "role": "system",
+            "content": """
+                You are writing javascript, HTML, CSS for creating a UI given a data model.
+				Using javascript, HTML, and CSS, write out the code snippet that executes the task provided by the user.
+
+                Please follow these rules while writing the code.
+				1. Only write javascript, html, and css code.
+				2. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
+            """,
+        },
+        {"role": "user", "content": prompt}
+    ]
+	res = client.chat.completions.create(model="gpt-4", messages=messages)
+	code = res.choices[0].message.content
+	create_and_write_file(task_code_file_path, code)
 	create_and_write_file(main_code_file_path, code)
 	print("sucessfully called GPT for implement_task", res)
 
-def check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path):
-    print("calling GPT for check_code_per_lock_step...")
+def merge_code(task, previous_task_main_code_file_path, task_main_code_file_path, main_code_file_path):
+    print("calling GPT for merge_code...")
+    new_code = read_file(main_code_file_path)
     previous_code = read_file(previous_task_main_code_file_path) if previous_task_main_code_file_path else ""
+    prompt = f"Please merge this code {new_code} that executes this task: {task}"
+    messages = [
+        {
+            "role": "system",
+            "content": f"""
+                You are acting as a code merging system. This is the previous state of the code: {previous_code}
+
+				The user will provide the new code snippet that executes a task. Please merge in the new code to the previous code.
+				Identify where the code snippet's functionality should be placed within the original code.
+
+                Please follow these rules while writing the code.
+                1. Please have the new code improve the existing code. Do not delete existing functionality in the code.
+				2. Only write javascript, html, and css code.
+				3. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
+            """,
+        },
+        {"role": "user", "content": prompt}
+    ]
+    res = client.chat.completions.create(model="gpt-4", messages=messages)
+    merged_code = res.choices[0].message.content
+    create_and_write_file(task_main_code_file_path, merged_code)
+    create_and_write_file(main_code_file_path, merged_code)
+    print("successfully called GPT for merge_code...")
+
+def check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_checked_code_file_path, main_code_file_path):
+    print("calling GPT for check_code_per_lock_step...")
     code = read_file(main_code_file_path)
     prompt=f"This is the code to check: {code}, with this task: {task}"
     messages = [
@@ -194,15 +264,11 @@ def check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_check
                 You are reviewing code for a specific task to build this design: {design_hypothesis}. The user will provide the task the code is supposed to complete.
 				Please ensure that the code is doing what the task says. 
 				
-				If it is not, update the code to do what the tasks suggests, but ensure that the functionality from the previous tasks are preserved. These were the previous tasks: {previous_tasks}
-				If code was commented out, add the previous code's functionality into the current code. This is the previous code: {previous_code}
+				If it is not, identify the area of the code that is not executing the task.
                 
-				The response should be formatted as follows: {{"approved": approved, "modified_code": modified_code, "what_was_changed": what_was_changed}},
-				where "modified_code" is a the updated html wrapped in a string,
-				where "what_was_changed" describes what was updated wrapped in a string,
-				where "approved" is a boolean. If the original code does what the task wants, then approved should be true. If not, approved should be false.
-				If "approved" is false, then "modified_code" should contain the modified code that does what the task wants, and "what_was_changed" should describe what was changed. If "approved" is true, then "modified_code" and "what_was_changed" should be null.
-
+				The response should be formatted as follows: {{"approved": approved, "issues": issues}},
+				where "approved" is a boolean and "issues" is a string describing where went wrong in the code that did not execute the task. Please keep "issues" to be less than 100 words. If the original code does what the task wants, then approved should be true. If not, approved should be false.
+				If "approved" is false, then "issues" should describe what needs to be fixed for the code to execute the task.
 				Only return the json object as the response.   
             """,
         },
@@ -212,7 +278,9 @@ def check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_check
     print("sucessfully called GPT for check_code", res)
     try:
         result = json.loads(res.choices[0].message.content)
-        checked_code = code if result["approved"] else result["modified_code"]
+        if result["approved"]:
+            return
+        checked_code = result["issues"]
         create_and_write_file(task_checked_code_file_path, checked_code)
         create_and_write_file(main_code_file_path, checked_code)
         if not result["approved"]:
@@ -220,7 +288,7 @@ def check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_check
         print("successfully parsed GPT response for check_code")
     except json.JSONDecodeError:
         print("JSON decoding failed. Retrying...")
-        check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path)
+        check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_checked_code_file_path, main_code_file_path)
 
 def overall_check(design_hypothesis, checked_code_file_path, main_code_file_path):
 	print("calling GPT for overall_check...")
@@ -252,11 +320,12 @@ def cleanup_code(data, cleaned_code_file_path, main_code_file_path):
         {
             "role": "system",
             "content": """
-                You are cleaning up javascript and HTML code to ensure that it runs on first try. Additionally, you are inputting all sample data provided by the user to hardcode it into the code if the code asks for it.
+                You are cleaning up javascript and HTML code to ensure that it runs on first try.
                 
                 Please follow these rules while cleaning up the code.
-                1. There should be no natural language at all. The entire response should be code. 
-				2. This is an EXAMPLE of a result: <!DOCTYPE html>
+                1. The entire response should be code. Comments are okay
+				2. Ensure that there is a "let data" variable that contains ALL of the faked data {faked_data}. If not, please edit the code to have the fully faked data. DO NOT DELETE ANY CODE OR COMMENT ANY CODE OUT OTHER THAN THIS VARIABLE.
+				3. This is an EXAMPLE of a result: <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
