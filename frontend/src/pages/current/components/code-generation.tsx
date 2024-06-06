@@ -4,7 +4,7 @@ import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";
 
 const CodeGeneration = () => {
-  const {plan, updatePlan} = usePlanContext();
+  const { plan, updatePlan } = usePlanContext();
 
   const [code, setCode] = useState("");
 
@@ -37,32 +37,28 @@ const CodeGeneration = () => {
 
   return (
     <Stack spacing="20px">
-      {plan && (
-        <>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={generateCode}
-            sx={{ width: "100%" }}
-          >
-            Generate Code
-          </Button>
-          <TextField
-            className={"hi"}
-            label="Code Editor"
-            variant="outlined"
-            multiline
-            rows={10}
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            inputProps={{ style: { fontFamily: "monospace" } }}
-          />
-          <Button variant="contained" color="primary" onClick={renderUI}>
-            Render
-          </Button>
-          <Paper id="output" className={"hi"} sx={{ height: "100vh" }} />
-        </>
-      )}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={generateCode}
+        sx={{ width: "100%" }}
+      >
+        Generate Code
+      </Button>
+      <TextField
+        className={"hi"}
+        label="Code Editor"
+        variant="outlined"
+        multiline
+        rows={10}
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        inputProps={{ style: { fontFamily: "monospace" } }}
+      />
+      <Button variant="contained" color="primary" onClick={renderUI}>
+        Render
+      </Button>
+      <Paper id="output" className={"hi"} sx={{ height: "100vh" }} />
     </Stack>
   );
 };
