@@ -1,12 +1,18 @@
-import { Button, Card, Stack, TextField } from "@mui/material";
+import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import axios from "axios";
+import { usePlanContext } from "../hooks/plan-context";
 
 const UserInputs = () => {
+  const { designHypothesis, updateDesignHypothesis: updateDesignHypothesisFE } =
+    usePlanContext();
+
   const [dataInput, setDataInput] = useState("");
   const [dataModel, setDataModel] = useState("");
   const [UIPrompt, setUIPrompt] = useState("");
-  const [designHypothesis, setDesignHypothesis] = useState("");
+
+  const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
+  const [updatedDataInput, setUpdatedDataInput] = useState(false);
 
   const generateFakeData = () => {
     axios({
@@ -25,7 +31,7 @@ const UserInputs = () => {
       });
   };
 
-  const saveFakedData = () => {
+  const updateFakedData = () => {
     axios({
       method: "POST",
       url: "/save_faked_data",
@@ -35,6 +41,7 @@ const UserInputs = () => {
     })
       .then((response) => {
         console.log("/save_faked_data request successful:", response.data);
+        setUpdatedDataInput(false);
       })
       .catch((error) => {
         console.error("Error calling /save_faked_data request:", error);
@@ -47,6 +54,7 @@ const UserInputs = () => {
       url: "/generate_design_hypothesis",
       data: {
         prompt: UIPrompt,
+        data_model: dataModel,
       },
     })
       .then((response) => {
@@ -54,7 +62,7 @@ const UserInputs = () => {
           "/generate_design_hypothesis request successful:",
           response.data,
         );
-        setDesignHypothesis(response.data.hypothesis);
+        updateDesignHypothesisFE(response.data.hypothesis);
       })
       .catch((error) => {
         console.error(
@@ -64,84 +72,143 @@ const UserInputs = () => {
       });
   };
 
+  const updateDesignHypothesis = () => {
+    axios({
+      method: "POST",
+      url: "/save_design_hypothesis",
+      data: {
+        design_hypothesis: designHypothesis,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/save_design_hypothesis request successful:",
+          response.data,
+        );
+        setUpdatedDesignHypothesis(false);
+      })
+      .catch((error) => {
+        console.error("Error calling /save_design_hypothesis request:", error);
+      });
+  };
+
   return (
-    <Stack spacing="20px">
-      <TextField
-        className={"user-input"}
-        label="User Input"
-        variant="outlined"
-        multiline
-        rows={2}
-        value={UIPrompt}
-        placeholder={""}
-        onChange={(e) => setUIPrompt(e.target.value)}
-      />
-      <TextField
-        className={"data-model"}
-        label="Data Model"
-        variant="outlined"
-        multiline
-        rows={10}
-        value={dataModel}
-        onChange={(e) => setDataModel(e.target.value)}
-        inputProps={{ style: { fontFamily: "monospace" } }}
-      />
-      <Stack direction="row" spacing="10px" width="100%">
-        <Stack spacing="10px" width="50%">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={generateDesignHypothesis}
-            disabled={!UIPrompt || !dataModel}
-            sx={{ width: "100%" }}
-          >
-            Generate design hypothesis
-          </Button>
-          {designHypothesis && (
-            <>
-              <Card
-                sx={{ padding: "40px", fontSize: "20px", lineHeight: "30px" }}
-              >
-                {designHypothesis}
-              </Card>
-            </>
-          )}
-        </Stack>
-        <Stack spacing="10px" width="50%">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={generateFakeData}
-            disabled={!UIPrompt || !dataModel}
-            sx={{ width: "100%" }}
-          >
-            Generate fake data
-          </Button>
-          {dataInput && (
-            <>
-              <TextField
-                className={"generated-data"}
-                label="Data Input"
-                variant="outlined"
-                multiline
-                rows={13}
-                value={dataInput}
-                onChange={(e) => setDataInput(e.target.value)}
-                inputProps={{ style: { fontFamily: "monospace" } }}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={saveFakedData}
-                disabled={!dataInput}
-              >
-                Save faked data
-              </Button>
-            </>
-          )}
+    <Box
+      sx={{
+        padding: "10px",
+        border: 10,
+        borderColor: "#9a4e4e",
+        backgroundColor: "white",
+      }}
+    >
+      <Stack spacing="20px">
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            alignSelf: "center",
+            fontFamily: "monospace",
+          }}
+        >
+          User Input
+        </Typography>
+        <TextField
+          className={"user-input"}
+          label="User Input"
+          variant="outlined"
+          multiline
+          rows={2}
+          value={UIPrompt}
+          placeholder={""}
+          onChange={(e) => setUIPrompt(e.target.value)}
+        />
+        <TextField
+          className={"data-model"}
+          label="Data Model"
+          variant="outlined"
+          multiline
+          rows={10}
+          value={dataModel}
+          onChange={(e) => setDataModel(e.target.value)}
+          inputProps={{ style: { fontFamily: "monospace" } }}
+        />
+        <Stack direction="row" spacing="10px" width="100%">
+          <Stack spacing="10px" width="50%">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={generateDesignHypothesis}
+              disabled={!UIPrompt || !dataModel}
+              sx={{ width: "100%" }}
+            >
+              {designHypothesis
+                ? "Generate new design hypothesis"
+                : "Generate design hypothesis"}
+            </Button>
+            {designHypothesis && (
+              <>
+                <TextField
+                  className={"design-hypothesis"}
+                  label="Design Hypothesis"
+                  variant="outlined"
+                  multiline
+                  rows={13}
+                  value={designHypothesis}
+                  onChange={(e) => {
+                    updateDesignHypothesisFE(e.target.value);
+                    setUpdatedDesignHypothesis(true);
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={updateDesignHypothesis}
+                  disabled={!updatedDesignHypothesis}
+                >
+                  Update design hypothesis
+                </Button>
+              </>
+            )}
+          </Stack>
+          <Stack spacing="10px" width="50%">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={generateFakeData}
+              disabled={!UIPrompt || !dataModel}
+              sx={{ width: "100%" }}
+            >
+              {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
+            </Button>
+            {dataInput && (
+              <>
+                <TextField
+                  className={"generated-data"}
+                  label="Data Input"
+                  variant="outlined"
+                  multiline
+                  rows={13}
+                  value={dataInput}
+                  onChange={(e) => {
+                    setDataInput(e.target.value);
+                    setUpdatedDataInput(true);
+                  }}
+                  inputProps={{ style: { fontFamily: "monospace" } }}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={updateFakedData}
+                  disabled={!updatedDataInput}
+                >
+                  Update faked data
+                </Button>
+              </>
+            )}
+          </Stack>
         </Stack>
       </Stack>
-    </Stack>
+    </Box>
   );
 };
 

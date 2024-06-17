@@ -19,6 +19,8 @@ def generate_fake_data():
     data = request.json
     globals.data_model = data["data_model"]
     data = get_fake_data(globals.data_model)
+    globals.faked_data = data
+    create_and_write_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}", globals.faked_data)
     return jsonify({"message": "Generated code", "fake_data": data}), 200
 
 
@@ -36,18 +38,27 @@ def generate_design_hypothesis():
     print("calling generate_design_hypothesis...")
     data = request.json
     globals.prompt = data["prompt"]
+    globals.data_model = data["data_model"]
     globals.design_hypothesis = get_design_hypothesis(globals.prompt, globals.data_model)
     date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    globals.folder_path = (
-        f"{globals.GENERATED_FOLDER_PATH}/generations_{date_time}_{uuid.uuid4()}"
-    )
-    create_folder(globals.folder_path)
+    if globals.folder_path is None:
+        globals.folder_path = (
+            f"{globals.GENERATED_FOLDER_PATH}/generations_{date_time}_{uuid.uuid4()}"
+        )
+        create_folder(globals.folder_path)
     return (
         jsonify(
             {"message": "Generated design hypothesis", "hypothesis": globals.design_hypothesis}
         ),
         200,
     )
+
+@app.route("/save_design_hypothesis", methods=["POST"])
+def save_design_hypothesis():
+    print("calling save_design_hypothesis...")
+    data = request.json
+    globals.design_hypothesis = data["design_hypothesis"]
+    return jsonify({"message": "Saved design hypothesis", "data": globals.design_hypothesis}), 200
 
 
 @app.route("/generate_plan", methods=["POST"])
@@ -58,16 +69,39 @@ def generate_plan():
     return jsonify({"message": "Generated Plan", "plan": stringified_plan}), 200
 
 # For testing only. Run curl http://127.0.0.1:5000/generate_code
-@app.route("/generate_code", methods=["GET"])
+@app.route("/generate_code", methods=["POST"])
 def generate_code():
     print("calling generate_code...")
+    data = request.json
+    task_id = data["task_id"]
+    print(globals.plan)
     file_path = implement_plan_lock_step(
-        globals.design_hypothesis, globals.plan, globals.faked_data, globals.folder_path
+        globals.design_hypothesis, globals.plan, globals.faked_data, globals.folder_path, task_id
     )
     # file_path = implement_plan(globals.prompt, globals.plan, globals.faked_data, globals.design_hypothesis, globals.folder_path)
     code = read_file(file_path)
     return jsonify({"message": "Generated code", "code": code}), 200
 
+@app.route("/get_code_per_step", methods=["GET"])
+def get_code_per_step():
+    print("calling get_code_per_step...")
+    task_id = request.args.get("task_id")
+    task_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.CLEANED_CODE_FILE_NAME}"
+    print(task_id)
+    code = read_file(task_code_folder_path) or ""
+    print(code)
+    return jsonify({"message": f"Grabbed code for {task_id}", "code": code}), 200
+
+@app.route("/save_code_per_step", methods=["POST"])
+def save_code_per_step():
+    print("calling get_code_per_step...")
+    data = request.json
+    task_id = data["task_id"]
+    code = data["code"]
+    task_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.CLEANED_CODE_FILE_NAME}"
+    create_and_write_file(task_code_folder_path, code)
+    print(code)
+    return jsonify({"message": f"Grabbed code for {task_id}", "code": code}), 200
 
 # For testing only. Run curl http://127.0.0.1:5000/set_globals_for_debug
 @app.route("/set_globals_for_debug", methods=["GET"])
