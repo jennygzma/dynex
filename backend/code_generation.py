@@ -19,8 +19,8 @@ client = globals.client
 # [code_folder_path]/index.html - main code that is changed and updated constantly
 # [code_folder_path]/checked.html - after all the steps, the final checked code
 # [code_folder_path]/cleaned.html - after all the steps, the final cleaned code
-# [code_folder_path]/[task_id]/index.html - initial generated code per task_id
-# [code_folder_path]/[task_id]/checked.html - checked generated code per task_id
+# [code_folder_path]/[task_id]/merged.html - initial generated code per task_id
+# [code_folder_path]/[task_id]/checked.html - checked generated code per task_id - currently not being used
 # [code_folder_path]/[task_id]/cleaned.html - cleaned generated code per task_id
 
 # for one shot
@@ -93,7 +93,7 @@ def implement_plan(prompt, plan, faked_data, design_hypothesis, code_folder_path
 	checked_code_file_path = f"{code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
 	initial_code_file_path = f"{code_folder_path}/initial.html"
-	main_code_file_path = f"{code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+	main_code_file_path = f"{code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
 	get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_path, main_code_file_path)
 	overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
 	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
@@ -125,39 +125,67 @@ def get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_p
 	print("sucessfully called GPT for get_ui_code", res);
 	return code
 
-def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_path):
+# def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_path):
+# 	print("calling GPT for implement_plan_lock_step...")
+# 	if len(plan) == 0 or plan is None:
+# 		print("ERROR: there was no plan...")
+# 		return ""
+# 	previous_tasks = []
+# 	checked_code_file_path = f"{code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
+# 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+# 	main_code_file_path = f"{code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
+
+# 	for step in plan:
+# 		print(f"for implement_plan, implementing task_id: {step["task_id"]}")
+# 		task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
+# 		create_folder(task_code_folder_path)
+# 		# task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
+# 		task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+# 		task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}" # merged code
+# 		task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
+# 		previous_task_merged_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MERGED_CODE_FILE_NAME}" if step["task_id"] > 1 else ""
+# 		if step["task_id"] == 1:
+# 			implement_first_task(design_hypothesis, step["task"], faked_data, task_merged_code_file_path, main_code_file_path)
+# 			cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
+# 			continue
+# 		implement_task_per_lock_step(step["task"],task_code_file_path, main_code_file_path)
+# 		merge_code(step["task"], previous_task_merged_code_file_path, task_merged_code_file_path, main_code_file_path)
+# 		# check_code_per_lock_step(step["task"], previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_merged_code_file_path, main_code_file_path)
+# 		cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
+# 		previous_tasks.append(step["task"])
+# 	overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
+# 	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
+# 	return main_code_file_path
+
+def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_path, task_id):
 	print("calling GPT for implement_plan_lock_step...")
 	if len(plan) == 0 or plan is None:
 		print("ERROR: there was no plan...")
 		return ""
-	previous_tasks = []
-	checked_code_file_path = f"{code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
-	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
-	main_code_file_path = f"{code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+	step = plan[task_id-1]
+	print("executing for step " + step["task"])
+	task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
+	create_folder(task_code_folder_path)
+	task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+	task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
+    # TODO: Add this back in the future
+    # task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
+	if task_id==1:
+		implement_first_task(design_hypothesis, step["task"], faked_data, task_merged_code_file_path)
+		cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path)
+		return task_cleaned_code_file_path
 
-	for step in plan:
-		print(f"for implement_plan, implementing task_id: {step["task_id"]}")
-		task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
-		create_folder(task_code_folder_path)
-		# task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
-		task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
-		task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}" # merged code
-		task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
-		previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}" if step["task_id"] > 1 else ""
-		if step["task_id"] == 1:
-			implement_first_task(design_hypothesis, step["task"], faked_data, task_main_code_file_path, main_code_file_path)
-			cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
-			continue
-		implement_task_per_lock_step(step["task"],task_code_file_path, main_code_file_path)
-		merge_code(step["task"], previous_task_main_code_file_path, task_main_code_file_path, main_code_file_path)
-		# check_code_per_lock_step(step["task"], previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_main_code_file_path, main_code_file_path)
-		cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
-		previous_tasks.append(step["task"])
-	overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
-	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
-	return main_code_file_path
+	task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
+	previous_task_cleaned_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.CLEANED_CODE_FILE_NAME}"
+	# previous_tasks = []
+	# for step in plan:
+	# 	previous_tasks.append(step["task"])
+	implement_task_per_lock_step(step["task"], task_code_file_path, previous_task_cleaned_code_file_path)
+	merge_code(step["task"], previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path)
+	cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path)
+	return task_cleaned_code_file_path
 
-def implement_first_task(design_hypothesis, task, faked_data, task_main_code_file_path, main_code_file_path ):
+def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_file_path):
 	print("calling GPT for implement_first_task...")
 	prompt = f"Please execute this task: {task}."
 	messages = [
@@ -179,14 +207,13 @@ def implement_first_task(design_hypothesis, task, faked_data, task_main_code_fil
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	code = res.choices[0].message.content
 	print("called GPT for initial html file code", code)
-	create_and_write_file(main_code_file_path, code)
-	create_and_write_file(task_main_code_file_path, code)
 	messages = [
         {
             "role": "system",
             "content": f"""
                 You are editing javascript, HTML, CSS for creating a UI given a data model.
 				Please edit the existing code to include a "let" variable called "data" that stores the faked_data {faked_data}
+				Be sure to populate the faked data in the UI.
 
                 Please follow these rules while writing the code.
 				1. Only write javascript, html, and css code.
@@ -198,18 +225,19 @@ def implement_first_task(design_hypothesis, task, faked_data, task_main_code_fil
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	print("called GPT for initial html file code")
 	code_with_data = res.choices[0].message.content
-	create_and_write_file(main_code_file_path, code_with_data)
-	create_and_write_file(task_main_code_file_path, code_with_data)
+	create_and_write_file(task_merged_code_file_path, code_with_data)
 	print("sucessfully called GPT for implement_first_task", res)
 
-def implement_task_per_lock_step(task, task_code_file_path, main_code_file_path):
+def implement_task_per_lock_step(task, task_code_file_path, previous_task_cleaned_code_file_path):
 	print("calling GPT for implement_task_per_lock_step...")
 	prompt = f"Please execute this task: {task}."
+	print(prompt)
 	messages = [
         {
             "role": "system",
-            "content": """
+            "content": f"""
                 You are writing javascript, HTML, CSS for creating a UI given a data model.
+				There is already existing code in the index.html file. Using the existing code {previous_task_cleaned_code_file_path}, identify where you would add code to implement this task.
 				Using javascript, HTML, and CSS, write out the code snippet that executes the task provided by the user.
 
                 Please follow these rules while writing the code.
@@ -222,14 +250,13 @@ def implement_task_per_lock_step(task, task_code_file_path, main_code_file_path)
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	code = res.choices[0].message.content
 	create_and_write_file(task_code_file_path, code)
-	create_and_write_file(main_code_file_path, code)
 	print("sucessfully called GPT for implement_task", res)
 
-def merge_code(task, previous_task_main_code_file_path, task_main_code_file_path, main_code_file_path):
+def merge_code(task, previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path):
     print("calling GPT for merge_code...")
-    new_code = read_file(main_code_file_path)
-    previous_code = read_file(previous_task_main_code_file_path) if previous_task_main_code_file_path else ""
-    prompt = f"Please merge this code {new_code} that executes this task: {task}"
+    task_code = read_file(task_code_file_path)
+    previous_code = read_file(previous_task_cleaned_code_file_path) if previous_task_cleaned_code_file_path else ""
+    prompt = f"Please merge this code {task_code} that executes this task: {task}"
     messages = [
         {
             "role": "system",
@@ -249,8 +276,7 @@ def merge_code(task, previous_task_main_code_file_path, task_main_code_file_path
     ]
     res = client.chat.completions.create(model="gpt-4", messages=messages)
     merged_code = res.choices[0].message.content
-    create_and_write_file(task_main_code_file_path, merged_code)
-    create_and_write_file(main_code_file_path, merged_code)
+    create_and_write_file(task_merged_code_file_path, merged_code)
     print("successfully called GPT for merge_code...")
 
 def check_code_per_lock_step(task, previous_tasks, design_hypothesis, task_checked_code_file_path, main_code_file_path):
@@ -312,20 +338,12 @@ def overall_check(design_hypothesis, checked_code_file_path, main_code_file_path
 	create_and_write_file(main_code_file_path, checked_code)
 	print("sucessfully called GPT for overall_check", res)
 
-def cleanup_code(data, cleaned_code_file_path, main_code_file_path):
+def cleanup_code(data, cleaned_code_file_path, task_merged_code_file_path):
 	print("calling GPT for cleanup_code...")
-	code = read_file(main_code_file_path)
-	prompt = f'This is the code: \n {code} \n\n This is the data: {data}'
-	messages = [
-        {
-            "role": "system",
-            "content": """
-                You are cleaning up javascript and HTML code to ensure that it runs on first try.
-                
-                Please follow these rules while cleaning up the code.
-                1. The entire response should be code. Comments are okay
-				2. Ensure that there is a "let data" variable that contains ALL of the faked data {faked_data}. If not, please edit the code to have the fully faked data. DO NOT DELETE ANY CODE OR COMMENT ANY CODE OUT OTHER THAN THIS VARIABLE.
-				3. This is an EXAMPLE of a result: <!DOCTYPE html>
+	code = read_file(task_merged_code_file_path)
+	prompt = f'This is the code: \n {code} \n\n This is the faked data: {data}'
+	sample_code = """
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -390,6 +408,16 @@ displayCharacter(currentIndex);
 
 </body>
 </html>
+"""
+	messages = [
+        {
+            "role": "system",
+            "content": f"""
+                You are cleaning up javascript and HTML code to ensure that it runs on first try.
+
+                Please follow these rules while cleaning up the code.
+                1. The entire response should be code. Comments are okay
+				2. This is an EXAMPLE of a result: {sample_code}
             """,
         },
         {"role": "user", "content": prompt}
@@ -397,5 +425,4 @@ displayCharacter(currentIndex);
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	cleaned_code = res.choices[0].message.content
 	create_and_write_file(cleaned_code_file_path, cleaned_code)
-	create_and_write_file(main_code_file_path, cleaned_code)
 	print("successfully called gpt for cleanup_code: " + cleaned_code)
