@@ -11,7 +11,7 @@ const Home = () => {
     <div className={"home"}>
       <Stack
         spacing="50px"
-        sx={{ padding: "20px", backgroundColor: "lightblue", height: "100%" }}
+        sx={{ padding: "20px", backgroundColor: "lightblue", height: "100%", minHeight:"100vh" }}
       >
         <Stack
           direction="row"
