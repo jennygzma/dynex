@@ -1,18 +1,23 @@
 import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";
 
 const UserInputs = () => {
-  const { designHypothesis, updateDesignHypothesis: updateDesignHypothesisFE } =
-    usePlanContext();
+  const { designHypothesis, updateDesignHypothesis } = usePlanContext();
+
+  useEffect(() => {
+    getFakedData();
+    getDesignHypothesis();
+  }, []);
 
   const [dataInput, setDataInput] = useState("");
   const [dataModel, setDataModel] = useState("");
   const [UIPrompt, setUIPrompt] = useState("");
-
   const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
   const [updatedDataInput, setUpdatedDataInput] = useState(false);
+
+  useEffect(() => {}, [designHypothesis, dataInput]);
 
   const generateFakeData = () => {
     axios({
@@ -24,14 +29,14 @@ const UserInputs = () => {
     })
       .then((response) => {
         console.log("/generate_fake_data request successful:", response.data);
-        setDataInput(response.data.fake_data);
+        getFakedData();
       })
       .catch((error) => {
         console.error("Error calling /generate_fake_data request:", error);
       });
   };
 
-  const updateFakedData = () => {
+  const saveFakedData = () => {
     axios({
       method: "POST",
       url: "/save_faked_data",
@@ -41,10 +46,25 @@ const UserInputs = () => {
     })
       .then((response) => {
         console.log("/save_faked_data request successful:", response.data);
-        setUpdatedDataInput(false);
+        getFakedData();
       })
       .catch((error) => {
         console.error("Error calling /save_faked_data request:", error);
+      });
+  };
+
+  const getFakedData = () => {
+    axios({
+      method: "GET",
+      url: "/get_faked_data",
+    })
+      .then((response) => {
+        console.log("/get_faked_data request successful:", response.data);
+        setDataInput(response.data.faked_data);
+        setUpdatedDataInput(false);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_faked_data request:", error);
       });
   };
 
@@ -62,7 +82,7 @@ const UserInputs = () => {
           "/generate_design_hypothesis request successful:",
           response.data,
         );
-        updateDesignHypothesisFE(response.data.hypothesis);
+        getDesignHypothesis();
       })
       .catch((error) => {
         console.error(
@@ -72,7 +92,7 @@ const UserInputs = () => {
       });
   };
 
-  const updateDesignHypothesis = () => {
+  const saveDesignHypothesis = () => {
     axios({
       method: "POST",
       url: "/save_design_hypothesis",
@@ -85,10 +105,28 @@ const UserInputs = () => {
           "/save_design_hypothesis request successful:",
           response.data,
         );
-        setUpdatedDesignHypothesis(false);
+        getDesignHypothesis();
       })
       .catch((error) => {
         console.error("Error calling /save_design_hypothesis request:", error);
+      });
+  };
+
+  const getDesignHypothesis = () => {
+    axios({
+      method: "GET",
+      url: "/get_design_hypothesis",
+    })
+      .then((response) => {
+        console.log(
+          "/get_design_hypothesis request successful:",
+          response.data,
+        );
+        updateDesignHypothesis(response.data.design_hypothesis);
+        setUpdatedDesignHypothesis(false);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_design_hypothesis request:", error);
       });
   };
 
@@ -155,14 +193,14 @@ const UserInputs = () => {
                   rows={13}
                   value={designHypothesis}
                   onChange={(e) => {
-                    updateDesignHypothesisFE(e.target.value);
+                    updateDesignHypothesis(e.target.value);
                     setUpdatedDesignHypothesis(true);
                   }}
                 />
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={updateDesignHypothesis}
+                  onClick={saveDesignHypothesis}
                   disabled={!updatedDesignHypothesis}
                 >
                   Update design hypothesis
@@ -198,7 +236,7 @@ const UserInputs = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={updateFakedData}
+                  onClick={saveFakedData}
                   disabled={!updatedDataInput}
                 >
                   Update faked data
