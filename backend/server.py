@@ -5,9 +5,11 @@ import json
 import uuid
 
 import globals
-from code_generation import get_fake_data, implement_plan_lock_step
+from code_generation import get_fake_data as get_generated_fake_data
+from code_generation import implement_plan_lock_step
 from flask import Flask, jsonify, request
-from planning import get_design_hypothesis, get_plan
+from planning import get_design_hypothesis as get_generated_design_hypothesis
+from planning import get_plan as get_generated_plan
 from utils import create_and_write_file, create_folder, read_file
 
 # Initializing flask app
@@ -18,11 +20,10 @@ def generate_fake_data():
     print("calling generate_fake_data...")
     data = request.json
     globals.data_model = data["data_model"]
-    data = get_fake_data(globals.data_model)
+    data = get_generated_fake_data(globals.data_model)
     globals.faked_data = data
     create_and_write_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}", globals.faked_data)
-    return jsonify({"message": "Generated code", "fake_data": data}), 200
-
+    return jsonify({"message": "Generated code"}), 200
 
 @app.route("/save_faked_data", methods=["POST"])
 def save_faked_data():
@@ -30,8 +31,12 @@ def save_faked_data():
     data = request.json
     globals.faked_data = data["faked_data"]
     create_and_write_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}", globals.faked_data)
-    return jsonify({"message": "Saved faked data", "data": globals.faked_data}), 200
+    return jsonify({"message": "Saved faked data"}), 200
 
+@app.route("/get_faked_data", methods=["GET"])
+def get_faked_data():
+    print("calling get_faked_data...")
+    return jsonify({"message": "getting faked data", "faked_data": json.dumps(globals.faked_data)}), 200
 
 @app.route("/generate_design_hypothesis", methods=["POST"])
 def generate_design_hypothesis():
@@ -39,7 +44,7 @@ def generate_design_hypothesis():
     data = request.json
     globals.prompt = data["prompt"]
     globals.data_model = data["data_model"]
-    globals.design_hypothesis = get_design_hypothesis(globals.prompt, globals.data_model)
+    globals.design_hypothesis = get_generated_design_hypothesis(globals.prompt, globals.data_model)
     date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if globals.folder_path is None:
         globals.folder_path = (
@@ -60,13 +65,28 @@ def save_design_hypothesis():
     globals.design_hypothesis = data["design_hypothesis"]
     return jsonify({"message": "Saved design hypothesis", "data": globals.design_hypothesis}), 200
 
+@app.route("/get_design_hypothesis", methods=["GET"])
+def get_design_hypothesis():
+    print("calling get_design_hypothesis...")
+    return jsonify({"message": "getting design hypothesis", "design_hypothesis": globals.design_hypothesis}), 200
 
 @app.route("/generate_plan", methods=["POST"])
 def generate_plan():
     print("calling generate_plan...")
-    stringified_plan = get_plan(globals.design_hypothesis)
-    globals.plan = json.loads(stringified_plan)
-    return jsonify({"message": "Generated Plan", "plan": stringified_plan}), 200
+    plan = get_generated_plan(globals.design_hypothesis)
+    globals.plan = json.loads(plan)
+    return jsonify({"message": "Generated Plan", "plan": plan}), 200
+
+@app.route("/get_plan", methods=["GET"])
+def get_plan():
+    print("calling get_plan...")
+    return jsonify({"message": "getting plan", "plan": json.dumps(globals.plan)}), 200
+
+@app.route("/save_plan", methods=["POST"])
+def save_plan():
+    print("calling save_plan...")
+    globals.plan=json.loads(request.json["plan"])
+    return jsonify({"message": "Saved plan", "data": globals.plan}), 200
 
 # For testing only. Run curl http://127.0.0.1:5000/generate_code
 @app.route("/generate_code", methods=["POST"])
@@ -90,7 +110,7 @@ def get_code_per_step():
     print(task_id)
     code = read_file(task_code_folder_path) or ""
     print(code)
-    return jsonify({"message": f"Grabbed code for {task_id}", "code": code}), 200
+    return jsonify({"message": f"grabbed code for {task_id}", "code": code}), 200
 
 @app.route("/save_code_per_step", methods=["POST"])
 def save_code_per_step():

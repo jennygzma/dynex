@@ -73,7 +73,6 @@ interface DesignAndRenderProps {
 }
 
 const DesignAndRender = ({ first = false, id }: DesignAndRenderProps) => {
-  console.log("hi jenny id", id);
   const [UIPrompt, setUIPrompt] = useState("");
   const [codeInput, setCodeInput] = useState("");
   const [designHypotheses, setDesignHypotheses] = useState<

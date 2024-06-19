@@ -11,12 +11,25 @@ import {
   Typography,
 } from "@mui/material";
 
+const mapPlan = (jsonPlan) => {
+  return jsonPlan.map((step) => {
+    return {
+      taskId: step.task_id,
+      task: step.task,
+    };
+  });
+};
+
 const Plan = () => {
   const { plan, updatePlan, currentTask, updateCurrentTask, designHypothesis } =
     usePlanContext();
+  useEffect(() => {
+    getPlan();
+  }, []);
   useEffect(() => {}, [plan, designHypothesis]);
-
+  const [updatedPlan, setUpdatedPlan] = useState(false);
   const [jsonPlan, setJsonPlan] = useState(undefined);
+
   const generatePlan = () => {
     axios({
       method: "POST",
@@ -24,19 +37,46 @@ const Plan = () => {
     })
       .then((response) => {
         console.log("/generate_plan request successful:", response.data);
-        const responsePlan = JSON.parse(response.data.plan);
-        setJsonPlan(`${responsePlan}`);
-        const mappedPlan = responsePlan.map((step) => {
-          return {
-            taskId: step.task_id,
-            task: step.task,
-          };
-        });
-        updatePlan(mappedPlan);
-        updateCurrentTask(undefined);
+        getPlan();
       })
       .catch((error) => {
         console.error("Error calling /generate_plan request:", error);
+      });
+  };
+
+  const getPlan = () => {
+    axios({
+      method: "GET",
+      url: "/get_plan",
+    })
+      .then((response) => {
+        console.log("/get_plan request successful:", response.data);
+        const responsePlan = JSON.parse(response.data.plan);
+        const stringifiedPlan = response.data.plan;
+        setJsonPlan(stringifiedPlan);
+        updatePlan(mapPlan(responsePlan));
+        updateCurrentTask(undefined);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_plan request:", error);
+      });
+  };
+
+  const savePlan = () => {
+    axios({
+      method: "POST",
+      url: "/save_plan",
+      data: {
+        plan: jsonPlan,
+      },
+    })
+      .then((response) => {
+        console.log("/save_plan request successful:", response.data);
+        getPlan();
+        setUpdatedPlan(false);
+      })
+      .catch((error) => {
+        console.error("Error calling /save_plan request:", error);
       });
   };
 
@@ -99,9 +139,10 @@ const Plan = () => {
                 label="Plan"
                 variant="outlined"
                 multiline
-                rows={13}
+                rows={30}
                 value={jsonPlan}
                 onChange={(e) => {
+                  setUpdatedPlan(true);
                   setJsonPlan(e.target.value);
                 }}
                 inputProps={{ style: { fontFamily: "monospace" } }}
@@ -109,7 +150,8 @@ const Plan = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={generatePlan}
+                disabled={!updatedPlan}
+                onClick={savePlan}
                 sx={{ width: "100%" }}
               >
                 Update Plan

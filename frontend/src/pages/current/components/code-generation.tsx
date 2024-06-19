@@ -16,7 +16,6 @@ const CodeGeneration = () => {
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
 
-  console.log("hi jenny currentTask", currentTask);
   useEffect(() => {
     if (currentTask === undefined) return;
     getCode();
