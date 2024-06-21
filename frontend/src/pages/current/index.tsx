@@ -1,17 +1,26 @@
 import { Stack, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserInputs from "./components/user-inputs";
 import CodeGeneration from "./components/code-generation";
 import Plan from "./components/plan";
 import { PlanProvider, usePlanContext } from "./hooks/plan-context";
+import Spinner from "./components/spinner";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
+  const { isLoading, updateIsLoading } = usePlanContext();
+  useEffect(() => {}, [isLoading]);
   return (
     <div className={"home"}>
+      {isLoading && <Spinner />}
       <Stack
         spacing="50px"
-        sx={{ padding: "20px", backgroundColor: "lightblue", height: "100%", minHeight:"100vh" }}
+        sx={{
+          padding: "20px",
+          backgroundColor: "lightblue",
+          height: "100%",
+          minHeight: "100vh",
+        }}
       >
         <Stack
           direction="row"
@@ -36,14 +45,12 @@ const Home = () => {
               fontFamily: "monospace",
             }}
           >
-            UX Prototype
+            UX Prototyping
           </Typography>
         </Stack>
-        <PlanProvider>
-          <UserInputs />
-          <Plan />
-          <CodeGeneration />
-        </PlanProvider>
+        <UserInputs />
+        <Plan />
+        <CodeGeneration />
       </Stack>
     </div>
   );

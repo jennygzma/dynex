@@ -13,6 +13,8 @@ export interface TaskInfo {
 }
 
 export interface PlanState {
+  isLoading: boolean;
+  updateIsLoading: Dispatch<SetStateAction<Boolean>>;
   plan: TaskInfo[] | undefined;
   updatePlan: Dispatch<SetStateAction<TaskInfo[]>>;
   currentTask: TaskInfo;
@@ -29,10 +31,13 @@ export const PlanProvider = ({ children }) => {
   const [plan, updatePlan] = useState(undefined);
   const [currentTask, updateCurrentTask] = useState(undefined);
   const [designHypothesis, updateDesignHypothesis] = useState(undefined);
+  const [isLoading, updateIsLoading] = useState(false);
 
   return (
     <PlanContext.Provider
       value={{
+        isLoading,
+        updateIsLoading,
         plan,
         updatePlan,
         currentTask,

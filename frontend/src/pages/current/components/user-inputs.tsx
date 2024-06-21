@@ -4,7 +4,8 @@ import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";
 
 const UserInputs = () => {
-  const { designHypothesis, updateDesignHypothesis } = usePlanContext();
+  const { updateIsLoading, designHypothesis, updateDesignHypothesis } =
+    usePlanContext();
 
   useEffect(() => {
     getFakedData();
@@ -20,6 +21,7 @@ const UserInputs = () => {
   useEffect(() => {}, [designHypothesis, dataInput]);
 
   const generateFakeData = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/generate_fake_data",
@@ -33,10 +35,14 @@ const UserInputs = () => {
       })
       .catch((error) => {
         console.error("Error calling /generate_fake_data request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const saveFakedData = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/save_faked_data",
@@ -50,10 +56,14 @@ const UserInputs = () => {
       })
       .catch((error) => {
         console.error("Error calling /save_faked_data request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const getFakedData = () => {
+    updateIsLoading(true);
     axios({
       method: "GET",
       url: "/get_faked_data",
@@ -65,10 +75,14 @@ const UserInputs = () => {
       })
       .catch((error) => {
         console.error("Error calling /get_faked_data request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const generateDesignHypothesis = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/generate_design_hypothesis",
@@ -89,10 +103,14 @@ const UserInputs = () => {
           "Error calling /generate_design_hypotheses request:",
           error,
         );
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const saveDesignHypothesis = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/save_design_hypothesis",
@@ -109,10 +127,14 @@ const UserInputs = () => {
       })
       .catch((error) => {
         console.error("Error calling /save_design_hypothesis request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const getDesignHypothesis = () => {
+    updateIsLoading(true);
     axios({
       method: "GET",
       url: "/get_design_hypothesis",
@@ -127,6 +149,9 @@ const UserInputs = () => {
       })
       .catch((error) => {
         console.error("Error calling /get_design_hypothesis request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
@@ -218,7 +243,7 @@ const UserInputs = () => {
             >
               {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
             </Button>
-            {dataInput && (
+            {dataInput !== "null" && dataInput && (
               <>
                 <TextField
                   className={"generated-data"}

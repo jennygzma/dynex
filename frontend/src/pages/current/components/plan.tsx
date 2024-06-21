@@ -21,8 +21,14 @@ const mapPlan = (jsonPlan) => {
 };
 
 const Plan = () => {
-  const { plan, updatePlan, currentTask, updateCurrentTask, designHypothesis } =
-    usePlanContext();
+  const {
+    updateIsLoading,
+    plan,
+    updatePlan,
+    currentTask,
+    updateCurrentTask,
+    designHypothesis,
+  } = usePlanContext();
   useEffect(() => {
     getPlan();
   }, []);
@@ -31,6 +37,7 @@ const Plan = () => {
   const [jsonPlan, setJsonPlan] = useState(undefined);
 
   const generatePlan = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/generate_plan",
@@ -41,10 +48,14 @@ const Plan = () => {
       })
       .catch((error) => {
         console.error("Error calling /generate_plan request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const getPlan = () => {
+    updateIsLoading(true);
     axios({
       method: "GET",
       url: "/get_plan",
@@ -59,10 +70,14 @@ const Plan = () => {
       })
       .catch((error) => {
         console.error("Error calling /get_plan request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const savePlan = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/save_plan",
@@ -77,6 +92,9 @@ const Plan = () => {
       })
       .catch((error) => {
         console.error("Error calling /save_plan request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 

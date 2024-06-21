@@ -36,7 +36,7 @@ def save_faked_data():
 @app.route("/get_faked_data", methods=["GET"])
 def get_faked_data():
     print("calling get_faked_data...")
-    return jsonify({"message": "getting faked data", "faked_data": json.dumps(globals.faked_data)}), 200
+    return jsonify({"message": "getting faked data", "faked_data": globals.faked_data}), 200
 
 @app.route("/generate_design_hypothesis", methods=["POST"])
 def generate_design_hypothesis():

@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Card,
   Paper,
   Stack,
   TextField,
@@ -12,16 +11,10 @@ import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";
 
 const CodeGeneration = () => {
-  const { plan, updatePlan, designHypothesis, currentTask } = usePlanContext();
+  const { updateIsLoading, plan, updatePlan, designHypothesis, currentTask } =
+    usePlanContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
-
-  useEffect(() => {
-    if (currentTask === undefined) return;
-    getCode();
-    renderUI();
-  }, [plan, designHypothesis, currentTask]);
-  useEffect(() => {}, [code]);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -37,6 +30,7 @@ const CodeGeneration = () => {
   };
 
   const saveCode = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/save_code_per_step",
@@ -52,9 +46,13 @@ const CodeGeneration = () => {
       })
       .catch((error) => {
         console.error("Error calling /save_code_per_step request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
   const getCode = () => {
+    updateIsLoading(true);
     axios({
       method: "GET",
       url: "/get_code_per_step",
@@ -70,10 +68,14 @@ const CodeGeneration = () => {
       })
       .catch((error) => {
         console.error("Error calling /get_code_per_step request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
 
   const generateCode = () => {
+    updateIsLoading(true);
     axios({
       method: "POST",
       url: "/generate_code",
@@ -87,8 +89,18 @@ const CodeGeneration = () => {
       })
       .catch((error) => {
         console.error("Error calling /generate_code request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    if (currentTask === undefined) return;
+    getCode();
+    renderUI();
+  }, [plan, designHypothesis, currentTask]);
+  // useEffect(() => {}, [code]);
 
   if (!designHypothesis || !plan || !currentTask) return <></>;
 
@@ -118,7 +130,7 @@ const CodeGeneration = () => {
           onClick={generateCode}
           sx={{ width: "100%" }}
         >
-          Generate Code
+          {code ? "Regenerate Code" : "Generate Code"}
         </Button>
         <TextField
           className={"hi"}
