@@ -6,6 +6,8 @@ from utils import (
     add_comment_to_html_file,
     create_and_write_file,
     create_folder,
+    delete_folder,
+    folder_exists,
     read_file,
 )
 
@@ -125,38 +127,6 @@ def get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_p
 	print("sucessfully called GPT for get_ui_code", res);
 	return code
 
-# def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_path):
-# 	print("calling GPT for implement_plan_lock_step...")
-# 	if len(plan) == 0 or plan is None:
-# 		print("ERROR: there was no plan...")
-# 		return ""
-# 	previous_tasks = []
-# 	checked_code_file_path = f"{code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
-# 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
-# 	main_code_file_path = f"{code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
-
-# 	for step in plan:
-# 		print(f"for implement_plan, implementing task_id: {step["task_id"]}")
-# 		task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
-# 		create_folder(task_code_folder_path)
-# 		# task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
-# 		task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
-# 		task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}" # merged code
-# 		task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
-# 		previous_task_merged_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MERGED_CODE_FILE_NAME}" if step["task_id"] > 1 else ""
-# 		if step["task_id"] == 1:
-# 			implement_first_task(design_hypothesis, step["task"], faked_data, task_merged_code_file_path, main_code_file_path)
-# 			cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
-# 			continue
-# 		implement_task_per_lock_step(step["task"],task_code_file_path, main_code_file_path)
-# 		merge_code(step["task"], previous_task_merged_code_file_path, task_merged_code_file_path, main_code_file_path)
-# 		# check_code_per_lock_step(step["task"], previous_tasks, design_hypothesis, task_checked_code_file_path, previous_task_merged_code_file_path, main_code_file_path)
-# 		cleanup_code(faked_data, task_cleaned_code_file_path,main_code_file_path)
-# 		previous_tasks.append(step["task"])
-# 	overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
-# 	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
-# 	return main_code_file_path
-
 def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_path, task_id):
 	print("calling GPT for implement_plan_lock_step...")
 	if len(plan) == 0 or plan is None:
@@ -174,7 +144,6 @@ def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_pa
 		implement_first_task(design_hypothesis, step["task"], faked_data, task_merged_code_file_path)
 		cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path)
 		return task_cleaned_code_file_path
-
 	task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
 	previous_task_cleaned_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.CLEANED_CODE_FILE_NAME}"
 	# previous_tasks = []
@@ -426,3 +395,15 @@ displayCharacter(currentIndex);
 	cleaned_code = res.choices[0].message.content
 	create_and_write_file(cleaned_code_file_path, cleaned_code)
 	print("successfully called gpt for cleanup_code: " + cleaned_code)
+
+def wipeout_code(code_folder_path, task_id, plan):
+	print(f"wiping out code from task id {task_id}")
+	num_steps = len(plan)
+	initial_index = task_id-1
+	for i in range(initial_index, num_steps):
+		step = plan[i]
+		task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
+		if not folder_exists(task_code_folder_path):
+			break
+		delete_folder(task_code_folder_path)
+	print(f"successfully wiped out code from task id {task_id}")
