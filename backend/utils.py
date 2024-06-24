@@ -33,6 +33,33 @@ def read_file(file_path):
         print(f"Error reading from file '{file_path}': {e}")
 
 
+def folder_exists(folder_path):
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        print(f"Folder '{folder_path}' exists.")
+        return True
+    else:
+        print(f"Folder '{folder_path}' does not exist.")
+        return False
+
+
+def delete_folder(folder_path):
+    try:
+        if os.path.exists(folder_path):
+            # Walk through the directory tree and delete all files and subdirectories
+            for root, dirs, files in os.walk(folder_path, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            # Finally, delete the main directory
+            os.rmdir(folder_path)
+            print(f"Folder '{folder_path}' has been deleted.")
+        else:
+            print(f"Folder '{folder_path}' does not exist.")
+    except Exception as e:
+        print(f"Error deleting folder '{folder_path}': {e}")
+
+
 def add_comment_to_html_file(html_file_path, comment):
     try:
         with open(html_file_path, "r") as file:

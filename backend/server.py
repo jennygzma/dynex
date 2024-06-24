@@ -6,11 +6,11 @@ import uuid
 
 import globals
 from code_generation import get_fake_data as get_generated_fake_data
-from code_generation import implement_plan_lock_step
+from code_generation import implement_plan_lock_step, wipeout_code
 from flask import Flask, jsonify, request
 from planning import get_design_hypothesis as get_generated_design_hypothesis
 from planning import get_plan as get_generated_plan
-from utils import create_and_write_file, create_folder, read_file
+from utils import create_and_write_file, create_folder, folder_exists, read_file
 
 # Initializing flask app
 app = Flask(__name__)
@@ -51,6 +51,9 @@ def generate_design_hypothesis():
             f"{globals.GENERATED_FOLDER_PATH}/generations_{date_time}_{uuid.uuid4()}"
         )
         create_folder(globals.folder_path)
+    if (folder_exists(f"{globals.folder_path}/1")):
+        wipeout_code(globals.folder_path, 1, globals.plan)
+    globals.plan = []
     return (
         jsonify(
             {"message": "Generated design hypothesis", "hypothesis": globals.design_hypothesis}
@@ -63,6 +66,9 @@ def save_design_hypothesis():
     print("calling save_design_hypothesis...")
     data = request.json
     globals.design_hypothesis = data["design_hypothesis"]
+    if (folder_exists(f"{globals.folder_path}/1")):
+        wipeout_code(globals.folder_path, 1, globals.plan)
+    globals.plan = []
     return jsonify({"message": "Saved design hypothesis", "data": globals.design_hypothesis}), 200
 
 @app.route("/get_design_hypothesis", methods=["GET"])
@@ -75,6 +81,8 @@ def generate_plan():
     print("calling generate_plan...")
     plan = get_generated_plan(globals.design_hypothesis)
     globals.plan = json.loads(plan)
+    if (folder_exists(f"{globals.folder_path}/1")):
+        wipeout_code(globals.folder_path, 1, globals.plan)
     return jsonify({"message": "Generated Plan", "plan": plan}), 200
 
 @app.route("/get_plan", methods=["GET"])
@@ -86,7 +94,29 @@ def get_plan():
 def save_plan():
     print("calling save_plan...")
     globals.plan=json.loads(request.json["plan"])
+    if (folder_exists(f"{globals.folder_path}/1")):
+        wipeout_code(globals.folder_path, 1, globals.plan)
     return jsonify({"message": "Saved plan", "data": globals.plan}), 200
+
+@app.route("/update_step_in_plan", methods=["POST"])
+def update_step_in_plan():
+    print("calling update_step_in_plan")
+    data = request.json
+    task_id = data["task_id"]
+    new_task_description = data["task_description"]
+    index = task_id-1
+    globals.plan[index]["task"]= new_task_description
+    if (folder_exists(f"{globals.folder_path}/{task_id}")):
+        wipeout_code(globals.folder_path, task_id, globals.plan)
+    return jsonify({"message": f"Updated step in plan for {task_id}", "data": globals.plan}), 200
+
+@app.route("/get_step_in_plan", methods=["GET"])
+def get_step_in_plan():
+    print("calling get_step_in_plan")
+    task_id = int(request.args.get("task_id"))
+    index = task_id-1
+    print(globals.plan[index]["task"])
+    return jsonify({"message": f"grabbed task description for {task_id}", "task_description": globals.plan[index]["task"]})
 
 # For testing only. Run curl http://127.0.0.1:5000/generate_code
 @app.route("/generate_code", methods=["POST"])
@@ -94,7 +124,9 @@ def generate_code():
     print("calling generate_code...")
     data = request.json
     task_id = data["task_id"]
-    print(globals.plan)
+    task_code_folder_path = f"{globals.folder_path}/{task_id}"
+    if folder_exists(task_code_folder_path):
+        wipeout_code(globals.folder_path, task_id, globals.plan)
     file_path = implement_plan_lock_step(
         globals.design_hypothesis, globals.plan, globals.faked_data, globals.folder_path, task_id
     )
