@@ -149,7 +149,7 @@ def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_pa
 	# previous_tasks = []
 	# for step in plan:
 	# 	previous_tasks.append(step["task"])
-	implement_task_per_lock_step(step["task"], task_code_file_path, previous_task_cleaned_code_file_path)
+	implement_task_per_lock_step(step["task"], task_code_file_path, previous_task_cleaned_code_file_path, design_hypothesis)
 	merge_code(step["task"], previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path)
 	cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path)
 	return task_cleaned_code_file_path
@@ -197,17 +197,20 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
 	create_and_write_file(task_merged_code_file_path, code_with_data)
 	print("sucessfully called GPT for implement_first_task", res)
 
-def implement_task_per_lock_step(task, task_code_file_path, previous_task_cleaned_code_file_path):
+def implement_task_per_lock_step(task, task_code_file_path, previous_task_cleaned_code_file_path, design_hypothesis):
 	print("calling GPT for implement_task_per_lock_step...")
 	prompt = f"Please execute this task: {task}."
 	print(prompt)
+	print("previous_task_cleaned_code_file_path ", previous_task_cleaned_code_file_path)
 	messages = [
         {
             "role": "system",
             "content": f"""
-                You are writing javascript, HTML, CSS for creating a UI given a data model.
+                You are a software engineer writing javascript, HTML, CSS for creating a UI given a data model.
 				There is already existing code in the index.html file. Using the existing code {previous_task_cleaned_code_file_path}, identify where you would add code to implement this task.
+				Keep in mind that this code will be merged into the previous code eventually.
 				Using javascript, HTML, and CSS, write out the code snippet that executes the task provided by the user.
+				For context, implement the task with the overall project in mind, which is: {design_hypothesis}
 
                 Please follow these rules while writing the code.
 				1. Only write javascript, html, and css code.
@@ -230,13 +233,14 @@ def merge_code(task, previous_task_cleaned_code_file_path, task_merged_code_file
         {
             "role": "system",
             "content": f"""
-                You are acting as a code merging system. This is the previous state of the code: {previous_code}
+                You are a code merging system. This is the previous state of the code: {previous_code}
 
-				The user will provide the new code snippet that executes a task. Please merge in the new code to the previous code.
+				The user will provide the new code snippet that executes a task. Please merge in the new code to the previous code where appropriate.
 				Identify where the code snippet's functionality should be placed within the original code.
+				KEEP all the previous code. Do not add comments suggesting /* existing code */.
 
                 Please follow these rules while writing the code.
-                1. Please have the new code improve the existing code. Do not delete existing functionality in the code.
+                1. Please have the new code improve the existing code. Do not delete existing code.
 				2. Only write javascript, html, and css code.
 				3. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
             """,
