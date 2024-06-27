@@ -6,7 +6,11 @@ import uuid
 
 import globals
 from code_generation import get_fake_data as get_generated_fake_data
-from code_generation import implement_plan_lock_step, wipeout_code
+from code_generation import (
+    implement_plan_lock_step,
+    test_code_per_lock_step,
+    wipeout_code,
+)
 from flask import Flask, jsonify, request
 from planning import get_design_hypothesis as get_generated_design_hypothesis
 from planning import get_plan as get_generated_plan
@@ -154,6 +158,15 @@ def save_code_per_step():
     create_and_write_file(task_code_folder_path, code)
     print(code)
     return jsonify({"message": f"Grabbed code for {task_id}", "code": code}), 200
+
+@app.route("/get_test_cases_per_lock_step", methods=["GET"])
+def get_test_cases_per_lock_step():
+    print("calling get_test_cases_per_lock_step...")
+    task_id = int(request.args.get("task_id"))
+    index = task_id-1
+    task = globals.plan[index]["task"]
+    test_cases = test_code_per_lock_step(task, globals.design_hypothesis)
+    return jsonify({"message": f"Grabbed test cases for {task_id} {task}", "test_cases": json.loads(test_cases)}), 200
 
 # For testing only. Run curl http://127.0.0.1:5000/set_globals_for_debug
 @app.route("/set_globals_for_debug", methods=["GET"])

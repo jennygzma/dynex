@@ -15,6 +15,7 @@ const CodeGeneration = () => {
     usePlanContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
+  const [testCases, setTestCases] = useState(undefined);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -95,6 +96,33 @@ const CodeGeneration = () => {
       });
   };
 
+  const getTestCases = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_test_cases_per_lock_step",
+      params: {
+        task_id: currentTask.taskId,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/get_test_cases_per_lock_step request successful:",
+          response.data,
+        );
+        setTestCases(response.data.test_cases);
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /get_test_cases_per_lock_step request:",
+          error,
+        );
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   useEffect(() => {
     if (currentTask === undefined) return;
     getCode();
@@ -153,10 +181,25 @@ const CodeGeneration = () => {
         >
           Update Code
         </Button>
-        <Button variant="contained" color="primary" onClick={renderUI}>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={!code}
+          onClick={renderUI}
+        >
           Render
         </Button>
-        <Paper id="output" className={"hi"} sx={{ height: "100vh" }} />
+        <Paper id="output" className={"hi"} sx={{ height: "1000px" }} />
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={!code}
+          onClick={getTestCases}
+        >
+          Get Test Cases
+        </Button>
+        {testCases &&
+          testCases.map((testCase, index) => <div key={index}>{testCase}</div>)}
       </Stack>
     </Box>
   );
