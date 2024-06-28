@@ -16,6 +16,7 @@ const CodeGeneration = () => {
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
   const [testCases, setTestCases] = useState(undefined);
+  const [problemDescription, setProblemDescription] = useState(undefined);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -123,6 +124,32 @@ const CodeGeneration = () => {
       });
   };
 
+  const debugAndRepairCode = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/debug_and_repair_code",
+      data: {
+        task_id: currentTask.taskId,
+        problem: problemDescription,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/debug_and_repair_code request successful:",
+          response.data,
+        );
+        getCode();
+        setProblemDescription(undefined);
+      })
+      .catch((error) => {
+        console.error("Error calling /debug_and_repair_code request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   useEffect(() => {
     if (currentTask === undefined) return;
     getCode();
@@ -154,14 +181,19 @@ const CodeGeneration = () => {
         </Typography>
         <Button
           variant="contained"
-          color="primary"
           onClick={generateCode}
-          sx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+            backgroundColor: "#9a4e4e",
+            "&:hover": {
+              backgroundColor: "#b55e5e",
+            },
+          }}
         >
           {code ? "Regenerate Code" : "Generate Code"}
         </Button>
         <TextField
-          className={"hi"}
+          className={"code"}
           label="Code Editor"
           variant="outlined"
           multiline
@@ -172,34 +204,115 @@ const CodeGeneration = () => {
             setUpdatedCode(true);
           }}
           inputProps={{ style: { fontFamily: "monospace" } }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#9a4e4e", // Default border color
+              },
+              "&:hover fieldset": {
+                borderColor: "#9a4e4e", // Border color on hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#9a4e4e", // Border color when focused
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: "#9a4e4e", // Label color
+            },
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#9a4e4e", // Label color when focused
+            },
+          }}
         />
         <Button
           variant="contained"
           disabled={!updatedCode}
-          color="primary"
           onClick={saveCode}
+          sx={{
+            backgroundColor: "#9a4e4e",
+            "&:hover": {
+              backgroundColor: "#b55e5e",
+            },
+          }}
         >
           Update Code
         </Button>
         <Button
           variant="contained"
-          color="primary"
-          disabled={!code}
-          onClick={renderUI}
-        >
-          Render
-        </Button>
-        <Paper id="output" className={"hi"} sx={{ height: "1000px" }} />
-        <Button
-          variant="contained"
-          color="primary"
           disabled={!code}
           onClick={getTestCases}
+          sx={{
+            backgroundColor: "#9a4e4e",
+            "&:hover": {
+              backgroundColor: "#b55e5e",
+            },
+          }}
         >
           Get Test Cases
         </Button>
         {testCases &&
           testCases.map((testCase, index) => <div key={index}>{testCase}</div>)}
+        <Stack direction="row" spacing="10px" sx={{ minWidth: "100%" }}>
+          <TextField
+            className={"problem"}
+            label="Problem Description"
+            variant="outlined"
+            multiline
+            rows={2}
+            value={problemDescription}
+            onChange={(e) => {
+              setProblemDescription(e.target.value);
+            }}
+            sx={{
+              width: "100%",
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#9a4e4e", // Default border color
+                },
+                "&:hover fieldset": {
+                  borderColor: "#9a4e4e", // Border color on hover
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#9a4e4e", // Border color when focused
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "#9a4e4e", // Label color
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#9a4e4e", // Label color when focused
+              },
+            }}
+          />
+          <Button
+            variant="contained"
+            disabled={!problemDescription}
+            onClick={debugAndRepairCode}
+            sx={{
+              backgroundColor: "#9a4e4e",
+              "&:hover": {
+                backgroundColor: "#b55e5e",
+              },
+            }}
+          >
+            Debug and Repair
+          </Button>
+        </Stack>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={!code}
+          onClick={renderUI}
+          sx={{
+            backgroundColor: "#9a4e4e",
+            "&:hover": {
+              backgroundColor: "#b55e5e",
+            },
+          }}
+        >
+          Render
+        </Button>
+        <Paper id="output" className={"hi"} sx={{ height: "1000px" }} />
       </Stack>
     </Box>
   );

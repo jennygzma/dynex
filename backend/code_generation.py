@@ -203,23 +203,24 @@ def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_pa
 	create_folder(task_code_folder_path)
 	task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
 	task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
+	task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
     # TODO: Add this back in the future
     # task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
 	if task_id==1:
 		implement_first_task(design_hypothesis, step["task"], faked_data, task_merged_code_file_path)
-		cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path)
+		cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 		return task_cleaned_code_file_path
 	task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
-	previous_task_cleaned_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.CLEANED_CODE_FILE_NAME}"
+	previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}"
 	# previous_tasks = []
 	# for step in plan:
 	# 	previous_tasks.append(step["task"])
 	# implement_task_per_lock_step(step["task"], task_code_file_path, previous_task_cleaned_code_file_path, design_hypothesis)
 	# merge_code(step["task"], previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path)
-	identify_code_changes(plan, step["task"], task_code_file_path, previous_task_cleaned_code_file_path, design_hypothesis)
-	inject_code(step["task"], previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path)
-	cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path)
-	return task_cleaned_code_file_path
+	identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
+	inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
+	cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
+	print("finished executing lock step for task_id", {task_id})
 
 def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_file_path):
 	print("calling GPT for implement_first_task...")
@@ -265,38 +266,39 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
 	print("sucessfully called GPT for implement_first_task", res)
 
 # not used currently
-def implement_task_per_lock_step(task, task_code_file_path, previous_task_cleaned_code_file_path, design_hypothesis):
-	print("calling GPT for implement_task_per_lock_step...")
-	prompt = f"Please execute this task: {task}."
-	print(prompt)
-	print("previous_task_cleaned_code_file_path ", previous_task_cleaned_code_file_path)
-	messages = [
-        {
-            "role": "system",
-            "content": f"""
-                You are a software engineer writing javascript, HTML, CSS for creating a UI given a data model.
-				There is already existing code in the index.html file. Using the existing code {previous_task_cleaned_code_file_path}, identify where you would add code to implement this task.
-				Keep in mind that this code will be merged into the previous code eventually.
-				Using javascript, HTML, and CSS, write out the code snippet that executes the task provided by the user.
-				For context, implement the task with the overall project in mind, which is: {design_hypothesis}
+# def implement_task_per_lock_step(task, task_code_file_path, previous_task_cleaned_code_file_path, design_hypothesis):
+# 	print("calling GPT for implement_task_per_lock_step...")
+# 	prompt = f"Please execute this task: {task}."
+# 	print(prompt)
+# 	print("previous_task_cleaned_code_file_path ", previous_task_cleaned_code_file_path)
+# 	messages = [
+#         {
+#             "role": "system",
+#             "content": f"""
+#                 You are a software engineer writing javascript, HTML, CSS for creating a UI given a data model.
+# 				There is already existing code in the index.html file. Using the existing code {previous_task_cleaned_code_file_path}, identify where you would add code to implement this task.
+# 				Keep in mind that this code will be merged into the previous code eventually.
+# 				Using javascript, HTML, and CSS, write out the code snippet that executes the task provided by the user.
+# 				For context, implement the task with the overall project in mind, which is: {design_hypothesis}
 
-                Please follow these rules while writing the code.
-				1. Only write javascript, html, and css code.
-				2. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
-            """,
-        },
-        {"role": "user", "content": prompt}
-    ]
-	res = client.chat.completions.create(model="gpt-4", messages=messages)
-	code = res.choices[0].message.content
-	create_and_write_file(task_code_file_path, code)
-	print("sucessfully called GPT for implement_task", res)
+#                 Please follow these rules while writing the code.
+# 				1. Only write javascript, html, and css code.
+# 				2. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
+#             """,
+#         },
+#         {"role": "user", "content": prompt}
+#     ]
+# 	res = client.chat.completions.create(model="gpt-4", messages=messages)
+# 	code = res.choices[0].message.content
+# 	create_and_write_file(task_code_file_path, code)
+# 	print("sucessfully called GPT for implement_task", res)
 
-def identify_code_changes(plan, task, task_code_file_path, previous_task_cleaned_code_file_path, design_hypothesis):
+def identify_code_changes(plan, task, task_code_file_path, previous_task_main_code_file_path, design_hypothesis):
 	print("calling GPT for identify_code_changes...")
 	prompt = f"Please return the array of code-snippets and the line number where you would inject the code as an array for this task: {task}."
 	print(prompt)
-	print("previous_task_cleaned_code_file_path ", previous_task_cleaned_code_file_path)
+	print("previous_task_main_code_file_path ", previous_task_main_code_file_path)
+	previous_code = read_file(previous_task_main_code_file_path)
 	messages = [
         {
             "role": "system",
@@ -305,8 +307,7 @@ def identify_code_changes(plan, task, task_code_file_path, previous_task_cleaned
                 The entire app will be written in javascript, HTML, and CSS within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}.
-				There is already existing code in the index.html file. Using the existing code {previous_task_cleaned_code_file_path}.
-				Now, identify where you would add code to implement ONLY this task and have it fully working.
+				There is already existing code in the index.html file. Using the existing code {previous_code}, identify where you would add code to implement ONLY this task and have it fully working.
 
 				Return the response in an array with this format: [{{"line number": line_number, "action": action, "code": code}}],
 				where the line number is where you would inject the code given the previous code,
@@ -322,38 +323,38 @@ def identify_code_changes(plan, task, task_code_file_path, previous_task_cleaned
 	print("sucessfully called GPT for identify_code_changes", injections)
 
 # not used currently
-def merge_code(task, previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path):
-    print("calling GPT for merge_code...")
-    task_code = read_file(task_code_file_path)
-    previous_code = read_file(previous_task_cleaned_code_file_path) if previous_task_cleaned_code_file_path else ""
-    prompt = f"Please merge this code {task_code} that executes this task: {task}"
-    messages = [
-        {
-            "role": "system",
-            "content": f"""
-                You are a code merging system. This is the previous state of the code: {previous_code}
+# def merge_code(task, previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path):
+#     print("calling GPT for merge_code...")
+#     task_code = read_file(task_code_file_path)
+#     previous_code = read_file(previous_task_cleaned_code_file_path) if previous_task_cleaned_code_file_path else ""
+#     prompt = f"Please merge this code {task_code} that executes this task: {task}"
+#     messages = [
+#         {
+#             "role": "system",
+#             "content": f"""
+#                 You are a code merging system. This is the previous state of the code: {previous_code}
 
-				The user will provide the new code snippet that executes a task. Please merge in the new code to the previous code where appropriate.
-				Identify where the code snippet's functionality should be placed within the original code.
-				KEEP all the previous code. Do not add comments suggesting /* existing code */.
+# 				The user will provide the new code snippet that executes a task. Please merge in the new code to the previous code where appropriate.
+# 				Identify where the code snippet's functionality should be placed within the original code.
+# 				KEEP all the previous code. Do not add comments suggesting /* existing code */.
 
-                Please follow these rules while writing the code.
-                1. Please have the new code improve the existing code. Do not delete existing code.
-				2. Only write javascript, html, and css code.
-				3. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
-            """,
-        },
-        {"role": "user", "content": prompt}
-    ]
-    res = client.chat.completions.create(model="gpt-4", messages=messages)
-    merged_code = res.choices[0].message.content
-    create_and_write_file(task_merged_code_file_path, merged_code)
-    print("successfully called GPT for merge_code...")
+#                 Please follow these rules while writing the code.
+#                 1. Please have the new code improve the existing code. Do not delete existing code.
+# 				2. Only write javascript, html, and css code.
+# 				3. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
+#             """,
+#         },
+#         {"role": "user", "content": prompt}
+#     ]
+#     res = client.chat.completions.create(model="gpt-4", messages=messages)
+#     merged_code = res.choices[0].message.content
+#     create_and_write_file(task_merged_code_file_path, merged_code)
+#     print("successfully called GPT for merge_code...")
 
-def inject_code(task, previous_task_cleaned_code_file_path, task_merged_code_file_path, task_code_file_path):
+def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path):
     print("calling GPT for inject_code...")
     task_code = read_file(task_code_file_path)
-    previous_code = read_file(previous_task_cleaned_code_file_path) if previous_task_cleaned_code_file_path else ""
+    previous_code = read_file(previous_task_main_code_file_path) if previous_task_main_code_file_path else ""
     prompt = f"Please merge these code snippets that execute this task {task}: {task_code}"
     messages = [
         {
@@ -363,10 +364,11 @@ def inject_code(task, previous_task_cleaned_code_file_path, task_merged_code_fil
 				The user will provide an array that shows a line number where you should inject the code snippet.
 				This is the previous state of the code: {previous_code}.
 				Loop through the list and logically inject the code into the previous code around the given line number so that it compiles properly, while still retaining previous logic.
-				Replace code if the task requires you to replace a specific line of code. For example, if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. Replace the current search bar with the new search bar. Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.
+				Replace code if the task requires you to replace a specific line of code.
+				For example, if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. Replace the current search bar with the new search bar. Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.
 				Otherwise, you must KEEP all previous code - you should not modify any of the previous code. Simply inject the code snippet to the line number.
-				Do not write comments similar to /* existing code goes here*/
-				KEEP all the data. Do NOT truncake data items.
+				DO NOT write comments similar to /* existing code goes here*/, or /* existing styles here... */, /* existing data items here... */, or anything similar.
+				KEEP all the data. Do NOT truncate data items, or comment out data items in the array. KEEP ALL DATA ITEMS.
 				Keep all the previous code in one file.
 				The code should be in this format with no natural language: {sample_code}
             """,
@@ -377,6 +379,41 @@ def inject_code(task, previous_task_cleaned_code_file_path, task_merged_code_fil
     merged_code = res.choices[0].message.content
     create_and_write_file(task_merged_code_file_path, merged_code)
     print("successfully called GPT for merge_code...")
+
+def get_debug_code(problem, task, task_code_folder_path, design_hypothesis):
+    print("calling GPT for get_debug_code...")
+    task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+    task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+    task_debug_code_file_path = f"{task_code_folder_path}/{globals.DEBUG_FILE_NAME}"
+    task_debug_merge_file_path = f"{task_code_folder_path}/{globals.DEBUG_MERGE_FILE_NAME}"
+    task_debug_cleaned_code_file_path = f"{task_code_folder_path}/{globals.DEBUG_CLEANED_FILE_NAME}"
+    task_code = read_file(task_cleaned_code_file_path)
+    prompt = f"Please fix the problem that the user describes: {problem}"
+    messages = [
+        {
+            "role": "system",
+            "content": f"""
+                A coding task has been implemented for a project we are working on.
+				For context, this is the project description: {design_hypothesis}. The task was this: {task}
+				However, the task was not implemented fully correctly. The user explains what is wrong in the problem {problem}.
+
+				Using the existing code {task_code}, identify where you would add code to implement ONLY this task and have it fully working.
+				Return the response in an array with this format: [{{"line number": line_number, "action": action, "code": code}}],
+				where the line number is where you would inject the code given the previous code,
+				action is whether or not you are replacing existing code or adding new code (Example: if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. REPLACE the current search bar with the new search bar. Example: Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.),
+				code is the actual code you would inject. Only write javascript, html, and css code.
+            """,
+        },
+        {"role": "user", "content": prompt}
+    ]
+    res = client.chat.completions.create(model="gpt-4", messages=messages)
+    debugged_code = res.choices[0].message.content
+    create_and_write_file(task_debug_code_file_path, debugged_code)
+    inject_code(problem, task_cleaned_code_file_path, task_debug_merge_file_path, task_debug_code_file_path)
+    cleanup_code(globals.faked_data, task_debug_cleaned_code_file_path, task_debug_merge_file_path, task_main_code_file_path)
+    print("successfully called GPT for get_debug_code...", debugged_code)
+    return task_main_code_file_path
+
 
 def test_code_per_lock_step(task, design_hypothesis):
     print("calling GPT for test_code_per_lock_step...")
@@ -402,9 +439,9 @@ def test_code_per_lock_step(task, design_hypothesis):
     print("sucessfully called GPT for test_code_per_lock_step", cases)
     return cases
 
-def cleanup_code(data, cleaned_code_file_path, task_merged_code_file_path):
+def cleanup_code(data, cleaned_code_file_path, code_file_path, task_main_code_file_path):
 	print("calling GPT for cleanup_code...")
-	code = read_file(task_merged_code_file_path)
+	code = read_file(code_file_path)
 	prompt = f'This is the code: \n {code} \n\n This is the faked data: {data}'
 
 	messages = [
@@ -412,7 +449,8 @@ def cleanup_code(data, cleaned_code_file_path, task_merged_code_file_path):
             "role": "system",
             "content": f"""
                 You are cleaning up javascript and HTML code to ensure that it runs on first try.
-				DO NOT DELETE ANY CODE. Only remove natural language. The goal is to have the code compile. Comments are okay
+				DO NOT DELETE ANY CODE. Only remove natural language. The goal is to have the code compile. Comments are okay.
+				If the code is already clean, simply return the code.
 				This is an EXAMPLE of a result: {sample_code}
             """,
         },
@@ -421,6 +459,8 @@ def cleanup_code(data, cleaned_code_file_path, task_merged_code_file_path):
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	cleaned_code = res.choices[0].message.content
 	create_and_write_file(cleaned_code_file_path, cleaned_code)
+	# every time we clean code it's the end of the step and we probably want to update the index.html file
+	create_and_write_file(task_main_code_file_path, cleaned_code)
 	print("successfully called gpt for cleanup_code: " + cleaned_code)
 
 def wipeout_code(code_folder_path, task_id, plan):

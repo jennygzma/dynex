@@ -8,12 +8,17 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=api_key)
+
 FAKED_DATA_FILE_NAME = "faked_data.json"
 GENERATED_FOLDER_PATH = "generated"
 MERGED_CODE_FILE_NAME = "merged.html"
 CHECKED_CODE_FILE_NAME = "checked.html"
 CLEANED_CODE_FILE_NAME = "cleaned.html"
 TASK_FILE_NAME = "task.html"
+DEBUG_FILE_NAME = "debug.html"
+DEBUG_MERGE_FILE_NAME = "debug_merged.html"
+DEBUG_CLEANED_FILE_NAME = "debug_clean.html"
+MAIN_CODE_FILE_NAME = "index.html"
 
 # user provided prompt for what UI should look like
 prompt = None
