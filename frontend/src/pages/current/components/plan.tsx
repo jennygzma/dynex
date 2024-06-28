@@ -175,9 +175,14 @@ const Plan = () => {
         </Typography>
         <Button
           variant="contained"
-          color="primary"
           onClick={generatePlan}
-          sx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+            backgroundColor: "#9a4e4e",
+            "&:hover": {
+              backgroundColor: "#b55e5e",
+            },
+          }}
         >
           {plan ? "Regenerate Plan" : "Create Plan"}
         </Button>
@@ -194,13 +199,37 @@ const Plan = () => {
               setJsonPlan(e.target.value);
             }}
             inputProps={{ style: { fontFamily: "monospace" } }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#9a4e4e", // Default border color
+                },
+                "&:hover fieldset": {
+                  borderColor: "#9a4e4e", // Border color on hover
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#9a4e4e", // Border color when focused
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "#9a4e4e", // Label color
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#9a4e4e", // Label color when focused
+              },
+            }}
           />
           <Button
             variant="contained"
-            color="primary"
             disabled={!updatedPlan}
             onClick={savePlan}
-            sx={{ width: "100%" }}
+            sx={{
+              width: "100%",
+              backgroundColor: "#9a4e4e",
+              "&:hover": {
+                backgroundColor: "#b55e5e",
+              },
+            }}
           >
             Update Plan
           </Button>
@@ -214,7 +243,6 @@ const Plan = () => {
                     <Card
                       key={task.taskId}
                       sx={{
-                        padding: "40px",
                         fontSize: "20px",
                         lineHeight: "30px",
                         backgroundColor:
@@ -223,8 +251,41 @@ const Plan = () => {
                             : "transparent",
                       }}
                     >
-                      <CardActionArea onClick={() => updateCurrentTask(task)}>
-                        {`${task.taskId}) ${task.task}`}
+                      <CardActionArea
+                        onClick={() => updateCurrentTask(task)}
+                        sx={{ padding: "30px" }}
+                      >
+                        <Typography>
+                          {`${task.taskId}) ${task.task}`}
+                        </Typography>
+                        {currentTask?.taskId === task.taskId && (
+                          <Stack direction="row" spacing="10px">
+                            <Button
+                              variant="contained"
+                              onClick={() => {}}
+                              sx={{
+                                backgroundColor: "#9a4e4e",
+                                "&:hover": {
+                                  backgroundColor: "#b55e5e",
+                                },
+                              }}
+                            >
+                              Add Task Beneath
+                            </Button>
+                            <Button
+                              variant="contained"
+                              onClick={() => {}}
+                              sx={{
+                                backgroundColor: "#9a4e4e",
+                                "&:hover": {
+                                  backgroundColor: "#b55e5e",
+                                },
+                              }}
+                            >
+                              Remove Task
+                            </Button>
+                          </Stack>
+                        )}
                       </CardActionArea>
                     </Card>
                     {currentTask?.taskId === task.taskId && (
@@ -241,13 +302,37 @@ const Plan = () => {
                             setNewTaskDescription(e.target.value);
                           }}
                           inputProps={{ style: { fontFamily: "monospace" } }}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              "& fieldset": {
+                                borderColor: "#9a4e4e", // Default border color
+                              },
+                              "&:hover fieldset": {
+                                borderColor: "#9a4e4e", // Border color on hover
+                              },
+                              "&.Mui-focused fieldset": {
+                                borderColor: "#9a4e4e", // Border color when focused
+                              },
+                            },
+                            "& .MuiInputLabel-root": {
+                              color: "#9a4e4e", // Label color
+                            },
+                            "& .MuiInputLabel-root.Mui-focused": {
+                              color: "#9a4e4e", // Label color when focused
+                            },
+                          }}
                         />
                         <Button
                           variant="contained"
-                          color="primary"
                           disabled={!updatedNewTaskDescription}
                           onClick={updateStepInPlan}
-                          sx={{ width: "100%" }}
+                          sx={{
+                            width: "100%",
+                            backgroundColor: "#9a4e4e",
+                            "&:hover": {
+                              backgroundColor: "#b55e5e",
+                            },
+                          }}
                         >
                           {"Update Step"}
                         </Button>

@@ -12,6 +12,7 @@ def create_folder(folder_path):
         print(f"error creating folder {folder_path}, {e}")
 
 
+# overwrites content of file
 def create_and_write_file(file_path, text):
     try:
         # Open the file in write mode (this will create the file if it doesn't exist)

@@ -5,8 +5,13 @@ import json
 import uuid
 
 import globals
+from code_generation import get_debug_code
 from code_generation import get_fake_data as get_generated_fake_data
-from code_generation import implement_plan_lock_step, wipeout_code
+from code_generation import (
+    implement_plan_lock_step,
+    test_code_per_lock_step,
+    wipeout_code,
+)
 from flask import Flask, jsonify, request
 from planning import get_design_hypothesis as get_generated_design_hypothesis
 from planning import get_plan as get_generated_plan
@@ -80,7 +85,8 @@ def get_design_hypothesis():
 def generate_plan():
     print("calling generate_plan...")
     plan = get_generated_plan(globals.design_hypothesis)
-    globals.plan = json.loads(plan)
+    print(plan)
+    globals.plan = plan
     if (folder_exists(f"{globals.folder_path}/1")):
         wipeout_code(globals.folder_path, 1, globals.plan)
     return jsonify({"message": "Generated Plan", "plan": plan}), 200
@@ -127,20 +133,21 @@ def generate_code():
     task_code_folder_path = f"{globals.folder_path}/{task_id}"
     if folder_exists(task_code_folder_path):
         wipeout_code(globals.folder_path, task_id, globals.plan)
-    file_path = implement_plan_lock_step(
+    implement_plan_lock_step(
         globals.design_hypothesis, globals.plan, globals.faked_data, globals.folder_path, task_id
     )
+    task_main_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
     # file_path = implement_plan(globals.prompt, globals.plan, globals.faked_data, globals.design_hypothesis, globals.folder_path)
-    code = read_file(file_path)
+    code = read_file(task_main_code_folder_path)
     return jsonify({"message": "Generated code", "code": code}), 200
 
 @app.route("/get_code_per_step", methods=["GET"])
 def get_code_per_step():
     print("calling get_code_per_step...")
     task_id = request.args.get("task_id")
-    task_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.CLEANED_CODE_FILE_NAME}"
+    task_main_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
     print(task_id)
-    code = read_file(task_code_folder_path) or ""
+    code = read_file(task_main_code_folder_path) or ""
     print(code)
     return jsonify({"message": f"grabbed code for {task_id}", "code": code}), 200
 
@@ -150,10 +157,31 @@ def save_code_per_step():
     data = request.json
     task_id = data["task_id"]
     code = data["code"]
-    task_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.CLEANED_CODE_FILE_NAME}"
-    create_and_write_file(task_code_folder_path, code)
+    task_main_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
+    create_and_write_file(task_main_code_folder_path, code)
     print(code)
     return jsonify({"message": f"Grabbed code for {task_id}", "code": code}), 200
+
+@app.route("/debug_and_repair_code", methods=["POST"])
+def debug_and_repair_code():
+    print("calling debug_and_repair_code...")
+    data = request.json
+    task_id = data["task_id"]
+    problem = data["problem"]
+    index = task_id-1
+    task = globals.plan[index]["task"]
+    task_code_folder_path = f"{globals.folder_path}/{task_id}"
+    get_debug_code(problem, task, task_code_folder_path, globals.design_hypothesis)
+    return jsonify({"message": "Debugged and regenerated code"}), 200
+
+@app.route("/get_test_cases_per_lock_step", methods=["GET"])
+def get_test_cases_per_lock_step():
+    print("calling get_test_cases_per_lock_step...")
+    task_id = int(request.args.get("task_id"))
+    index = task_id-1
+    task = globals.plan[index]["task"]
+    test_cases = test_code_per_lock_step(task, globals.design_hypothesis)
+    return jsonify({"message": f"Grabbed test cases for {task_id} {task}", "test_cases": json.loads(test_cases)}), 200
 
 # For testing only. Run curl http://127.0.0.1:5000/set_globals_for_debug
 @app.route("/set_globals_for_debug", methods=["GET"])
@@ -176,6 +204,7 @@ def set_globals_for_debug():
             "description": "Raw organic brown eggs in a basket",
             "quantity": 200,
             "price": 28.1,
+            "expiration": "04/30/2025",
             "rating": 4
         },
         {
@@ -184,6 +213,7 @@ def set_globals_for_debug():
             "description": "Raw organic white eggs in a carton",
             "quantity": 300,
             "price": 30.2,
+            "expiration": "05/30/2025",
             "rating": 4.1
         },
         {
@@ -192,6 +222,7 @@ def set_globals_for_debug():
             "description": "Large raw organic eggs in a container",
             "quantity": 150,
             "price": 35.5,
+            "expiration": "06/30/2024",
             "rating": 4.8
         },
         {
@@ -200,6 +231,7 @@ def set_globals_for_debug():
             "description": "Fresh organic whole milk in a bottle",
             "quantity": 500,
             "price": 22.2,
+            "expiration": "06/31/2024",
             "rating": 4.6
         },
         {
@@ -208,6 +240,7 @@ def set_globals_for_debug():
             "description": "Creamy organic unsalted butter",
             "quantity": 250,
             "price": 20.1,
+            "expiration": "06/20/2024",
             "rating": 4.3
         },
         {
@@ -216,6 +249,7 @@ def set_globals_for_debug():
             "description": "White cheddar cheese block",
             "quantity": 120,
             "price": 33.2,
+            "expiration": "07/30/2024",
             "rating": 4.7
         },
         {
@@ -224,6 +258,7 @@ def set_globals_for_debug():
             "description": "Greek yogurt in a tub",
             "quantity": 400,
             "price": 15.5,
+            "expiration": "06/30/2025",
             "rating": 4.2
         },
         {
@@ -232,6 +267,7 @@ def set_globals_for_debug():
             "description": "Heavy cream in a carton",
             "quantity": 325,
             "price": 26.6,
+            "expiration": "08/12/2024",
             "rating": 4.4
         },
         {
@@ -240,6 +276,7 @@ def set_globals_for_debug():
             "description": "Sour cream in a tub",
             "quantity": 210,
             "price": 18,
+            "expiration": "06/30/2024",
             "rating": 3.9
         },
         {
@@ -248,6 +285,7 @@ def set_globals_for_debug():
             "description": "Low-fat cottage cheese in a tub",
             "quantity": 175,
             "price": 21.3,
+            "expiration": "06/30/2024",
             "rating": 3.8
         }
     ]

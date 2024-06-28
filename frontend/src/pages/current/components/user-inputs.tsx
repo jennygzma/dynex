@@ -184,6 +184,25 @@ const UserInputs = () => {
           value={UIPrompt}
           placeholder={""}
           onChange={(e) => setUIPrompt(e.target.value)}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#9a4e4e", // Default border color
+              },
+              "&:hover fieldset": {
+                borderColor: "#9a4e4e", // Border color on hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#9a4e4e", // Border color when focused
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: "#9a4e4e", // Label color
+            },
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#9a4e4e", // Label color when focused
+            },
+          }}
         />
         <TextField
           className={"data-model"}
@@ -194,15 +213,39 @@ const UserInputs = () => {
           value={dataModel}
           onChange={(e) => setDataModel(e.target.value)}
           inputProps={{ style: { fontFamily: "monospace" } }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#9a4e4e", // Default border color
+              },
+              "&:hover fieldset": {
+                borderColor: "#9a4e4e", // Border color on hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#9a4e4e", // Border color when focused
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: "#9a4e4e", // Label color
+            },
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#9a4e4e", // Label color when focused
+            },
+          }}
         />
         <Stack direction="row" spacing="10px" width="100%">
           <Stack spacing="10px" width="50%">
             <Button
               variant="contained"
-              color="primary"
               onClick={generateDesignHypothesis}
               disabled={!UIPrompt || !dataModel}
-              sx={{ width: "100%" }}
+              sx={{
+                width: "100%",
+                backgroundColor: "#9a4e4e",
+                "&:hover": {
+                  backgroundColor: "#b55e5e",
+                },
+              }}
             >
               {designHypothesis
                 ? "Generate new design hypothesis"
@@ -221,12 +264,36 @@ const UserInputs = () => {
                     updateDesignHypothesis(e.target.value);
                     setUpdatedDesignHypothesis(true);
                   }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "#9a4e4e", // Default border color
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#9a4e4e", // Border color on hover
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#9a4e4e", // Border color when focused
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#9a4e4e", // Label color
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#9a4e4e", // Label color when focused
+                    },
+                  }}
                 />
                 <Button
                   variant="contained"
-                  color="primary"
                   onClick={saveDesignHypothesis}
                   disabled={!updatedDesignHypothesis}
+                  sx={{
+                    backgroundColor: "#9a4e4e",
+                    "&:hover": {
+                      backgroundColor: "#b55e5e",
+                    },
+                  }}
                 >
                   Update design hypothesis
                 </Button>
@@ -236,10 +303,15 @@ const UserInputs = () => {
           <Stack spacing="10px" width="50%">
             <Button
               variant="contained"
-              color="primary"
               onClick={generateFakeData}
               disabled={!UIPrompt || !dataModel}
-              sx={{ width: "100%" }}
+              sx={{
+                width: "100%",
+                backgroundColor: "#9a4e4e",
+                "&:hover": {
+                  backgroundColor: "#b55e5e",
+                },
+              }}
             >
               {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
             </Button>
@@ -257,12 +329,36 @@ const UserInputs = () => {
                     setUpdatedDataInput(true);
                   }}
                   inputProps={{ style: { fontFamily: "monospace" } }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "#9a4e4e", // Default border color
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#9a4e4e", // Border color on hover
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#9a4e4e", // Border color when focused
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#9a4e4e", // Label color
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#9a4e4e", // Label color when focused
+                    },
+                  }}
                 />
                 <Button
                   variant="contained"
-                  color="primary"
                   onClick={saveFakedData}
                   disabled={!updatedDataInput}
+                  sx={{
+                    backgroundColor: "#9a4e4e",
+                    "&:hover": {
+                      backgroundColor: "#b55e5e",
+                    },
+                  }}
                 >
                   Update faked data
                 </Button>

@@ -1,4 +1,6 @@
 # This file handles brainstorming the design hypothesis and creating the task list.
+import json
+
 import globals
 
 client = globals.client
@@ -80,4 +82,10 @@ def cleanup_plan(plan):
     ]
     res = client.chat.completions.create(model="gpt-4", messages=messages)
     print("sucessfully called GPT for cleanup_plan", res)
-    return res.choices[0].message.content
+    cleaned_plan = res.choices[0].message.content
+    try:
+        cleaned_plan_json = json.loads(cleaned_plan)
+        return cleaned_plan_json
+    except json.JSONDecodeError:
+        print("Error decoding JSON, retrying...")
+        cleanup_plan(plan)
