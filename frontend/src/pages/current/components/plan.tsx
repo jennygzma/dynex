@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { usePlanContext } from "../hooks/plan-context";
 import axios from "axios";
-import {
-  Box,
-  Button,
-  Card,
-  CardActionArea,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Card, CardActionArea, Stack, Typography } from "@mui/material";
+import Button from "../../../components/Button";
+import TextField from "../../../components/TextField";
+import Box from "../../../components/Box";
 
 const mapPlan = (jsonPlan) => {
   return jsonPlan.map((step) => {
@@ -36,13 +31,16 @@ const Plan = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     setUpdatedNewTaskDescription(false);
-    getStepInPlan();
+    getStep();
   }, [currentTask]);
   const [updatedPlan, setUpdatedPlan] = useState(false);
   const [jsonPlan, setJsonPlan] = useState(undefined);
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
     useState(false);
+  const [clickedAddStep, setClickedAddStep] = useState(false);
+  const [addStepNewTaskDescription, setAddStepNewTaskDescription] =
+    useState(undefined);
 
   const generatePlan = () => {
     updateIsLoading(true);
@@ -106,7 +104,7 @@ const Plan = () => {
       });
   };
 
-  const getStepInPlan = () => {
+  const getStep = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
@@ -128,7 +126,7 @@ const Plan = () => {
       });
   };
 
-  const updateStepInPlan = () => {
+  const updateStep = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
@@ -140,7 +138,7 @@ const Plan = () => {
     })
       .then((response) => {
         console.log("/update_step_in_plan request successful:", response.data);
-        getStepInPlan();
+        getStep();
         getPlan();
         setUpdatedNewTaskDescription(false);
       })
@@ -152,16 +150,54 @@ const Plan = () => {
       });
   };
 
+  const addStep = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/add_step_in_plan",
+      data: {
+        current_task_id: currentTask.taskId,
+        new_task_description: addStepNewTaskDescription,
+      },
+    })
+      .then((response) => {
+        console.log("/add_step_in_plan request successful:", response.data);
+        getPlan();
+        setClickedAddStep(false);
+        setAddStepNewTaskDescription(undefined);
+      })
+      .catch((error) => {
+        console.error("Error calling /add_step_in_plan request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const removeStep = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/remove_step_in_plan",
+      data: {
+        task_id: currentTask.taskId,
+      },
+    })
+      .then((response) => {
+        console.log("/remove_step_in_plan request successful:", response.data);
+        getPlan();
+      })
+      .catch((error) => {
+        console.error("Error calling /remove_step_in_plan request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   if (!designHypothesis) return <></>;
   return (
-    <Box
-      sx={{
-        padding: "10px",
-        border: 10,
-        borderColor: "#9a4e4e",
-        backgroundColor: "white",
-      }}
-    >
+    <Box>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -174,14 +210,9 @@ const Plan = () => {
           Planning
         </Typography>
         <Button
-          variant="contained"
           onClick={generatePlan}
           sx={{
             width: "100%",
-            backgroundColor: "#9a4e4e",
-            "&:hover": {
-              backgroundColor: "#b55e5e",
-            },
           }}
         >
           {plan ? "Regenerate Plan" : "Create Plan"}
@@ -190,45 +221,19 @@ const Plan = () => {
           <TextField
             className={"generated-plan"}
             label="Plan"
-            variant="outlined"
-            multiline
             rows={10}
             value={jsonPlan}
             onChange={(e) => {
               setUpdatedPlan(true);
               setJsonPlan(e.target.value);
             }}
-            inputProps={{ style: { fontFamily: "monospace" } }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#9a4e4e", // Default border color
-                },
-                "&:hover fieldset": {
-                  borderColor: "#9a4e4e", // Border color on hover
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#9a4e4e", // Border color when focused
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#9a4e4e", // Label color
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#9a4e4e", // Label color when focused
-              },
-            }}
+            code={true}
           />
           <Button
-            variant="contained"
             disabled={!updatedPlan}
             onClick={savePlan}
             sx={{
               width: "100%",
-              backgroundColor: "#9a4e4e",
-              "&:hover": {
-                backgroundColor: "#b55e5e",
-              },
             }}
           >
             Update Plan
@@ -253,88 +258,55 @@ const Plan = () => {
                     >
                       <CardActionArea
                         onClick={() => updateCurrentTask(task)}
-                        sx={{ padding: "30px" }}
+                        sx={{ padding: "15px" }}
                       >
                         <Typography>
                           {`${task.taskId}) ${task.task}`}
                         </Typography>
-                        {currentTask?.taskId === task.taskId && (
+                      </CardActionArea>
+                      {currentTask?.taskId === task.taskId && (
+                        <Stack spacing="10px" padding="15px">
                           <Stack direction="row" spacing="10px">
-                            <Button
-                              variant="contained"
-                              onClick={() => {}}
-                              sx={{
-                                backgroundColor: "#9a4e4e",
-                                "&:hover": {
-                                  backgroundColor: "#b55e5e",
-                                },
+                            <TextField
+                              className={"generated-plan"}
+                              label="Update Step"
+                              value={newTaskDescription}
+                              onChange={(e) => {
+                                setUpdatedNewTaskDescription(true);
+                                setNewTaskDescription(e.target.value);
                               }}
-                            >
-                              Add Task Beneath
-                            </Button>
+                            />
                             <Button
-                              variant="contained"
-                              onClick={() => {}}
-                              sx={{
-                                backgroundColor: "#9a4e4e",
-                                "&:hover": {
-                                  backgroundColor: "#b55e5e",
-                                },
-                              }}
+                              disabled={!updatedNewTaskDescription}
+                              onClick={updateStep}
                             >
-                              Remove Task
+                              Update Step
                             </Button>
                           </Stack>
-                        )}
-                      </CardActionArea>
+                          <Stack direction="row" spacing="10px">
+                            <Button onClick={() => setClickedAddStep(true)}>
+                              Add Task Beneath
+                            </Button>
+                            <Button onClick={removeStep}>Remove Task</Button>
+                          </Stack>
+                        </Stack>
+                      )}
                     </Card>
-                    {currentTask?.taskId === task.taskId && (
-                      <Stack sx={{ width: "100%" }} spacing={"10px"}>
+                    {clickedAddStep && currentTask?.taskId === task.taskId && (
+                      <Stack direction="row" spacing="10px">
                         <TextField
-                          className={"generated-plan"}
-                          label="Plan"
-                          variant="outlined"
-                          multiline
-                          rows={2}
-                          value={newTaskDescription}
+                          className={"add-step-to-plan"}
+                          label="Add Step"
+                          value={addStepNewTaskDescription}
                           onChange={(e) => {
-                            setUpdatedNewTaskDescription(true);
-                            setNewTaskDescription(e.target.value);
-                          }}
-                          inputProps={{ style: { fontFamily: "monospace" } }}
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              "& fieldset": {
-                                borderColor: "#9a4e4e", // Default border color
-                              },
-                              "&:hover fieldset": {
-                                borderColor: "#9a4e4e", // Border color on hover
-                              },
-                              "&.Mui-focused fieldset": {
-                                borderColor: "#9a4e4e", // Border color when focused
-                              },
-                            },
-                            "& .MuiInputLabel-root": {
-                              color: "#9a4e4e", // Label color
-                            },
-                            "& .MuiInputLabel-root.Mui-focused": {
-                              color: "#9a4e4e", // Label color when focused
-                            },
+                            setAddStepNewTaskDescription(e.target.value);
                           }}
                         />
                         <Button
-                          variant="contained"
-                          disabled={!updatedNewTaskDescription}
-                          onClick={updateStepInPlan}
-                          sx={{
-                            width: "100%",
-                            backgroundColor: "#9a4e4e",
-                            "&:hover": {
-                              backgroundColor: "#b55e5e",
-                            },
-                          }}
+                          disabled={!addStepNewTaskDescription}
+                          onClick={addStep}
                         >
-                          {"Update Step"}
+                          Add Step
                         </Button>
                       </Stack>
                     )}

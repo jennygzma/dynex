@@ -1,7 +1,10 @@
-import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";
+import Button from "../../../components/Button";
+import TextField from "../../../components/TextField";
+import Box from "../../../components/Box";
 
 const UserInputs = () => {
   const { updateIsLoading, designHypothesis, updateDesignHypothesis } =
@@ -156,14 +159,7 @@ const UserInputs = () => {
   };
 
   return (
-    <Box
-      sx={{
-        padding: "10px",
-        border: 10,
-        borderColor: "#9a4e4e",
-        backgroundColor: "white",
-      }}
-    >
+    <Box>
       <Stack spacing="20px">
         <Typography
           variant="h4"
@@ -178,73 +174,24 @@ const UserInputs = () => {
         <TextField
           className={"user-input"}
           label="User Input"
-          variant="outlined"
-          multiline
-          rows={2}
           value={UIPrompt}
-          placeholder={""}
           onChange={(e) => setUIPrompt(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "#9a4e4e", // Default border color
-              },
-              "&:hover fieldset": {
-                borderColor: "#9a4e4e", // Border color on hover
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#9a4e4e", // Border color when focused
-              },
-            },
-            "& .MuiInputLabel-root": {
-              color: "#9a4e4e", // Label color
-            },
-            "& .MuiInputLabel-root.Mui-focused": {
-              color: "#9a4e4e", // Label color when focused
-            },
-          }}
         />
         <TextField
+          code={true}
           className={"data-model"}
           label="Data Model"
-          variant="outlined"
-          multiline
           rows={10}
           value={dataModel}
           onChange={(e) => setDataModel(e.target.value)}
-          inputProps={{ style: { fontFamily: "monospace" } }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "#9a4e4e", // Default border color
-              },
-              "&:hover fieldset": {
-                borderColor: "#9a4e4e", // Border color on hover
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#9a4e4e", // Border color when focused
-              },
-            },
-            "& .MuiInputLabel-root": {
-              color: "#9a4e4e", // Label color
-            },
-            "& .MuiInputLabel-root.Mui-focused": {
-              color: "#9a4e4e", // Label color when focused
-            },
-          }}
         />
         <Stack direction="row" spacing="10px" width="100%">
           <Stack spacing="10px" width="50%">
             <Button
-              variant="contained"
               onClick={generateDesignHypothesis}
               disabled={!UIPrompt || !dataModel}
               sx={{
                 width: "100%",
-                backgroundColor: "#9a4e4e",
-                "&:hover": {
-                  backgroundColor: "#b55e5e",
-                },
               }}
             >
               {designHypothesis
@@ -256,44 +203,16 @@ const UserInputs = () => {
                 <TextField
                   className={"design-hypothesis"}
                   label="Design Hypothesis"
-                  variant="outlined"
-                  multiline
                   rows={13}
                   value={designHypothesis}
                   onChange={(e) => {
                     updateDesignHypothesis(e.target.value);
                     setUpdatedDesignHypothesis(true);
                   }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#9a4e4e", // Default border color
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#9a4e4e", // Border color on hover
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#9a4e4e", // Border color when focused
-                      },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: "#9a4e4e", // Label color
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "#9a4e4e", // Label color when focused
-                    },
-                  }}
                 />
                 <Button
-                  variant="contained"
                   onClick={saveDesignHypothesis}
                   disabled={!updatedDesignHypothesis}
-                  sx={{
-                    backgroundColor: "#9a4e4e",
-                    "&:hover": {
-                      backgroundColor: "#b55e5e",
-                    },
-                  }}
                 >
                   Update design hypothesis
                 </Button>
@@ -302,15 +221,10 @@ const UserInputs = () => {
           </Stack>
           <Stack spacing="10px" width="50%">
             <Button
-              variant="contained"
               onClick={generateFakeData}
               disabled={!UIPrompt || !dataModel}
               sx={{
                 width: "100%",
-                backgroundColor: "#9a4e4e",
-                "&:hover": {
-                  backgroundColor: "#b55e5e",
-                },
               }}
             >
               {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
@@ -318,6 +232,7 @@ const UserInputs = () => {
             {dataInput !== "null" && dataInput && (
               <>
                 <TextField
+                  code={true}
                   className={"generated-data"}
                   label="Data Input"
                   variant="outlined"
@@ -328,7 +243,6 @@ const UserInputs = () => {
                     setDataInput(e.target.value);
                     setUpdatedDataInput(true);
                   }}
-                  inputProps={{ style: { fontFamily: "monospace" } }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       "& fieldset": {
@@ -349,17 +263,7 @@ const UserInputs = () => {
                     },
                   }}
                 />
-                <Button
-                  variant="contained"
-                  onClick={saveFakedData}
-                  disabled={!updatedDataInput}
-                  sx={{
-                    backgroundColor: "#9a4e4e",
-                    "&:hover": {
-                      backgroundColor: "#b55e5e",
-                    },
-                  }}
-                >
+                <Button onClick={saveFakedData} disabled={!updatedDataInput}>
                   Update faked data
                 </Button>
               </>

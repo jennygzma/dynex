@@ -1,14 +1,10 @@
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";
+import Button from "../../../components/Button";
+import TextField from "../../../components/TextField";
+import Box from "../../../components/Box";
 
 const CodeGeneration = () => {
   const { updateIsLoading, plan, updatePlan, designHypothesis, currentTask } =
@@ -155,19 +151,11 @@ const CodeGeneration = () => {
     getCode();
     renderUI();
   }, [plan, designHypothesis, currentTask]);
-  // useEffect(() => {}, [code]);
 
   if (!designHypothesis || !plan || !currentTask) return <></>;
 
   return (
-    <Box
-      sx={{
-        padding: "10px",
-        border: 10,
-        borderColor: "#9a4e4e",
-        backgroundColor: "white",
-      }}
-    >
+    <Box>
       <Stack spacing="20px">
         <Typography
           variant="h4"
@@ -180,14 +168,9 @@ const CodeGeneration = () => {
           Implementation
         </Typography>
         <Button
-          variant="contained"
           onClick={generateCode}
           sx={{
             width: "100%",
-            backgroundColor: "#9a4e4e",
-            "&:hover": {
-              backgroundColor: "#b55e5e",
-            },
           }}
         >
           {code ? "Regenerate Code" : "Generate Code"}
@@ -195,59 +178,18 @@ const CodeGeneration = () => {
         <TextField
           className={"code"}
           label="Code Editor"
-          variant="outlined"
-          multiline
           rows={40}
           value={code}
           onChange={(e) => {
             setCode(e.target.value);
             setUpdatedCode(true);
           }}
-          inputProps={{ style: { fontFamily: "monospace" } }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "#9a4e4e", // Default border color
-              },
-              "&:hover fieldset": {
-                borderColor: "#9a4e4e", // Border color on hover
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#9a4e4e", // Border color when focused
-              },
-            },
-            "& .MuiInputLabel-root": {
-              color: "#9a4e4e", // Label color
-            },
-            "& .MuiInputLabel-root.Mui-focused": {
-              color: "#9a4e4e", // Label color when focused
-            },
-          }}
+          code={true}
         />
-        <Button
-          variant="contained"
-          disabled={!updatedCode}
-          onClick={saveCode}
-          sx={{
-            backgroundColor: "#9a4e4e",
-            "&:hover": {
-              backgroundColor: "#b55e5e",
-            },
-          }}
-        >
+        <Button disabled={!updatedCode} onClick={saveCode}>
           Update Code
         </Button>
-        <Button
-          variant="contained"
-          disabled={!code}
-          onClick={getTestCases}
-          sx={{
-            backgroundColor: "#9a4e4e",
-            "&:hover": {
-              backgroundColor: "#b55e5e",
-            },
-          }}
-        >
+        <Button disabled={!code} onClick={getTestCases}>
           Get Test Cases
         </Button>
         {testCases &&
@@ -256,60 +198,16 @@ const CodeGeneration = () => {
           <TextField
             className={"problem"}
             label="Problem Description"
-            variant="outlined"
-            multiline
-            rows={2}
             value={problemDescription}
             onChange={(e) => {
               setProblemDescription(e.target.value);
             }}
-            sx={{
-              width: "100%",
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#9a4e4e", // Default border color
-                },
-                "&:hover fieldset": {
-                  borderColor: "#9a4e4e", // Border color on hover
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#9a4e4e", // Border color when focused
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#9a4e4e", // Label color
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#9a4e4e", // Label color when focused
-              },
-            }}
           />
-          <Button
-            variant="contained"
-            disabled={!problemDescription}
-            onClick={debugAndRepairCode}
-            sx={{
-              backgroundColor: "#9a4e4e",
-              "&:hover": {
-                backgroundColor: "#b55e5e",
-              },
-            }}
-          >
+          <Button disabled={!problemDescription} onClick={debugAndRepairCode}>
             Debug and Repair
           </Button>
         </Stack>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={!code}
-          onClick={renderUI}
-          sx={{
-            backgroundColor: "#9a4e4e",
-            "&:hover": {
-              backgroundColor: "#b55e5e",
-            },
-          }}
-        >
+        <Button disabled={!code} onClick={renderUI}>
           Render
         </Button>
         <Paper id="output" className={"hi"} sx={{ height: "1000px" }} />
