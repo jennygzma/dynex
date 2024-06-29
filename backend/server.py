@@ -116,6 +116,41 @@ def update_step_in_plan():
         wipeout_code(globals.folder_path, task_id, globals.plan)
     return jsonify({"message": f"Updated step in plan for {task_id}", "data": globals.plan}), 200
 
+@app.route("/add_step_in_plan", methods=["POST"])
+def add_step_in_plan():
+    print("calling add_step_in_plan")
+    data = request.json
+    curr_task_id = data["current_task_id"]
+    new_task_id = curr_task_id+1
+    new_task_description = data["new_task_description"]
+    injected_index = new_task_id-1
+    new_task = {
+        "task_id": None,
+        "task": new_task_description,
+        "dep": []
+    }
+    globals.plan.insert(injected_index, new_task)
+    for i in range(injected_index, len(globals.plan)):
+        globals.plan[i]["task_id"] = i+1
+    if (folder_exists(f"{globals.folder_path}/{new_task_id}")):
+        wipeout_code(globals.folder_path, new_task_id, globals.plan)
+    print("new plan", globals.plan)
+    return jsonify({"message": f"Added step in plan for {new_task_id}", "data": globals.plan}), 200
+
+@app.route("/remove_step_in_plan", methods=["POST"])
+def remove_step_in_plan():
+    print("calling remove_step_in_plan")
+    data = request.json
+    task_id = data["task_id"]
+    index = task_id-1
+    globals.plan.pop(index)
+    for i in range(index, len(globals.plan)):
+        globals.plan[i]["task_id"] = i+1
+    if (folder_exists(f"{globals.folder_path}/{task_id}")):
+        wipeout_code(globals.folder_path, task_id, globals.plan)
+    print("new plan", globals.plan)
+    return jsonify({"message": f"Removed step in plan for {task_id}", "data": globals.plan}), 200
+
 @app.route("/get_step_in_plan", methods=["GET"])
 def get_step_in_plan():
     print("calling get_step_in_plan")

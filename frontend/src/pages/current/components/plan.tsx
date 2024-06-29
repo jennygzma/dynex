@@ -36,13 +36,16 @@ const Plan = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     setUpdatedNewTaskDescription(false);
-    getStepInPlan();
+    getStep();
   }, [currentTask]);
   const [updatedPlan, setUpdatedPlan] = useState(false);
   const [jsonPlan, setJsonPlan] = useState(undefined);
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
     useState(false);
+  const [clickedAddStep, setClickedAddStep] = useState(false);
+  const [addStepNewTaskDescription, setAddStepNewTaskDescription] =
+    useState(undefined);
 
   const generatePlan = () => {
     updateIsLoading(true);
@@ -106,7 +109,7 @@ const Plan = () => {
       });
   };
 
-  const getStepInPlan = () => {
+  const getStep = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
@@ -128,7 +131,7 @@ const Plan = () => {
       });
   };
 
-  const updateStepInPlan = () => {
+  const updateStep = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
@@ -140,12 +143,57 @@ const Plan = () => {
     })
       .then((response) => {
         console.log("/update_step_in_plan request successful:", response.data);
-        getStepInPlan();
+        getStep();
         getPlan();
         setUpdatedNewTaskDescription(false);
       })
       .catch((error) => {
         console.error("Error calling /update_step_in_plan request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const addStep = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/add_step_in_plan",
+      data: {
+        current_task_id: currentTask.taskId,
+        new_task_description: addStepNewTaskDescription,
+      },
+    })
+      .then((response) => {
+        console.log("/add_step_in_plan request successful:", response.data);
+        getPlan();
+        setClickedAddStep(false);
+        setAddStepNewTaskDescription(undefined);
+      })
+      .catch((error) => {
+        console.error("Error calling /add_step_in_plan request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const removeStep = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/remove_step_in_plan",
+      data: {
+        task_id: currentTask.taskId,
+      },
+    })
+      .then((response) => {
+        console.log("/remove_step_in_plan request successful:", response.data);
+        getPlan();
+      })
+      .catch((error) => {
+        console.error("Error calling /remove_step_in_plan request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -253,56 +301,112 @@ const Plan = () => {
                     >
                       <CardActionArea
                         onClick={() => updateCurrentTask(task)}
-                        sx={{ padding: "30px" }}
+                        sx={{ padding: "15px" }}
                       >
-                        <Typography>
-                          {`${task.taskId}) ${task.task}`}
-                        </Typography>
-                        {currentTask?.taskId === task.taskId && (
-                          <Stack direction="row" spacing="10px">
-                            <Button
-                              variant="contained"
-                              onClick={() => {}}
-                              sx={{
-                                backgroundColor: "#9a4e4e",
-                                "&:hover": {
-                                  backgroundColor: "#b55e5e",
-                                },
-                              }}
-                            >
-                              Add Task Beneath
-                            </Button>
-                            <Button
-                              variant="contained"
-                              onClick={() => {}}
-                              sx={{
-                                backgroundColor: "#9a4e4e",
-                                "&:hover": {
-                                  backgroundColor: "#b55e5e",
-                                },
-                              }}
-                            >
-                              Remove Task
-                            </Button>
-                          </Stack>
-                        )}
+                        <Stack spacing="10px">
+                          <Typography>
+                            {`${task.taskId}) ${task.task}`}
+                          </Typography>
+                          {currentTask?.taskId === task.taskId && (
+                            <Stack spacing="10px">
+                              <Stack direction="row" spacing="10px">
+                                <TextField
+                                  className={"generated-plan"}
+                                  label="Update Step"
+                                  variant="outlined"
+                                  multiline
+                                  rows={2}
+                                  value={newTaskDescription}
+                                  onChange={(e) => {
+                                    setUpdatedNewTaskDescription(true);
+                                    setNewTaskDescription(e.target.value);
+                                  }}
+                                  inputProps={{
+                                    style: { fontFamily: "monospace" },
+                                  }}
+                                  sx={{
+                                    width: "100%",
+                                    "& .MuiOutlinedInput-root": {
+                                      "& fieldset": {
+                                        borderColor: "#9a4e4e", // Default border color
+                                      },
+                                      "&:hover fieldset": {
+                                        borderColor: "#9a4e4e", // Border color on hover
+                                      },
+                                      "&.Mui-focused fieldset": {
+                                        borderColor: "#9a4e4e", // Border color when focused
+                                      },
+                                    },
+                                    "& .MuiInputLabel-root": {
+                                      color: "#9a4e4e", // Label color
+                                    },
+                                    "& .MuiInputLabel-root.Mui-focused": {
+                                      color: "#9a4e4e", // Label color when focused
+                                    },
+                                  }}
+                                />
+                                <Button
+                                  variant="contained"
+                                  disabled={!updatedNewTaskDescription}
+                                  onClick={updateStep}
+                                  sx={{
+                                    backgroundColor: "#9a4e4e",
+                                    "&:hover": {
+                                      backgroundColor: "#b55e5e",
+                                    },
+                                  }}
+                                >
+                                  Update Step
+                                </Button>
+                              </Stack>
+                              <Stack direction="row" spacing="10px">
+                                <Button
+                                  variant="contained"
+                                  onClick={() => setClickedAddStep(true)}
+                                  sx={{
+                                    backgroundColor: "#9a4e4e",
+                                    "&:hover": {
+                                      backgroundColor: "#b55e5e",
+                                    },
+                                  }}
+                                >
+                                  Add Task Beneath
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  onClick={removeStep}
+                                  sx={{
+                                    backgroundColor: "#9a4e4e",
+                                    "&:hover": {
+                                      backgroundColor: "#b55e5e",
+                                    },
+                                  }}
+                                >
+                                  Remove Task
+                                </Button>
+                              </Stack>
+                            </Stack>
+                          )}
+                        </Stack>
                       </CardActionArea>
                     </Card>
-                    {currentTask?.taskId === task.taskId && (
-                      <Stack sx={{ width: "100%" }} spacing={"10px"}>
+                    {clickedAddStep && currentTask?.taskId === task.taskId && (
+                      <Stack direction="row" spacing="10px">
                         <TextField
-                          className={"generated-plan"}
-                          label="Plan"
+                          className={"add-step-to-plan"}
+                          label="Add Step"
                           variant="outlined"
                           multiline
                           rows={2}
-                          value={newTaskDescription}
+                          value={addStepNewTaskDescription}
                           onChange={(e) => {
-                            setUpdatedNewTaskDescription(true);
-                            setNewTaskDescription(e.target.value);
+                            setAddStepNewTaskDescription(e.target.value);
                           }}
-                          inputProps={{ style: { fontFamily: "monospace" } }}
+                          inputProps={{
+                            style: { fontFamily: "monospace" },
+                          }}
                           sx={{
+                            width: "100%",
                             "& .MuiOutlinedInput-root": {
                               "& fieldset": {
                                 borderColor: "#9a4e4e", // Default border color
@@ -324,17 +428,16 @@ const Plan = () => {
                         />
                         <Button
                           variant="contained"
-                          disabled={!updatedNewTaskDescription}
-                          onClick={updateStepInPlan}
+                          disabled={!addStepNewTaskDescription}
+                          onClick={addStep}
                           sx={{
-                            width: "100%",
                             backgroundColor: "#9a4e4e",
                             "&:hover": {
                               backgroundColor: "#b55e5e",
                             },
                           }}
                         >
-                          {"Update Step"}
+                          Add Step
                         </Button>
                       </Stack>
                     )}
