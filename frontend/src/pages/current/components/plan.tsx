@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { usePlanContext } from "../hooks/plan-context";
 import axios from "axios";
-import {
-  Box,
-  Button,
-  Card,
-  CardActionArea,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Card, CardActionArea, Stack, Typography } from "@mui/material";
+import Button from "../../../components/Button";
+import TextField from "../../../components/TextField";
+import Box from "../../../components/Box";
 
 const mapPlan = (jsonPlan) => {
   return jsonPlan.map((step) => {
@@ -202,14 +197,7 @@ const Plan = () => {
 
   if (!designHypothesis) return <></>;
   return (
-    <Box
-      sx={{
-        padding: "10px",
-        border: 10,
-        borderColor: "#9a4e4e",
-        backgroundColor: "white",
-      }}
-    >
+    <Box>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -222,14 +210,9 @@ const Plan = () => {
           Planning
         </Typography>
         <Button
-          variant="contained"
           onClick={generatePlan}
           sx={{
             width: "100%",
-            backgroundColor: "#9a4e4e",
-            "&:hover": {
-              backgroundColor: "#b55e5e",
-            },
           }}
         >
           {plan ? "Regenerate Plan" : "Create Plan"}
@@ -238,45 +221,19 @@ const Plan = () => {
           <TextField
             className={"generated-plan"}
             label="Plan"
-            variant="outlined"
-            multiline
             rows={10}
             value={jsonPlan}
             onChange={(e) => {
               setUpdatedPlan(true);
               setJsonPlan(e.target.value);
             }}
-            inputProps={{ style: { fontFamily: "monospace" } }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#9a4e4e", // Default border color
-                },
-                "&:hover fieldset": {
-                  borderColor: "#9a4e4e", // Border color on hover
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#9a4e4e", // Border color when focused
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#9a4e4e", // Label color
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#9a4e4e", // Label color when focused
-              },
-            }}
+            code={true}
           />
           <Button
-            variant="contained"
             disabled={!updatedPlan}
             onClick={savePlan}
             sx={{
               width: "100%",
-              backgroundColor: "#9a4e4e",
-              "&:hover": {
-                backgroundColor: "#b55e5e",
-              },
             }}
           >
             Update Plan
@@ -303,139 +260,51 @@ const Plan = () => {
                         onClick={() => updateCurrentTask(task)}
                         sx={{ padding: "15px" }}
                       >
-                        <Stack spacing="10px">
-                          <Typography>
-                            {`${task.taskId}) ${task.task}`}
-                          </Typography>
-                          {currentTask?.taskId === task.taskId && (
-                            <Stack spacing="10px">
-                              <Stack direction="row" spacing="10px">
-                                <TextField
-                                  className={"generated-plan"}
-                                  label="Update Step"
-                                  variant="outlined"
-                                  multiline
-                                  rows={2}
-                                  value={newTaskDescription}
-                                  onChange={(e) => {
-                                    setUpdatedNewTaskDescription(true);
-                                    setNewTaskDescription(e.target.value);
-                                  }}
-                                  inputProps={{
-                                    style: { fontFamily: "monospace" },
-                                  }}
-                                  sx={{
-                                    width: "100%",
-                                    "& .MuiOutlinedInput-root": {
-                                      "& fieldset": {
-                                        borderColor: "#9a4e4e", // Default border color
-                                      },
-                                      "&:hover fieldset": {
-                                        borderColor: "#9a4e4e", // Border color on hover
-                                      },
-                                      "&.Mui-focused fieldset": {
-                                        borderColor: "#9a4e4e", // Border color when focused
-                                      },
-                                    },
-                                    "& .MuiInputLabel-root": {
-                                      color: "#9a4e4e", // Label color
-                                    },
-                                    "& .MuiInputLabel-root.Mui-focused": {
-                                      color: "#9a4e4e", // Label color when focused
-                                    },
-                                  }}
-                                />
-                                <Button
-                                  variant="contained"
-                                  disabled={!updatedNewTaskDescription}
-                                  onClick={updateStep}
-                                  sx={{
-                                    backgroundColor: "#9a4e4e",
-                                    "&:hover": {
-                                      backgroundColor: "#b55e5e",
-                                    },
-                                  }}
-                                >
-                                  Update Step
-                                </Button>
-                              </Stack>
-                              <Stack direction="row" spacing="10px">
-                                <Button
-                                  variant="contained"
-                                  onClick={() => setClickedAddStep(true)}
-                                  sx={{
-                                    backgroundColor: "#9a4e4e",
-                                    "&:hover": {
-                                      backgroundColor: "#b55e5e",
-                                    },
-                                  }}
-                                >
-                                  Add Task Beneath
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  onClick={removeStep}
-                                  sx={{
-                                    backgroundColor: "#9a4e4e",
-                                    "&:hover": {
-                                      backgroundColor: "#b55e5e",
-                                    },
-                                  }}
-                                >
-                                  Remove Task
-                                </Button>
-                              </Stack>
-                            </Stack>
-                          )}
-                        </Stack>
+                        <Typography>
+                          {`${task.taskId}) ${task.task}`}
+                        </Typography>
                       </CardActionArea>
+                      {currentTask?.taskId === task.taskId && (
+                        <Stack spacing="10px" padding="15px">
+                          <Stack direction="row" spacing="10px">
+                            <TextField
+                              className={"generated-plan"}
+                              label="Update Step"
+                              value={newTaskDescription}
+                              onChange={(e) => {
+                                setUpdatedNewTaskDescription(true);
+                                setNewTaskDescription(e.target.value);
+                              }}
+                            />
+                            <Button
+                              disabled={!updatedNewTaskDescription}
+                              onClick={updateStep}
+                            >
+                              Update Step
+                            </Button>
+                          </Stack>
+                          <Stack direction="row" spacing="10px">
+                            <Button onClick={() => setClickedAddStep(true)}>
+                              Add Task Beneath
+                            </Button>
+                            <Button onClick={removeStep}>Remove Task</Button>
+                          </Stack>
+                        </Stack>
+                      )}
                     </Card>
                     {clickedAddStep && currentTask?.taskId === task.taskId && (
                       <Stack direction="row" spacing="10px">
                         <TextField
                           className={"add-step-to-plan"}
                           label="Add Step"
-                          variant="outlined"
-                          multiline
-                          rows={2}
                           value={addStepNewTaskDescription}
                           onChange={(e) => {
                             setAddStepNewTaskDescription(e.target.value);
                           }}
-                          inputProps={{
-                            style: { fontFamily: "monospace" },
-                          }}
-                          sx={{
-                            width: "100%",
-                            "& .MuiOutlinedInput-root": {
-                              "& fieldset": {
-                                borderColor: "#9a4e4e", // Default border color
-                              },
-                              "&:hover fieldset": {
-                                borderColor: "#9a4e4e", // Border color on hover
-                              },
-                              "&.Mui-focused fieldset": {
-                                borderColor: "#9a4e4e", // Border color when focused
-                              },
-                            },
-                            "& .MuiInputLabel-root": {
-                              color: "#9a4e4e", // Label color
-                            },
-                            "& .MuiInputLabel-root.Mui-focused": {
-                              color: "#9a4e4e", // Label color when focused
-                            },
-                          }}
                         />
                         <Button
-                          variant="contained"
                           disabled={!addStepNewTaskDescription}
                           onClick={addStep}
-                          sx={{
-                            backgroundColor: "#9a4e4e",
-                            "&:hover": {
-                              backgroundColor: "#b55e5e",
-                            },
-                          }}
                         >
                           Add Step
                         </Button>
