@@ -58,6 +58,7 @@ def generate_design_hypothesis():
         create_folder(globals.folder_path)
     if (folder_exists(f"{globals.folder_path}/1")):
         wipeout_code(globals.folder_path, 1, globals.plan)
+    create_and_write_file(f"{globals.folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}", globals.design_hypothesis)
     globals.plan = []
     return (
         jsonify(
@@ -73,6 +74,7 @@ def save_design_hypothesis():
     globals.design_hypothesis = data["design_hypothesis"]
     if (folder_exists(f"{globals.folder_path}/1")):
         wipeout_code(globals.folder_path, 1, globals.plan)
+    create_and_write_file(f"{globals.folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}", globals.design_hypothesis)
     globals.plan = []
     return jsonify({"message": "Saved design hypothesis", "data": globals.design_hypothesis}), 200
 
@@ -89,6 +91,7 @@ def generate_plan():
     globals.plan = plan
     if (folder_exists(f"{globals.folder_path}/1")):
         wipeout_code(globals.folder_path, 1, globals.plan)
+    create_and_write_file(f"{globals.folder_path}/{globals.PLAN_FILE_NAME}", json.dumps(globals.plan))
     return jsonify({"message": "Generated Plan", "plan": plan}), 200
 
 @app.route("/get_plan", methods=["GET"])
@@ -102,6 +105,7 @@ def save_plan():
     globals.plan=json.loads(request.json["plan"])
     if (folder_exists(f"{globals.folder_path}/1")):
         wipeout_code(globals.folder_path, 1, globals.plan)
+    create_and_write_file(f"{globals.folder_path}/{globals.PLAN_FILE_NAME}", json.dumps(globals.plan))
     return jsonify({"message": "Saved plan", "data": globals.plan}), 200
 
 @app.route("/update_step_in_plan", methods=["POST"])
@@ -217,6 +221,19 @@ def get_test_cases_per_lock_step():
     task = globals.plan[index]["task"]
     test_cases = test_code_per_lock_step(task, globals.design_hypothesis)
     return jsonify({"message": f"Grabbed test cases for {task_id} {task}", "test_cases": json.loads(test_cases)}), 200
+
+# For testing only. Run curl http://127.0.0.1:5000/set_globals_for_uuid/uuid
+@app.route("/set_globals_for_uuid/<generated_uuid>", methods=["GET"])
+def set_globals_for_uuid(generated_uuid):
+    #backend/generated/generations_2024-07-11_11-34-47_321a5bcc-953c-4fed-abd6-53ad7daae446
+    print("calling set_globals_for_uuid")
+    globals.folder_path = f"{globals.GENERATED_FOLDER_PATH}/{generated_uuid}"
+    globals.faked_data = read_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}")
+    globals.design_hypothesis = read_file(f"{globals.folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}")
+    plan = read_file(f"{globals.folder_path}/{globals.PLAN_FILE_NAME}")
+    print(plan)
+    globals.plan = json.loads(plan)
+    return jsonify({"message": "Successfully set global fields"}), 200
 
 # For testing only. Run curl http://127.0.0.1:5000/set_globals_for_debug
 @app.route("/set_globals_for_debug", methods=["GET"])
@@ -357,6 +374,10 @@ def set_globals_for_debug():
             "dep": [2,3]
         }
     ]
+    create_folder(globals.folder_path)
+    create_and_write_file(f"{globals.folder_path}/{globals.PLAN_FILE_NAME}", json.dumps(globals.plan))
+    create_and_write_file(f"{globals.folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}", globals.design_hypothesis)
+    create_and_write_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}", json.dumps(globals.faked_data))
     return jsonify({"message": "Successfully set global fields"}), 200
 
 # Running app

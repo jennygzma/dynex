@@ -6,7 +6,7 @@ import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 
-const UserInputs = () => {
+const ProjectFormation = () => {
   const { updateIsLoading, designHypothesis, updateDesignHypothesis } =
     usePlanContext();
 
@@ -169,7 +169,7 @@ const UserInputs = () => {
             fontFamily: "monospace",
           }}
         >
-          User Input
+          Project Formation
         </Typography>
         <TextField
           className={"user-input"}
@@ -275,4 +275,4 @@ const UserInputs = () => {
   );
 };
 
-export default UserInputs;
+export default ProjectFormation;

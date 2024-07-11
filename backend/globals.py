@@ -10,6 +10,8 @@ api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
 FAKED_DATA_FILE_NAME = "faked_data.json"
+DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
+PLAN_FILE_NAME = "plan.json"
 GENERATED_FOLDER_PATH = "generated"
 MERGED_CODE_FILE_NAME = "merged.html"
 CHECKED_CODE_FILE_NAME = "checked.html"

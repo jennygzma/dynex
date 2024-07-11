@@ -13,6 +13,10 @@ const CodeGeneration = () => {
   const [updatedCode, setUpdatedCode] = useState(false);
   const [testCases, setTestCases] = useState(undefined);
   const [problemDescription, setProblemDescription] = useState(undefined);
+  const [clickedRender, setClickedRender] = useState(false);
+
+  const lines = code.split("\n").length;
+  const lineNumbers = Array.from({ length: lines }, (_, i) => i + 1);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -149,11 +153,12 @@ const CodeGeneration = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     getCode();
-    renderUI();
+    setTestCases(undefined);
+    setProblemDescription(undefined);
+    setClickedRender(false);
   }, [plan, designHypothesis, currentTask]);
 
   if (!designHypothesis || !plan || !currentTask) return <></>;
-
   return (
     <Box>
       <Stack spacing="20px">
@@ -175,42 +180,89 @@ const CodeGeneration = () => {
         >
           {code ? "Regenerate Code" : "Generate Code"}
         </Button>
-        <TextField
-          className={"code"}
-          label="Code Editor"
-          rows={40}
-          value={code}
-          onChange={(e) => {
-            setCode(e.target.value);
-            setUpdatedCode(true);
-          }}
-          code={true}
-        />
-        <Button disabled={!updatedCode} onClick={saveCode}>
-          Update Code
-        </Button>
-        <Button disabled={!code} onClick={getTestCases}>
-          Get Test Cases
-        </Button>
-        {testCases &&
-          testCases.map((testCase, index) => <div key={index}>{testCase}</div>)}
-        <Stack direction="row" spacing="10px" sx={{ minWidth: "100%" }}>
-          <TextField
-            className={"problem"}
-            label="Problem Description"
-            value={problemDescription}
-            onChange={(e) => {
-              setProblemDescription(e.target.value);
-            }}
-          />
-          <Button disabled={!problemDescription} onClick={debugAndRepairCode}>
-            Debug and Repair
-          </Button>
-        </Stack>
-        <Button disabled={!code} onClick={renderUI}>
-          Render
-        </Button>
-        <Paper id="output" className={"hi"} sx={{ height: "1000px" }} />
+        {code && (
+          <>
+            <Box
+              border={5}
+              sx={{ justifyContent: "center", alignItems: "center" }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  alignSelf: "center",
+                  fontFamily: "monospace",
+                }}
+              >
+                Code Editor{" "}
+              </Typography>
+              <TextField
+                className={"code"}
+                rows={40}
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  setUpdatedCode(true);
+                }}
+                code={true}
+              />
+            </Box>
+            <Button disabled={!updatedCode} onClick={saveCode}>
+              Update Code
+            </Button>
+            <Button disabled={!code} onClick={getTestCases}>
+              Get Test Cases
+            </Button>
+            {testCases &&
+              testCases.map((testCase, index) => (
+                <div key={index}>{testCase}</div>
+              ))}
+            <Stack direction="row" spacing="10px" sx={{ minWidth: "100%" }}>
+              <TextField
+                className={"problem"}
+                label="Problem Description"
+                value={problemDescription}
+                onChange={(e) => {
+                  setProblemDescription(e.target.value);
+                }}
+              />
+              <Button
+                disabled={!problemDescription}
+                onClick={debugAndRepairCode}
+              >
+                Debug and Repair
+              </Button>
+            </Stack>
+            <Button
+              disabled={!code}
+              onClick={() => {
+                setClickedRender(true);
+                renderUI();
+              }}
+            >
+              Render
+            </Button>
+            {!clickedRender && (
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  alignSelf: "center",
+                  fontFamily: "monospace",
+                }}
+              >
+                Your UI will be rendered here!
+              </Typography>
+            )}
+            <Box border={clickedRender ? 5 : 0}>
+              <Paper
+                id="output"
+                className="output"
+                sx={{ height: clickedRender ? "500px" : "0px" }}
+              />
+            </Box>
+          </>
+        )}
       </Stack>
     </Box>
   );

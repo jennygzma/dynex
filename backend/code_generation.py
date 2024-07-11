@@ -378,6 +378,11 @@ def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_p
     res = client.chat.completions.create(model="gpt-4", messages=messages)
     merged_code = res.choices[0].message.content
     create_and_write_file(task_merged_code_file_path, merged_code)
+    merged_code_lines = len(merged_code.splitlines())
+    previous_code_lines=len(previous_code.splitlines())
+    if previous_code_lines >= merged_code_lines:
+        print("injecting code again... merge failed...")
+        inject_code(task, previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
     print("successfully called GPT for merge_code...")
 
 def get_debug_code(problem, task, task_code_folder_path, design_hypothesis):
@@ -388,13 +393,13 @@ def get_debug_code(problem, task, task_code_folder_path, design_hypothesis):
     task_debug_merge_file_path = f"{task_code_folder_path}/{globals.DEBUG_MERGE_FILE_NAME}"
     task_debug_cleaned_code_file_path = f"{task_code_folder_path}/{globals.DEBUG_CLEANED_FILE_NAME}"
     task_code = read_file(task_cleaned_code_file_path)
-    prompt = f"Please fix the problem that the user describes: {problem}"
+    prompt = f"Please fix the problem that the user describes: {problem}, please fix the problem in the existing code and return the entire code! Thank you!"
     messages = [
         {
             "role": "system",
             "content": f"""
                 A coding task has been implemented for a project we are working on.
-				For context, this is the project description: {design_hypothesis}. The task was this: {task}
+				For context, this is the project description: {design_hypothesis}. The task was this: {task}. The faked data is this: {globals.faked_data}. All the faked data should be stored in the data array.
 				However, the task was not implemented fully correctly. The user explains what is wrong in the problem {problem}.
 
 				Using the existing code {task_code}, identify where you would add code to implement ONLY this task and have it fully working.

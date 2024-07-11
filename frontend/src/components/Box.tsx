@@ -2,15 +2,16 @@ import React, { ReactElement, ReactNode } from "react";
 import { Box as ReactBox, BoxProps as ReactBoxProps } from "@mui/material";
 
 interface BoxProps extends ReactBoxProps {
-  children: ReactNode;
+  children?: ReactNode;
+  border?: number;
 }
 
-const Box = ({ children, sx, ...props }: BoxProps): ReactElement => {
+const Box = ({ children, border, sx, ...props }: BoxProps): ReactElement => {
   return (
     <ReactBox
       sx={{
         padding: "10px",
-        border: 10,
+        border: border ?? 10,
         borderColor: "#9a4e4e",
         backgroundColor: "white",
         ...sx,

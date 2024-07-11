@@ -45,7 +45,7 @@ const Home = () => {
               fontFamily: "monospace",
             }}
           >
-            UX Prototyping
+            FRANKY
           </Typography>
         </Stack>
         <UserInputs />

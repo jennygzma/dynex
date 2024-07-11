@@ -5,6 +5,10 @@ import globals
 
 client = globals.client
 
+sample_plan = """
+[{'task_id': 1, 'task': "Create the HTML table structure with headers which include 'title', 'type', 'quantity', 'price', 'expiration_date', and 'rating'.", 'dep': []}, {'task_id': 2, 'task': "In each row, add HTML elements (text inputs, drop-downs, date pickers, etc.) for the respective fields, also add a 'details' button. Add placeholder inventory rows.", 'dep': [1]}, {'task_id': 3, 'task': "Implement JavaScript code to give functionality to the detail button. On click, it should generate a pop-up or modal showing all the data from the row, including the 'description'.", 'dep': [2]}, {'task_id': 4, 'task': 'Implement JavaScript code to make the table rows interactive, allowing operations such as add, delete and update.', 'dep': [2]}, {'task_id': 5, 'task': 'Implement JavaScript code to sort the table by any field when the user clicks on a column header.', 'dep': [2, 4]}, {'task_id': 6, 'task': 'Add a search bar and implement JavaScript for searching items in inventory table, add functionality to filter the displayed table rows based on search text.', 'dep': [2, 4, 5]}]
+"""
+
 
 def get_design_hypothesis(ui_prompt, data_model_prompt):
     print("calling GPT for get_design_hypothesis...")
@@ -41,6 +45,7 @@ def get_plan(design_hypothesis):
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		
+        Here is an example of the level of detail that should be included in a plan: {sample_plan}
 		Please limit the plan to three to six steps.
 		"""
     messages = [
@@ -88,4 +93,4 @@ def cleanup_plan(plan):
         return cleaned_plan_json
     except json.JSONDecodeError:
         print("Error decoding JSON, retrying...")
-        cleanup_plan(plan)
+        return cleanup_plan(plan)

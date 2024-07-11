@@ -42,6 +42,8 @@ const Plan = () => {
   const [addStepNewTaskDescription, setAddStepNewTaskDescription] =
     useState(undefined);
 
+  console.log("hi jenny jsonPlan", jsonPlan);
+
   const generatePlan = () => {
     updateIsLoading(true);
     axios({
@@ -218,17 +220,19 @@ const Plan = () => {
           {plan ? "Regenerate Plan" : "Create Plan"}
         </Button>
         <Stack sx={{ width: "100%" }} spacing={"10px"}>
-          <TextField
-            className={"generated-plan"}
-            label="Plan"
-            rows={10}
-            value={jsonPlan}
-            onChange={(e) => {
-              setUpdatedPlan(true);
-              setJsonPlan(e.target.value);
-            }}
-            code={true}
-          />
+          {plan && (
+            <TextField
+              className={"generated-plan"}
+              label="Plan"
+              rows={10}
+              value={jsonPlan}
+              onChange={(e) => {
+                setUpdatedPlan(true);
+                setJsonPlan(e.target.value);
+              }}
+              code={true}
+            />
+          )}
           <Button
             disabled={!updatedPlan}
             onClick={savePlan}
