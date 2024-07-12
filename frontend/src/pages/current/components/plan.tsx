@@ -31,18 +31,13 @@ const Plan = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     setUpdatedNewTaskDescription(false);
-    getStep();
   }, [currentTask]);
-  const [updatedPlan, setUpdatedPlan] = useState(false);
-  const [jsonPlan, setJsonPlan] = useState(undefined);
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
     useState(false);
   const [clickedAddStep, setClickedAddStep] = useState(false);
   const [addStepNewTaskDescription, setAddStepNewTaskDescription] =
     useState(undefined);
-
-  console.log("hi jenny jsonPlan", jsonPlan);
 
   const generatePlan = () => {
     updateIsLoading(true);
@@ -71,57 +66,10 @@ const Plan = () => {
       .then((response) => {
         console.log("/get_plan request successful:", response.data);
         const responsePlan = JSON.parse(response.data.plan);
-        const stringifiedPlan = response.data.plan;
-        setJsonPlan(stringifiedPlan);
         updatePlan(mapPlan(responsePlan));
       })
       .catch((error) => {
         console.error("Error calling /get_plan request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const savePlan = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_plan",
-      data: {
-        plan: jsonPlan,
-      },
-    })
-      .then((response) => {
-        console.log("/save_plan request successful:", response.data);
-        getPlan();
-        updateCurrentTask(undefined);
-        setUpdatedPlan(false);
-      })
-      .catch((error) => {
-        console.error("Error calling /save_plan request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const getStep = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_step_in_plan",
-      params: {
-        task_id: currentTask.taskId,
-      },
-    })
-      .then((response) => {
-        console.log("/get_step_in_plan request successful:", response.data);
-        const newTaskDescription = response.data.task_description;
-        setNewTaskDescription(newTaskDescription);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_step_in_plan request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -140,7 +88,6 @@ const Plan = () => {
     })
       .then((response) => {
         console.log("/update_step_in_plan request successful:", response.data);
-        getStep();
         getPlan();
         setUpdatedNewTaskDescription(false);
       })
@@ -219,30 +166,6 @@ const Plan = () => {
         >
           {plan ? "Regenerate Plan" : "Create Plan"}
         </Button>
-        <Stack sx={{ width: "100%" }} spacing={"10px"}>
-          {plan && (
-            <TextField
-              className={"generated-plan"}
-              label="Plan"
-              rows={10}
-              value={jsonPlan}
-              onChange={(e) => {
-                setUpdatedPlan(true);
-                setJsonPlan(e.target.value);
-              }}
-              code={true}
-            />
-          )}
-          <Button
-            disabled={!updatedPlan}
-            onClick={savePlan}
-            sx={{
-              width: "100%",
-            }}
-          >
-            Update Plan
-          </Button>
-        </Stack>
         {plan && (
           <Stack direction="row" spacing="10px">
             <Stack sx={{ width: "100%" }}>
