@@ -11,6 +11,7 @@ client = OpenAI(api_key=api_key)
 
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
+USER_INPUT_FILE_NAME = "user_input.txt"
 PLAN_FILE_NAME = "plan.json"
 TASK_MAP_FILE_NAME = "task_map.json"
 GENERATED_FOLDER_PATH = "generated"
@@ -23,6 +24,10 @@ ITERATION_FILE_NAME = "iteration.html"
 ITERATION_MERGE_FILE_NAME = "iteration_merged.html"
 ITERATION_CLEANED_FILE_NAME = "iteration_clean.html"
 MAIN_CODE_FILE_NAME = "index.html"
+
+# task_map fields
+DEBUG_ITERATION_MAP = "debug_iteration_map"
+CURRENT_DEBUG_ITERATION = "current_debug_iteration"
 
 # user provided prompt for what UI should look like
 prompt = None

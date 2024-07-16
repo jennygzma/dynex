@@ -15,6 +15,8 @@ const CodeGeneration = () => {
   const [problemDescription, setProblemDescription] = useState(undefined);
   const [clickedRender, setClickedRender] = useState(false);
   const [iterations, setIterations] = useState(undefined);
+  const [currentIteration, setCurrentIteration] = useState(0);
+  const [clickedDeleteIteration, setClickedDeleteIteration] = useState(false);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -51,6 +53,7 @@ const CodeGeneration = () => {
         updateIsLoading(false);
       });
   };
+
   const getCode = () => {
     updateIsLoading(true);
     axios({
@@ -131,6 +134,35 @@ const CodeGeneration = () => {
       });
   };
 
+  const deleteCodeForIteration = (iteration: number) => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/delete_code_per_step_per_iteration",
+      params: {
+        task_id: currentTask.taskId,
+        iteration: iteration,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/delete_code_per_step_per_iteration request successful:",
+          response.data,
+        );
+        setClickedDeleteIteration(!clickedDeleteIteration);
+        getIterations();
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /delete_code_per_step_per_iteration request:",
+          error,
+        );
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   const generateCode = () => {
     updateIsLoading(true);
     axios({
@@ -194,6 +226,7 @@ const CodeGeneration = () => {
         getCode();
         getIterations();
         setProblemDescription("");
+        setCurrentIteration(response.data.current_iteration);
       })
       .catch((error) => {
         console.error("Error calling /iterate_code request:", error);
@@ -210,7 +243,7 @@ const CodeGeneration = () => {
     setTestCases(undefined);
     setProblemDescription("");
     setClickedRender(false);
-  }, [plan, designHypothesis, currentTask]);
+  }, [plan, designHypothesis, currentTask, clickedDeleteIteration]);
 
   if (!designHypothesis || !plan || !currentTask) return <></>;
   return (
@@ -325,14 +358,28 @@ const CodeGeneration = () => {
                     Iterate, Debug, or Repair
                   </Typography>
                   {iterations && (
-                    <Button onClick={() => getCodeForIteration(0)}>
+                    <Button
+                      onClick={() => {
+                        getCodeForIteration(0);
+                        setCurrentIteration(0);
+                      }}
+                    >
                       Revert to Original
                     </Button>
                   )}
                   {iterations &&
                     Object.keys(iterations).map((key) => (
                       <Stack direction="row" spacing="5px">
-                        <Card sx={{ padding: "10px", width: "95%" }}>
+                        <Card
+                          sx={{
+                            padding: "10px",
+                            width: "90%",
+                            backgroundColor:
+                              +key === currentIteration
+                                ? "rgba(154, 78, 78, 0.5)"
+                                : "transparent",
+                          }}
+                        >
                           <Typography variant="body2">
                             {iterations[key]}
                           </Typography>
@@ -340,9 +387,17 @@ const CodeGeneration = () => {
                         <Button
                           onClick={() => {
                             getCodeForIteration(+key);
+                            setCurrentIteration(+key);
                           }}
                         >
                           Set
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            deleteCodeForIteration(+key);
+                          }}
+                        >
+                          Delete
                         </Button>
                       </Stack>
                     ))}
@@ -385,7 +440,7 @@ const CodeGeneration = () => {
               <Paper
                 id="output"
                 className="output"
-                sx={{ height: clickedRender ? "500px" : "0px" }}
+                sx={{ height: clickedRender ? "800px" : "0px" }}
               />
             </Box>
           </>

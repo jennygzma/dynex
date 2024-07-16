@@ -10,11 +10,11 @@ sample_plan = """
 """
 
 
-def get_design_hypothesis(ui_prompt, data_model_prompt):
+def get_design_hypothesis(ui_prompt, faked_data):
     print("calling GPT for get_design_hypothesis...")
     prompt = f"""
         This is the UI prompt: {ui_prompt}
-        This is the data_model: {data_model_prompt}
+        This is the faked_data: {faked_data}
     """
     messages = [
         {
@@ -42,6 +42,7 @@ def get_plan(design_hypothesis):
 		Assume all the code will exist in one index.html file, and that the UI will render in one page with no backend. 
 		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
 		The first step of the plan should be creating the HTML structure of the design hypothesis.
+        Placeholder data already exists. There should be NO task for mocking placeholder data, or populating the cards with placeholder data, since that already exists.
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		

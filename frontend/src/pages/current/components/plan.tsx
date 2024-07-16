@@ -31,6 +31,7 @@ const Plan = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     setUpdatedNewTaskDescription(false);
+    setNewTaskDescription(currentTask.task);
   }, [currentTask]);
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
@@ -114,6 +115,7 @@ const Plan = () => {
         getPlan();
         setClickedAddStep(false);
         setAddStepNewTaskDescription(undefined);
+        updateCurrentTask(plan[plan.length - 1]);
       })
       .catch((error) => {
         console.error("Error calling /add_step_in_plan request:", error);

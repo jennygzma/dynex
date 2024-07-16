@@ -97,26 +97,15 @@ displayCharacter(currentIndex);
 </html>
 """
 
-def get_fake_data(data_model):
+def get_fake_data(prompt):
 	print("calling GPT for get_fake_data...")
 	messages = [
         {
             "role": "system",
             "content": """
-                You are generating fake JSON data given a data model. Given an example data model, please use that model to generate a JSON array of fake data. Here is an example:
+                You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. Here is an example:
 				
-				User Input:
-                {
-                    "id": 11,
-                    "title": "perfume Oil",
-                    "description": "Mega Discount, Impression of A...",
-                    "price": 13,
-                    "discountPercentage": 8.4,
-                    "rating": 4.26,
-                    "stock": 65,
-                    "brand": "Impression of Acqua Di Gio",
-                    "category": "fragrances",
-                }
+				User Input: I want to create a UI that visualizes a beauty store's inventory.
 				
 				System result:
 				[
@@ -149,7 +138,7 @@ def get_fake_data(data_model):
 				3. Please ensure that the generated data makes sense. 
             """,
         },
-        {"role": "user", "content": "please generate data given this data model: " + data_model}
+        {"role": "user", "content": "please generate data given this UI: " + prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
 	print("sucessfully called GPT for get_fake_data", res)
@@ -319,7 +308,7 @@ def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_p
         {"role": "user", "content": prompt}
     ]
     res = client.chat.completions.create(model="gpt-4", messages=messages)
-    merged_code = res.choices[0].message.content
+    merged_code = f"This is the merged code: \n {res.choices[0].message.content}"
     create_and_write_file(task_merged_code_file_path, merged_code)
     merged_code_lines = len(merged_code.splitlines())
     previous_code_lines=len(previous_code.splitlines())
@@ -397,7 +386,7 @@ def cleanup_code(data, cleaned_code_file_path, code_file_path, task_main_code_fi
             "role": "system",
             "content": f"""
                 You are cleaning up javascript and HTML code to ensure that it runs on first try.
-				If the code runs on first try, return the code. DO NOT RETURN ANYTHING ELSE, DO NOT RETURN "This code is already cleaned."
+				If the code runs on first try, return the code. DO NOT RETURN ANYTHING ELSE, DO NOT RETURN SOMETHING LIKE "This code is already cleaned."
 				DO NOT DELETE ANY CODE. Only remove natural language. The goal is to have the code compile. Comments are okay.
 				This is an EXAMPLE of a result: {sample_code}
             """,
@@ -421,4 +410,8 @@ def wipeout_code(code_folder_path, task_id, plan):
 		if not folder_exists(task_code_folder_path):
 			break
 		delete_folder(task_code_folder_path)
+		task_code_iteration_folder_path = f"{code_folder_path}/{step["task_id"]}/{globals.ITERATION_FOLDER_NAME}"
+		delete_folder(task_code_iteration_folder_path)
+		globals.task_map[initial_index+1][globals.CURRENT_DEBUG_ITERATION] = 0
+		globals.task_map[initial_index+1][globals.DEBUG_ITERATION_MAP] = {}
 	print(f"successfully wiped out code from task id {task_id}")

@@ -20,14 +20,18 @@ from utils import create_and_write_file, create_folder, folder_exists, read_file
 # Initializing flask app
 app = Flask(__name__)
 
+@app.route("/get_user_input", methods=["GET"])
+def get_user_input():
+    print("calling get_user_input...")
+    print(globals.prompt)
+    return jsonify({"message": "getting user input", "user_input": globals.prompt}), 200
+
 @app.route("/generate_fake_data", methods=["POST"])
 def generate_fake_data():
     print("calling generate_fake_data...")
-    data = request.json
-    globals.data_model = data["data_model"]
-    data = get_generated_fake_data(globals.data_model)
+    globals.prompt = request.json["prompt"]
+    data = get_generated_fake_data(globals.prompt)
     globals.faked_data = data
-    create_and_write_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}", globals.faked_data)
     return jsonify({"message": "Generated code"}), 200
 
 @app.route("/save_faked_data", methods=["POST"])
@@ -48,8 +52,7 @@ def generate_design_hypothesis():
     print("calling generate_design_hypothesis...")
     data = request.json
     globals.prompt = data["prompt"]
-    globals.data_model = data["data_model"]
-    globals.design_hypothesis = get_generated_design_hypothesis(globals.prompt, globals.data_model)
+    globals.design_hypothesis = get_generated_design_hypothesis(globals.prompt, globals.faked_data)
     date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if globals.folder_path is None:
         globals.folder_path = (
@@ -59,6 +62,8 @@ def generate_design_hypothesis():
     if (folder_exists(f"{globals.folder_path}/1")):
         wipeout_code(globals.folder_path, 1, globals.plan)
     create_and_write_file(f"{globals.folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}", globals.design_hypothesis)
+    create_and_write_file(f"{globals.folder_path}/{globals.USER_INPUT_FILE_NAME}", globals.prompt)
+    create_and_write_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}", globals.faked_data)
     globals.plan = []
     return (
         jsonify(
@@ -95,8 +100,8 @@ def generate_plan():
     globals.task_map = {
         int(task["task_id"]): {
             "task": task["task"],
-            "current_debug_iteration": 0,
-            "debug_iteration_map": {}
+            globals.CURRENT_DEBUG_ITERATION: 0,
+            globals.DEBUG_ITERATION_MAP: {}
         }
         for task in plan
     }
@@ -154,8 +159,8 @@ def add_step_in_plan():
         globals.task_map[key+1] = globals.task_map.pop(key)
     globals.task_map[new_task_id] = {
             "task": new_task_description,
-            "current_debug_iteration": 0,
-            "debug_iteration_map": {}
+            globals.CURRENT_DEBUG_ITERATION: 0,
+            globals.DEBUG_ITERATION_MAP: {}
         }
     globals.task_map = {key: globals.task_map[key] for key in sorted(globals.task_map)}
 
@@ -214,8 +219,8 @@ def get_code_per_step():
 def get_iteration_map_per_step():
     print("calling get_iteration_map_per_step...")
     task_id = int(request.args.get("task_id"))
-    print(type(task_id))
-    return jsonify({"message": f"grabbed iteration_map for {task_id}", "iterations": globals.task_map[task_id]["debug_iteration_map"]}), 200
+    print(globals.task_map[task_id][globals.DEBUG_ITERATION_MAP])
+    return jsonify({"message": f"grabbed iteration_map for {task_id}", "iterations": globals.task_map[task_id][globals.DEBUG_ITERATION_MAP]}), 200
 
 @app.route("/get_code_per_step_per_iteration", methods=["GET"])
 def get_code_per_step_per_iteration():
@@ -230,6 +235,17 @@ def get_code_per_step_per_iteration():
     code = read_file(code_folder_path) or ""
     create_and_write_file(f"{globals.folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}", code)
     return jsonify({"message": f"grabbed code for {task_id}", "code": code}), 200
+
+@app.route("/delete_code_per_step_per_iteration", methods=["POST"])
+def delete_code_per_step_per_iteration():
+    print("calling delete_code_per_step_per_iteration...")
+    task_id = int(request.args.get("task_id"))
+    iteration = request.args.get("iteration")
+    print(f"before, task id {task_id} iteration {iteration}, {globals.task_map[task_id][globals.DEBUG_ITERATION_MAP]}")
+    globals.task_map[task_id][globals.DEBUG_ITERATION_MAP].pop(iteration, None)
+    print(f"after, task id {task_id} iteration {iteration}, {globals.task_map[task_id][globals.DEBUG_ITERATION_MAP]}")
+    create_and_write_file(f"{globals.folder_path}/{globals.TASK_MAP_FILE_NAME}", json.dumps(globals.task_map))
+    return jsonify({"message": f"deleted iteration for {task_id} {iteration}"}), 200
 
 @app.route("/save_code_per_step", methods=["POST"])
 def save_code_per_step():
@@ -248,9 +264,9 @@ def iterate_code():
     data = request.json
     task_id = data["task_id"]
     problem = data["problem"]
-    globals.task_map[task_id]["current_debug_iteration"] = globals.task_map[task_id]["current_debug_iteration"]+1
-    current_debug_iteration = globals.task_map[task_id]["current_debug_iteration"]
-    globals.task_map[task_id]["debug_iteration_map"][current_debug_iteration] = problem
+    globals.task_map[task_id][globals.CURRENT_DEBUG_ITERATION] = globals.task_map[task_id][globals.CURRENT_DEBUG_ITERATION]+1
+    current_debug_iteration = globals.task_map[task_id][globals.CURRENT_DEBUG_ITERATION]
+    globals.task_map[task_id][globals.DEBUG_ITERATION_MAP][str(current_debug_iteration)] = problem
     print(globals.task_map)
     create_and_write_file(f"{globals.folder_path}/{globals.TASK_MAP_FILE_NAME}", json.dumps(globals.task_map))
     task = globals.task_map[task_id]["task"]
@@ -258,7 +274,7 @@ def iterate_code():
     current_iteration_folder_path = f"{task_code_folder_path}/{globals.ITERATION_FOLDER_NAME}/{current_debug_iteration}"
     create_folder(current_iteration_folder_path)
     get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, globals.design_hypothesis)
-    return jsonify({"message": "Debugged and regenerated code"}), 200
+    return jsonify({"message": "Debugged and regenerated code", "current_iteration": globals.task_map[task_id][globals.CURRENT_DEBUG_ITERATION]}), 200
 
 @app.route("/get_test_cases_per_lock_step", methods=["GET"])
 def get_test_cases_per_lock_step():
@@ -277,6 +293,7 @@ def set_globals_for_uuid(generated_uuid):
     globals.folder_path = f"{globals.GENERATED_FOLDER_PATH}/{generated_uuid}"
     globals.faked_data = read_file(f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}")
     globals.design_hypothesis = read_file(f"{globals.folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}")
+    globals.prompt = read_file(f"{globals.folder_path}/{globals.USER_INPUT_FILE_NAME}")
     plan = read_file(f"{globals.folder_path}/{globals.PLAN_FILE_NAME}")
     globals.plan = json.loads(plan)
     task_map = json.loads(read_file(f"{globals.folder_path}/{globals.TASK_MAP_FILE_NAME}"))
@@ -425,8 +442,8 @@ def set_globals_for_debug():
     globals.task_map = {
         task["task_id"]: {
             "task": task["task"],
-            "current_debug_iteration": 0,
-            "debug_iteration_map": {}
+            globals.CURRENT_DEBUG_ITERATION: 0,
+            globals.DEBUG_ITERATION_MAP: {}
         }
         for task in globals.plan
     }
