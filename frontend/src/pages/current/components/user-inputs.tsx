@@ -13,15 +13,33 @@ const ProjectFormation = () => {
   useEffect(() => {
     getFakedData();
     getDesignHypothesis();
+    getUserInput();
   }, []);
 
   const [dataInput, setDataInput] = useState("");
-  const [dataModel, setDataModel] = useState("");
   const [UIPrompt, setUIPrompt] = useState("");
   const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
   const [updatedDataInput, setUpdatedDataInput] = useState(false);
 
   useEffect(() => {}, [designHypothesis, dataInput]);
+
+  const getUserInput = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_user_input",
+    })
+      .then((response) => {
+        console.log("/get_user_input request successful:", response.data);
+        setUIPrompt(response.data.user_input);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_user_input request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
 
   const generateFakeData = () => {
     updateIsLoading(true);
@@ -29,7 +47,7 @@ const ProjectFormation = () => {
       method: "POST",
       url: "/generate_fake_data",
       data: {
-        data_model: dataModel,
+        prompt: UIPrompt,
       },
     })
       .then((response) => {
@@ -91,7 +109,6 @@ const ProjectFormation = () => {
       url: "/generate_design_hypothesis",
       data: {
         prompt: UIPrompt,
-        data_model: dataModel,
       },
     })
       .then((response) => {
@@ -177,19 +194,42 @@ const ProjectFormation = () => {
           value={UIPrompt}
           onChange={(e) => setUIPrompt(e.target.value)}
         />
-        <TextField
-          code={true}
-          className={"data-model"}
-          label="Data Model"
-          rows={10}
-          value={dataModel}
-          onChange={(e) => setDataModel(e.target.value)}
-        />
         <Stack direction="row" spacing="10px" width="100%">
           <Stack spacing="10px" width="50%">
             <Button
+              onClick={generateFakeData}
+              disabled={!UIPrompt}
+              sx={{
+                width: "100%",
+              }}
+            >
+              {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
+            </Button>
+            {dataInput !== "null" && dataInput && (
+              <>
+                <TextField
+                  code={true}
+                  className={"generated-data"}
+                  label="Data Input"
+                  variant="outlined"
+                  multiline
+                  rows={13}
+                  value={dataInput}
+                  onChange={(e) => {
+                    setDataInput(e.target.value);
+                    setUpdatedDataInput(true);
+                  }}
+                />
+                <Button onClick={saveFakedData} disabled={!updatedDataInput}>
+                  Update faked data
+                </Button>
+              </>
+            )}
+          </Stack>
+          <Stack spacing="10px" width="50%">
+            <Button
               onClick={generateDesignHypothesis}
-              disabled={!UIPrompt || !dataModel}
+              disabled={!UIPrompt || !dataInput}
               sx={{
                 width: "100%",
               }}
@@ -215,56 +255,6 @@ const ProjectFormation = () => {
                   disabled={!updatedDesignHypothesis}
                 >
                   Update design hypothesis
-                </Button>
-              </>
-            )}
-          </Stack>
-          <Stack spacing="10px" width="50%">
-            <Button
-              onClick={generateFakeData}
-              disabled={!UIPrompt || !dataModel}
-              sx={{
-                width: "100%",
-              }}
-            >
-              {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
-            </Button>
-            {dataInput !== "null" && dataInput && (
-              <>
-                <TextField
-                  code={true}
-                  className={"generated-data"}
-                  label="Data Input"
-                  variant="outlined"
-                  multiline
-                  rows={13}
-                  value={dataInput}
-                  onChange={(e) => {
-                    setDataInput(e.target.value);
-                    setUpdatedDataInput(true);
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#9a4e4e", // Default border color
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#9a4e4e", // Border color on hover
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#9a4e4e", // Border color when focused
-                      },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: "#9a4e4e", // Label color
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "#9a4e4e", // Label color when focused
-                    },
-                  }}
-                />
-                <Button onClick={saveFakedData} disabled={!updatedDataInput}>
-                  Update faked data
                 </Button>
               </>
             )}

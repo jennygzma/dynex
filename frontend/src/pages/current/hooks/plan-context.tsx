@@ -9,7 +9,6 @@ import React, {
 export interface TaskInfo {
   taskId: number;
   task: string;
-  code: string;
 }
 
 export interface PlanState {

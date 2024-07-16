@@ -1,4 +1,4 @@
-import { Paper, Stack, Typography } from "@mui/material";
+import { Card, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";
@@ -7,16 +7,16 @@ import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 
 const CodeGeneration = () => {
-  const { updateIsLoading, plan, updatePlan, designHypothesis, currentTask } =
+  const { updateIsLoading, plan, designHypothesis, currentTask } =
     usePlanContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
   const [testCases, setTestCases] = useState(undefined);
   const [problemDescription, setProblemDescription] = useState(undefined);
   const [clickedRender, setClickedRender] = useState(false);
-
-  const lines = code.split("\n").length;
-  const lineNumbers = Array.from({ length: lines }, (_, i) => i + 1);
+  const [iterations, setIterations] = useState(undefined);
+  const [currentIteration, setCurrentIteration] = useState(0);
+  const [clickedDeleteIteration, setClickedDeleteIteration] = useState(false);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -27,7 +27,7 @@ const CodeGeneration = () => {
     output.appendChild(iframe);
     const doc = iframe.contentWindow.document;
     doc.open();
-    doc.write(plan[currentTask.taskId - 1].code);
+    doc.write(code);
     doc.close();
   };
 
@@ -53,6 +53,7 @@ const CodeGeneration = () => {
         updateIsLoading(false);
       });
   };
+
   const getCode = () => {
     updateIsLoading(true);
     axios({
@@ -64,12 +65,98 @@ const CodeGeneration = () => {
     })
       .then((response) => {
         console.log("/get_code_per_step request successful:", response.data);
-        plan[currentTask.taskId - 1].code = response.data.code;
-        updatePlan(plan);
         setCode(response.data.code);
       })
       .catch((error) => {
         console.error("Error calling /get_code_per_step request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const getIterations = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_iteration_map_per_step",
+      params: {
+        task_id: currentTask.taskId,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/get_iteration_map_per_step request successful:",
+          response.data,
+        );
+        if (Object.entries(response.data.iterations).length > 0) {
+          setIterations(response.data.iterations);
+        } else {
+          setIterations(undefined);
+        }
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /get_iteration_map_per_step request:",
+          error,
+        );
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const getCodeForIteration = (iteration: number) => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_code_per_step_per_iteration",
+      params: {
+        task_id: currentTask.taskId,
+        iteration: iteration,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/get_code_per_step_per_iteration request successful:",
+          response.data,
+        );
+        setCode(response.data.code);
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /get_code_per_step_per_iteration request:",
+          error,
+        );
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const deleteCodeForIteration = (iteration: number) => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/delete_code_per_step_per_iteration",
+      params: {
+        task_id: currentTask.taskId,
+        iteration: iteration,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/delete_code_per_step_per_iteration request successful:",
+          response.data,
+        );
+        setClickedDeleteIteration(!clickedDeleteIteration);
+        getIterations();
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /delete_code_per_step_per_iteration request:",
+          error,
+        );
       })
       .finally(() => {
         updateIsLoading(false);
@@ -124,26 +211,25 @@ const CodeGeneration = () => {
       });
   };
 
-  const debugAndRepairCode = () => {
+  const iterateCode = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/debug_and_repair_code",
+      url: "/iterate_code",
       data: {
         task_id: currentTask.taskId,
         problem: problemDescription,
       },
     })
       .then((response) => {
-        console.log(
-          "/debug_and_repair_code request successful:",
-          response.data,
-        );
+        console.log("/iterate_code request successful:", response.data);
         getCode();
-        setProblemDescription(undefined);
+        getIterations();
+        setProblemDescription("");
+        setCurrentIteration(response.data.current_iteration);
       })
       .catch((error) => {
-        console.error("Error calling /debug_and_repair_code request:", error);
+        console.error("Error calling /iterate_code request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -153,10 +239,11 @@ const CodeGeneration = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     getCode();
+    getIterations();
     setTestCases(undefined);
-    setProblemDescription(undefined);
+    setProblemDescription("");
     setClickedRender(false);
-  }, [plan, designHypothesis, currentTask]);
+  }, [plan, designHypothesis, currentTask, clickedDeleteIteration]);
 
   if (!designHypothesis || !plan || !currentTask) return <></>;
   return (
@@ -186,52 +273,147 @@ const CodeGeneration = () => {
               border={5}
               sx={{ justifyContent: "center", alignItems: "center" }}
             >
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: "bold",
-                  alignSelf: "center",
-                  fontFamily: "monospace",
-                }}
-              >
-                Code Editor{" "}
-              </Typography>
-              <TextField
-                className={"code"}
-                rows={40}
-                value={code}
-                onChange={(e) => {
-                  setCode(e.target.value);
-                  setUpdatedCode(true);
-                }}
-                code={true}
-              />
+              <Stack spacing="10px">
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: "bold",
+                    alignSelf: "center",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  Code Editor{" "}
+                </Typography>
+                <TextField
+                  className={"code"}
+                  rows={40}
+                  value={code}
+                  onChange={(e) => {
+                    setCode(e.target.value);
+                    setUpdatedCode(true);
+                  }}
+                  code={true}
+                />
+                <Button
+                  disabled={!updatedCode}
+                  onClick={saveCode}
+                  sx={{ width: "100%" }}
+                >
+                  Update Code
+                </Button>
+              </Stack>
             </Box>
-            <Button disabled={!updatedCode} onClick={saveCode}>
-              Update Code
-            </Button>
-            <Button disabled={!code} onClick={getTestCases}>
-              Get Test Cases
-            </Button>
-            {testCases &&
-              testCases.map((testCase, index) => (
-                <div key={index}>{testCase}</div>
-              ))}
-            <Stack direction="row" spacing="10px" sx={{ minWidth: "100%" }}>
-              <TextField
-                className={"problem"}
-                label="Problem Description"
-                value={problemDescription}
-                onChange={(e) => {
-                  setProblemDescription(e.target.value);
+            <Stack direction="row" spacing="10px">
+              <Box
+                border={5}
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "25%",
                 }}
-              />
-              <Button
-                disabled={!problemDescription}
-                onClick={debugAndRepairCode}
               >
-                Debug and Repair
-              </Button>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: "bold",
+                    alignSelf: "center",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  Brainstorm Test Cases
+                </Typography>
+                <Stack spacing="10px">
+                  <Button
+                    disabled={!code}
+                    onClick={getTestCases}
+                    sx={{ width: "100%" }}
+                  >
+                    Get Test Cases
+                  </Button>
+                  {testCases &&
+                    testCases.map((testCase, index) => (
+                      <Typography variant="body2" key={index}>
+                        {testCase}
+                      </Typography>
+                    ))}
+                </Stack>
+              </Box>
+              <Box
+                border={5}
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "75%",
+                }}
+              >
+                <Stack spacing="10px">
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: "bold",
+                      alignSelf: "center",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    Iterate, Debug, or Repair
+                  </Typography>
+                  {iterations && (
+                    <Button
+                      onClick={() => {
+                        getCodeForIteration(0);
+                        setCurrentIteration(0);
+                      }}
+                    >
+                      Revert to Original
+                    </Button>
+                  )}
+                  {iterations &&
+                    Object.keys(iterations).map((key) => (
+                      <Stack direction="row" spacing="5px">
+                        <Card
+                          sx={{
+                            padding: "10px",
+                            width: "90%",
+                            backgroundColor:
+                              +key === currentIteration
+                                ? "rgba(154, 78, 78, 0.5)"
+                                : "transparent",
+                          }}
+                        >
+                          <Typography variant="body2">
+                            {iterations[key]}
+                          </Typography>
+                        </Card>
+                        <Button
+                          onClick={() => {
+                            getCodeForIteration(+key);
+                            setCurrentIteration(+key);
+                          }}
+                        >
+                          Set
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            deleteCodeForIteration(+key);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
+                    ))}
+                  <TextField
+                    className={"problem"}
+                    label="Problem Description"
+                    value={problemDescription}
+                    onChange={(e) => {
+                      setProblemDescription(e.target.value);
+                    }}
+                  />
+                  <Button disabled={!problemDescription} onClick={iterateCode}>
+                    Iterate
+                  </Button>
+                </Stack>
+              </Box>
             </Stack>
             <Button
               disabled={!code}
@@ -258,7 +440,7 @@ const CodeGeneration = () => {
               <Paper
                 id="output"
                 className="output"
-                sx={{ height: clickedRender ? "500px" : "0px" }}
+                sx={{ height: clickedRender ? "800px" : "0px" }}
               />
             </Box>
           </>
