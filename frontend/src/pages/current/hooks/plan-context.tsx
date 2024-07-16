@@ -18,6 +18,10 @@ export interface PlanState {
   updatePlan: Dispatch<SetStateAction<TaskInfo[]>>;
   currentTask: TaskInfo;
   updateCurrentTask: Dispatch<SetStateAction<TaskInfo>>;
+  iterations: Record<number, string> | undefined;
+  updateIterations: Dispatch<SetStateAction<Record<number, string>>>;
+  currentIteration: number;
+  updateCurrentIteration: Dispatch<SetStateAction<number>>;
   designHypothesis: string;
   updateDesignHypothesis: Dispatch<SetStateAction<string>>;
 }
@@ -31,6 +35,8 @@ export const PlanProvider = ({ children }) => {
   const [currentTask, updateCurrentTask] = useState(undefined);
   const [designHypothesis, updateDesignHypothesis] = useState(undefined);
   const [isLoading, updateIsLoading] = useState(false);
+  const [iterations, updateIterations] = useState(undefined);
+  const [currentIteration, updateCurrentIteration] = useState(0);
 
   return (
     <PlanContext.Provider
@@ -41,6 +47,10 @@ export const PlanProvider = ({ children }) => {
         updatePlan,
         currentTask,
         updateCurrentTask,
+        iterations,
+        updateIterations,
+        currentIteration,
+        updateCurrentIteration,
         designHypothesis,
         updateDesignHypothesis,
       }}

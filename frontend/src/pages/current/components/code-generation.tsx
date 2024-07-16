@@ -7,16 +7,18 @@ import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 
 const CodeGeneration = () => {
-  const { updateIsLoading, plan, designHypothesis, currentTask } =
-    usePlanContext();
+  const {
+    updateIsLoading,
+    plan,
+    designHypothesis,
+    currentTask,
+    currentIteration,
+    updateCurrentIteration,
+  } = usePlanContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
-  const [testCases, setTestCases] = useState(undefined);
   const [problemDescription, setProblemDescription] = useState(undefined);
   const [clickedRender, setClickedRender] = useState(false);
-  const [iterations, setIterations] = useState(undefined);
-  const [currentIteration, setCurrentIteration] = useState(0);
-  const [clickedDeleteIteration, setClickedDeleteIteration] = useState(false);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -75,37 +77,6 @@ const CodeGeneration = () => {
       });
   };
 
-  const getIterations = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_iteration_map_per_step",
-      params: {
-        task_id: currentTask.taskId,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/get_iteration_map_per_step request successful:",
-          response.data,
-        );
-        if (Object.entries(response.data.iterations).length > 0) {
-          setIterations(response.data.iterations);
-        } else {
-          setIterations(undefined);
-        }
-      })
-      .catch((error) => {
-        console.error(
-          "Error calling /get_iteration_map_per_step request:",
-          error,
-        );
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
   const getCodeForIteration = (iteration: number) => {
     updateIsLoading(true);
     axios({
@@ -126,35 +97,6 @@ const CodeGeneration = () => {
       .catch((error) => {
         console.error(
           "Error calling /get_code_per_step_per_iteration request:",
-          error,
-        );
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const deleteCodeForIteration = (iteration: number) => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/delete_code_per_step_per_iteration",
-      params: {
-        task_id: currentTask.taskId,
-        iteration: iteration,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/delete_code_per_step_per_iteration request successful:",
-          response.data,
-        );
-        setClickedDeleteIteration(!clickedDeleteIteration);
-        getIterations();
-      })
-      .catch((error) => {
-        console.error(
-          "Error calling /delete_code_per_step_per_iteration request:",
           error,
         );
       })
@@ -184,33 +126,6 @@ const CodeGeneration = () => {
       });
   };
 
-  const getTestCases = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_test_cases_per_lock_step",
-      params: {
-        task_id: currentTask.taskId,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/get_test_cases_per_lock_step request successful:",
-          response.data,
-        );
-        setTestCases(response.data.test_cases);
-      })
-      .catch((error) => {
-        console.error(
-          "Error calling /get_test_cases_per_lock_step request:",
-          error,
-        );
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
   const iterateCode = () => {
     updateIsLoading(true);
     axios({
@@ -223,10 +138,8 @@ const CodeGeneration = () => {
     })
       .then((response) => {
         console.log("/iterate_code request successful:", response.data);
-        getCode();
-        getIterations();
         setProblemDescription("");
-        setCurrentIteration(response.data.current_iteration);
+        updateCurrentIteration(response.data.current_iteration);
       })
       .catch((error) => {
         console.error("Error calling /iterate_code request:", error);
@@ -239,16 +152,15 @@ const CodeGeneration = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     getCode();
-    getIterations();
-    setTestCases(undefined);
+    getCodeForIteration(currentIteration);
     setProblemDescription("");
     setClickedRender(false);
-  }, [plan, designHypothesis, currentTask, clickedDeleteIteration]);
+  }, [plan, designHypothesis, currentTask, currentIteration]);
 
-  if (!designHypothesis || !plan || !currentTask) return <></>;
+  if (!designHypothesis) return <></>;
   return (
-    <Box>
-      <Stack spacing="20px">
+    <Box sx={{ width: "75%" }}>
+      <Stack spacing="10px">
         <Typography
           variant="h4"
           sx={{
@@ -309,41 +221,7 @@ const CodeGeneration = () => {
                 sx={{
                   justifyContent: "center",
                   alignItems: "center",
-                  width: "25%",
-                }}
-              >
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: "bold",
-                    alignSelf: "center",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  Brainstorm Test Cases
-                </Typography>
-                <Stack spacing="10px">
-                  <Button
-                    disabled={!code}
-                    onClick={getTestCases}
-                    sx={{ width: "100%" }}
-                  >
-                    Get Test Cases
-                  </Button>
-                  {testCases &&
-                    testCases.map((testCase, index) => (
-                      <Typography variant="body2" key={index}>
-                        {testCase}
-                      </Typography>
-                    ))}
-                </Stack>
-              </Box>
-              <Box
-                border={5}
-                sx={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "75%",
+                  width: "100%",
                 }}
               >
                 <Stack spacing="10px">
@@ -357,50 +235,6 @@ const CodeGeneration = () => {
                   >
                     Iterate, Debug, or Repair
                   </Typography>
-                  {iterations && (
-                    <Button
-                      onClick={() => {
-                        getCodeForIteration(0);
-                        setCurrentIteration(0);
-                      }}
-                    >
-                      Revert to Original
-                    </Button>
-                  )}
-                  {iterations &&
-                    Object.keys(iterations).map((key) => (
-                      <Stack direction="row" spacing="5px">
-                        <Card
-                          sx={{
-                            padding: "10px",
-                            width: "90%",
-                            backgroundColor:
-                              +key === currentIteration
-                                ? "rgba(154, 78, 78, 0.5)"
-                                : "transparent",
-                          }}
-                        >
-                          <Typography variant="body2">
-                            {iterations[key]}
-                          </Typography>
-                        </Card>
-                        <Button
-                          onClick={() => {
-                            getCodeForIteration(+key);
-                            setCurrentIteration(+key);
-                          }}
-                        >
-                          Set
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            deleteCodeForIteration(+key);
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </Stack>
-                    ))}
                   <TextField
                     className={"problem"}
                     label="Problem Description"

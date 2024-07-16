@@ -49,8 +49,10 @@ const Home = () => {
           </Typography>
         </Stack>
         <UserInputs />
-        <Plan />
-        <CodeGeneration />
+        <Stack direction="row">
+          <Plan />
+          <CodeGeneration />
+        </Stack>
       </Stack>
     </div>
   );
