@@ -30,71 +30,151 @@ client = globals.client
 # cleaned.html - cleaned code
 
 sample_code = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tinder-like Character UI</title>
-    <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #ececec; }
-        .card { width: 300px; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 20px; padding: 20px; text-align: center; }
-        .card img { max-width: 100%; border-radius: 10px; }
-        .buttons { text-align: center; margin-top: 20px; }
-        button { padding: 10px 20px; margin: 0 10px; border: none; border-radius: 5px; cursor: pointer; }
-        .like { background-color: #4CAF50; color: white; }
-        .dislike { background-color: #f44336; color: white; }
-    </style>
-</head>
-<body>
+import React from 'react';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 
-<div class="card">
-    <img src="" alt="Character Image" id="charImage">
-    <h2 id="charTitle"></h2>
-    <p id="charDescription"></p>
-</div>
+class CardComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    let data = [
+      {
+          "id": 1,
+          "itemName": "Milk",
+          "description": "1 litre fresh cow milk",
+          "price": 3.5,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Dairy Products",
+          "stock": 150
+      },
+      {
+          "id": 2,
+          "itemName": "Eggs",
+          "description": "12 fresh chicken eggs pack",
+          "price": 2,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Poultry",
+          "stock": 500
+      },
+      {
+          "id": 3,
+          "itemName": "Bread",
+          "description": "Whole wheat bread",
+          "price": 1.5,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Bakery",
+          "stock": 75
+      },
+      {
+          "id": 4,
+          "itemName": "Apples",
+          "description": "One pound of organic apples",
+          "price": 1,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Fruits",
+          "stock": 100
+      },
+      {
+          "id": 5,
+          "itemName": "Carrots",
+          "description": "Organic fresh carrots - 1 pound",
+          "price": 0.8,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Vegetables",
+          "stock": 80
+      },
+      {
+          "id": 6,
+          "itemName": "Rice",
+          "description": "Long grain basmati rice - 5 kg",
+          "price": 8,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Staples",
+          "stock": 50
+      },
+      {
+          "id": 7,
+          "itemName": "Pasta",
+          "description": "Italian pasta - 1 kg",
+          "price": 2,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Pastas and Noodles",
+          "stock": 70
+      },
+      {
+          "id": 8,
+          "itemName": "Olive Oil",
+          "description": "Extra virgin olive oil - 500ml",
+          "price": 5,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Oils and Vinegars",
+          "stock": 60
+      },
+      {
+          "id": 9,
+          "itemName": "Cheese",
+          "description": "Mozzarella Cheese - 200g",
+          "price": 3,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Dairy Products",
+          "stock": 100
+      },
+      {
+          "id": 10,
+          "itemName": "Chips",
+          "description": "Potato chips - 200g",
+          "price": 1,
+          "isAddedToCart": false,
+          "isBought": false,
+          "category": "Snacks",
+          "stock": 200
+      }
+    ];
+    this.state = { items: data }
+  }
 
-<div class="buttons">
-    <button class="dislike" onclick="changeCharacter(-1)">Dislike</button>
-    <button class="like" onclick="changeCharacter(1)">Like</button>
-</div>
-
-<script>
-const characters = [
-    { title: "Monkey D Luffy", description: "Role: Straw Hat Pirate, Captain. Fun Fact: Is Dumb. Favorite Moment: Helping Nami", imagePath: "luffyImage.jpeg" },
-    { title: "Roronoa Zoro", description: "Role: Straw Hat Pirate, Right Wing. Fun Fact: Gets Lost. Favorite Moment: Nothing Happened", imagePath: "zoroImage.jpeg" },
-    { title: "Vinsmoke Sanji", description: "Role: Straw Hat Pirate, Chef, Left Wing. Fun Fact: Nose bleeds. Favorite Moment: Bowing to Zeff", imagePath: "sanjiImage.jpeg" },
-    { title: "Nami", description: "Role: Straw Hat Pirate, Navigator. Fun Fact: Thief. Favorite Moment: Asking Luffy for help", imagePath: "namiImage.jpeg" },
-    { title: "Usopp", description: "Role: Straw Hat Pirate, Sniper. Fun Fact: Liar. Favorite Moment: Enies Lobby", imagePath: "usoppImage.jpeg" },
-    { title: "Tony Tony Chopper", description: "Role: Straw Hat Pirate, Doctor. Fun Fact: Cotton Candy. Favorite Moment: Doctorine Arc", imagePath: "chopperImage.jpeg" },
-    { title: "Nico Robin", description: "Role: Straw Hat Pirate, Archaeologist. Fun Fact: Randomly got pale. Favorite Moment: One day you will find friends", imagePath: "robinImage.jpeg" },
-    { title: "Franky", description: "Role: Straw Hat Pirate, Shipwright. Fun Fact: Coca Cola. Favorite Moment: Stopping train", imagePath: "frankyImage.jpeg" },
-    { title: "Brook", description: "Role: Straw Hat Pirate, Musician. Fun Fact: .... Favorite Moment: Bink's Sake", imagePath: "brookImage.jpeg" },
-    { title: "Shanks", description: "Role: Red-Haired Pirate, Captain. Fun Fact: Is Cool. Favorite Moment: Saving Luffy", imagePath: "shanksImage.jpeg" }
-];
-
-let currentIndex = 0;
-
-function displayCharacter(index) {
-    const { title, description, imagePath } = characters[index];
-    document.getElementById('charImage').src = imagePath; // Placeholder, replace with actual paths or URLs
-    document.getElementById('charImage').alt = title;
-    document.getElementById('charTitle').innerText = title;
-    document.getElementById('charDescription').innerText = description;
+  render() {
+    return (
+      <div>
+        {this.state.items.map((item, index) => {
+          return (
+            <Card key={index} sx={{ maxWidth: 345 }}>
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="div">
+                  {item.itemName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {item.description}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {'Price: $' + item.price}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {'Category: ' + item.category}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {'Stock: ' + item.stock}
+                </Typography>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  }
 }
 
-function changeCharacter(direction) {
-    currentIndex += direction;
-    if (currentIndex < 0) currentIndex = characters.length - 1;
-    if (currentIndex >= characters.length) currentIndex = 0;
-    displayCharacter(currentIndex);
-}
-
-displayCharacter(currentIndex);
-</script>
-
-</body>
-</html>
+export default CardComponent;
 """
 
 def get_fake_data(prompt):
@@ -162,13 +242,13 @@ def get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_p
         {
             "role": "system",
             "content": f"""
-                You are writing javascript, HTML, CSS for creating a UI given a data model. This is the goal: {design_hypothesis}. The design should meet the following user specifications:
+                You are writing FE code for creating a UI given a data model. Please only write in React and use the MUI package. This is the goal: {design_hypothesis}. The design should meet the following user specifications:
                 
                 Please follow these rules while writing the code.
                 1. A code snippet should be followed by a short explanation summarizing what the code is doing as a code comment, not natural language. The explanation should be no more than 15 words long. 
                 2. If previous code exists, please have the new code improve the existing code. Do not start completely from scratch.
-				3. Only write javascript, html, and css code. Do not have any natural language unless it is wrapped in a comment
-				4. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code. 
+				3. Only write in react using the MUI package code. Do not have any natural language unless it is wrapped in a comment
+				4. Do not return separate files code. Compile it all together in one component and only send me the code. 
 				5. There should be no natural language at all. The entire response should be code. 
             """,
         },
@@ -218,14 +298,14 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
         {
             "role": "system",
             "content": f"""
-                You are writing javascript, HTML, CSS for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
+                You are writing React and MUI code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
 				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Do not implement the entire design hypothesis - simply create the HTML structure.
 
 				Idenfity each component of the UI and make sure to give it a logical id. For example, if the UI includes a search bar, the search bar id should be called "searchBar". If the UI has a table, the tableId should be called "table".
 
                 Follow these rules while writing the code.
-				1. Only write javascript, html, and css code.
-				2. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
+				1. Only write React and MUI code.
+				2. Do not return separate files code. Compile it all together in one file in one component and only send me the code.
             """,
         },
         {"role": "user", "content": prompt}
@@ -237,13 +317,13 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
         {
             "role": "system",
             "content": f"""
-                You are writing javascript, HTML, CSS for creating a UI given a data model.
+                You are writing React and MUI code for creating a UI given a data model.
 				Please edit the existing code to include a "let" variable called "data" that stores the faked_data {faked_data}
 				Be sure to populate the faked data in the UI with ALL of the fake data provided. Do not comment "... more objects" or anything similar. PUT ALL THE FAKED DATA IN THE ARRAY.
 
                 Please follow these rules while writing the code.
-				1. Only write javascript, html, and css code.
-				2. Do not return separate javascript, HTML, and CSS code. Compile it all together in one file and only send me the code.
+				1. Only write React and MUI.
+				2. Do not return separate React and MUI components. Compile it all together in one file and in one component and only send me the code.
             """,
         },
         {"role": "user", "content": f"This is the existing code {code}"}
@@ -265,7 +345,7 @@ def identify_code_changes(plan, task, task_code_file_path, previous_task_main_co
             "role": "system",
             "content": f"""
                 You are working on an app dsecribed here: {design_hypothesis}.
-                The entire app will be written in javascript, HTML, and CSS within an index.html file. There is only this index.html file for the entire app.
+                The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}.
 				There is already existing code in the index.html file. Using the existing code {previous_code}, identify where you would add code to implement ONLY this task and have it fully working.
@@ -273,7 +353,7 @@ def identify_code_changes(plan, task, task_code_file_path, previous_task_main_co
 				Return the response in an array with this format: [{{"line number": line_number, "action": action, "code": code}}],
 				where the line number is where you would inject the code given the previous code,
 				action is whether or not you are replacing existing code or adding new code (Example: if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. REPLACE the current search bar with the new search bar. Example: Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.),
-				code is the actual code you would inject. Only write javascript, html, and css code.
+				code is the actual code you would inject. Only write in React and MUI code.
             """,
         },
         {"role": "user", "content": prompt}
@@ -338,7 +418,7 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
 				Return the response in an array with this format: [{{"line number": line_number, "action": action, "code": code}}],
 				where the line number is where you would inject the code given the previous code,
 				action is whether or not you are replacing existing code or adding new code (Example: if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. REPLACE the current search bar with the new search bar. Example: Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.),
-				code is the actual code you would inject. Only write javascript, html, and css code.
+				code is the actual code you would inject. Only write React and MUI code.
             """,
         },
         {"role": "user", "content": prompt}
@@ -385,7 +465,7 @@ def cleanup_code(data, cleaned_code_file_path, code_file_path, task_main_code_fi
         {
             "role": "system",
             "content": f"""
-                You are cleaning up javascript and HTML code to ensure that it runs on first try.
+                You are cleaning up React and MUI code to ensure that it runs on first try.
 				If the code runs on first try, return the code. DO NOT RETURN ANYTHING ELSE, DO NOT RETURN SOMETHING LIKE "This code is already cleaned."
 				DO NOT DELETE ANY CODE. Only remove natural language. The goal is to have the code compile. Comments are okay.
 				This is an EXAMPLE of a result: {sample_code}
