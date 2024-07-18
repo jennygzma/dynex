@@ -1,14 +1,14 @@
 import { Stack, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import UserInputs from "./components/user-inputs";
 import CodeGeneration from "./components/code-generation";
 import Plan from "./components/plan";
-import { PlanProvider, usePlanContext } from "./hooks/plan-context";
+import { usePlanContext } from "./hooks/plan-context";
 import Spinner from "./components/spinner";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
-  const { isLoading, updateIsLoading } = usePlanContext();
+  const { isLoading } = usePlanContext();
   useEffect(() => {}, [isLoading]);
   return (
     <div className={"home"}>

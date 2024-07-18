@@ -28,22 +28,6 @@ const Plan = () => {
     updateCurrentTask,
     designHypothesis,
   } = usePlanContext();
-  useEffect(() => {
-    getPlan();
-  }, []);
-  useEffect(() => {}, [plan, designHypothesis]);
-  useEffect(() => {
-    if (currentTask === undefined) return;
-    setUpdatedNewTaskDescription(false);
-    setNewTaskDescription(currentTask.task);
-    setTestCases(undefined);
-    getIterations();
-    updateCurrentIteration(0);
-  }, [currentTask]);
-
-  useEffect(() => {
-    getIterations();
-  }, [currentIteration]);
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
     useState(false);
@@ -246,6 +230,24 @@ const Plan = () => {
         updateIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    getPlan();
+  }, []);
+  useEffect(() => {}, [plan, designHypothesis]);
+  useEffect(() => {
+    if (currentTask === undefined) return;
+    setUpdatedNewTaskDescription(false);
+    setNewTaskDescription(currentTask.task);
+    setTestCases(undefined);
+    getIterations();
+    updateCurrentIteration(0);
+  }, [currentTask]);
+
+  useEffect(() => {
+    if (currentTask === undefined) return;
+    getIterations();
+  }, [currentIteration, currentTask]);
 
   if (!designHypothesis) return <></>;
   return (

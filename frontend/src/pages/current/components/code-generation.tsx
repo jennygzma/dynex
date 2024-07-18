@@ -1,4 +1,4 @@
-import { Card, Paper, Stack, Typography } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlanContext } from "../hooks/plan-context";

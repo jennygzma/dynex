@@ -234,7 +234,7 @@ def get_code_per_step_per_iteration():
         code_folder_path = f"{globals.folder_path}/{task_id}/{globals.ITERATION_FOLDER_NAME}/{iteration}/{globals.ITERATION_CLEANED_FILE_NAME}"
     code = read_file(code_folder_path) or ""
     create_and_write_file(f"{globals.folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}", code)
-    return jsonify({"message": f"grabbed code for {task_id}", "code": code}), 200
+    return jsonify({"message": f"grabbed code for {task_id} and iteration {iteration}", "code": code}), 200
 
 @app.route("/delete_code_per_step_per_iteration", methods=["POST"])
 def delete_code_per_step_per_iteration():
