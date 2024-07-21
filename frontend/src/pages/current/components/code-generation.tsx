@@ -5,144 +5,7 @@ import { usePlanContext } from "../hooks/plan-context";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
-import * as MUI from '@mui/material';
 
-const generatedCode = `
-function CardComponent({ MUI }) {
-  const { Card, CardContent, Typography } = MUI;
-
-  let data = [
-    {
-        "id": 1,
-        "itemName": "Milk",
-        "description": "1 litre fresh cow milk",
-        "price": 3.5,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Dairy Products",
-        "stock": 150
-    },
-    {
-        "id": 2,
-        "itemName": "Eggs",
-        "description": "12 fresh chicken eggs pack",
-        "price": 2,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Poultry",
-        "stock": 500
-    },
-    {
-        "id": 3,
-        "itemName": "Bread",
-        "description": "Whole wheat bread",
-        "price": 1.5,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Bakery",
-        "stock": 75
-    },
-    {
-        "id": 4,
-        "itemName": "Apples",
-        "description": "One pound of organic apples",
-        "price": 1,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Fruits",
-        "stock": 100
-    },
-    {
-        "id": 5,
-        "itemName": "Carrots",
-        "description": "Organic fresh carrots - 1 pound",
-        "price": 0.8,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Vegetables",
-        "stock": 80
-    },
-    {
-        "id": 6,
-        "itemName": "Rice",
-        "description": "Long grain basmati rice - 5 kg",
-        "price": 8,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Staples",
-        "stock": 50
-    },
-    {
-        "id": 7,
-        "itemName": "Pasta",
-        "description": "Italian pasta - 1 kg",
-        "price": 2,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Pastas and Noodles",
-        "stock": 70
-    },
-    {
-        "id": 8,
-        "itemName": "Olive Oil",
-        "description": "Extra virgin olive oil - 500ml",
-        "price": 5,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Oils and Vinegars",
-        "stock": 60
-    },
-    {
-        "id": 9,
-        "itemName": "Cheese",
-        "description": "Mozzarella Cheese - 200g",
-        "price": 3,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Dairy Products",
-        "stock": 100
-    },
-    {
-        "id": 10,
-        "itemName": "Chips",
-        "description": "Potato chips - 200g",
-        "price": 1,
-        "isAddedToCart": false,
-        "isBought": false,
-        "category": "Snacks",
-        "stock": 200
-    }
-  ];
-
-  return (
-    <div>
-      {data.map((item, index) => (
-        <Card key={index} sx={{ maxWidth: 345 }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              {item.itemName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {item.description}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {'Price: $' + item.price}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {'Category: ' + item.category}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {'Stock: ' + item.stock}
-            </Typography>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-};
-
-module.exports = CardComponent;
-`;
 const CodeGeneration = () => {
   const {
     updateIsLoading,
@@ -156,21 +19,19 @@ const CodeGeneration = () => {
   const [updatedCode, setUpdatedCode] = useState(false);
   const [problemDescription, setProblemDescription] = useState(undefined);
   const [clickedRender, setClickedRender] = useState(false);
-  const [Component, setComponent] = useState<React.ComponentType | null>(null);
 
-  console.log("hi jenny componnent", Component)
-  // const renderUI = () => {
-  //   const output = document.getElementById("output");
-  //   output.innerHTML = "";
-  //   const iframe = document.createElement("iframe");
-  //   iframe.width = "100%";
-  //   iframe.height = "100%";
-  //   output.appendChild(iframe);
-  //   const doc = iframe.contentWindow.document;
-  //   doc.open();
-  //   doc.write(code);
-  //   doc.close();
-  // };
+  const renderUI = () => {
+    const output = document.getElementById("output");
+    output.innerHTML = "";
+    const iframe = document.createElement("iframe");
+    iframe.width = "100%";
+    iframe.height = "100%";
+    output.appendChild(iframe);
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(code);
+    doc.close();
+  };
 
   const saveCode = () => {
     updateIsLoading(true);
@@ -207,9 +68,7 @@ const CodeGeneration = () => {
       .then((response) => {
         console.log("/get_code_per_step request successful:", response.data);
         setCode(response.data.code);
-        const DynamicComponent = new Function('React', 'MUI', `return ${generatedCode}`)(React, MUI);
-        console.log("hi jenny dynamic Component", DynamicComponent);
-        setComponent(() => DynamicComponent);
+        // setCode(generatedCode);
       })
       .catch((error) => {
         console.error("Error calling /get_code_per_step request:", error);
@@ -217,13 +76,6 @@ const CodeGeneration = () => {
       .finally(() => {
         updateIsLoading(false);
       });
-  };
-  const renderGeneratedComponent = () => {
-    // Evaluate the generated code as JavaScript
-    const CardComponent = new Function('React', 'MUI', `
-      return (${generatedCode});
-    `)(React, MUI); // Ensure MUI components are provided
-    return <CardComponent MUI={MUI} />;
   };
 
   const getCodeForIteration = (iteration: number) => {
@@ -401,6 +253,7 @@ const CodeGeneration = () => {
             <Button
               disabled={!code}
               onClick={() => {
+                renderUI();
                 setClickedRender(true);
               }}
             >
@@ -419,12 +272,11 @@ const CodeGeneration = () => {
               </Typography>
             )}
             <Box border={clickedRender ? 5 : 0}>
-              {/* <Paper
+              <Paper
                 id="output"
                 className="output"
                 sx={{ height: clickedRender ? "800px" : "0px" }}
-              /> */}
-              {renderGeneratedComponent()}
+              />
             </Box>
           </>
         )}

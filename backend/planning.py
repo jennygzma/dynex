@@ -5,6 +5,7 @@ import globals
 
 client = globals.client
 
+
 def get_design_hypothesis(ui_prompt, faked_data):
     print("calling GPT for get_design_hypothesis...")
     prompt = f"""

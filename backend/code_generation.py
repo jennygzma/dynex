@@ -30,151 +30,74 @@ client = globals.client
 # cleaned.html - cleaned code
 
 sample_code = """
-import React from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React App with MUI and Hooks</title>
+  <!-- Load React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel for JSX transformation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Load MUI from CDN -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const {
+      Button,
+      Container,
+      Typography,
+      TextField,
+    } = MaterialUI;
 
-class CardComponent extends React.Component {
-  constructor(props) {
-    super(props);
-    let data = [
-      {
-          "id": 1,
-          "itemName": "Milk",
-          "description": "1 litre fresh cow milk",
-          "price": 3.5,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Dairy Products",
-          "stock": 150
-      },
-      {
-          "id": 2,
-          "itemName": "Eggs",
-          "description": "12 fresh chicken eggs pack",
-          "price": 2,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Poultry",
-          "stock": 500
-      },
-      {
-          "id": 3,
-          "itemName": "Bread",
-          "description": "Whole wheat bread",
-          "price": 1.5,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Bakery",
-          "stock": 75
-      },
-      {
-          "id": 4,
-          "itemName": "Apples",
-          "description": "One pound of organic apples",
-          "price": 1,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Fruits",
-          "stock": 100
-      },
-      {
-          "id": 5,
-          "itemName": "Carrots",
-          "description": "Organic fresh carrots - 1 pound",
-          "price": 0.8,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Vegetables",
-          "stock": 80
-      },
-      {
-          "id": 6,
-          "itemName": "Rice",
-          "description": "Long grain basmati rice - 5 kg",
-          "price": 8,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Staples",
-          "stock": 50
-      },
-      {
-          "id": 7,
-          "itemName": "Pasta",
-          "description": "Italian pasta - 1 kg",
-          "price": 2,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Pastas and Noodles",
-          "stock": 70
-      },
-      {
-          "id": 8,
-          "itemName": "Olive Oil",
-          "description": "Extra virgin olive oil - 500ml",
-          "price": 5,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Oils and Vinegars",
-          "stock": 60
-      },
-      {
-          "id": 9,
-          "itemName": "Cheese",
-          "description": "Mozzarella Cheese - 200g",
-          "price": 3,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Dairy Products",
-          "stock": 100
-      },
-      {
-          "id": 10,
-          "itemName": "Chips",
-          "description": "Potato chips - 200g",
-          "price": 1,
-          "isAddedToCart": false,
-          "isBought": false,
-          "category": "Snacks",
-          "stock": 200
-      }
-    ];
-    this.state = { items: data }
-  }
+    const { useState, useEffect } = React;
 
-  render() {
-    return (
-      <div>
-        {this.state.items.map((item, index) => {
-          return (
-            <Card key={index} sx={{ maxWidth: 345 }}>
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                  {item.itemName}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {item.description}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {'Price: $' + item.price}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {'Category: ' + item.category}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {'Stock: ' + item.stock}
-                </Typography>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    );
-  }
-}
+    function App() {
+      const [count, setCount] = useState(0);
+      const [name, setName] = useState('');
 
-export default CardComponent;
+      useEffect(() => {
+        document.title = \`Count: \${count}\`;
+      }, [count]);
+
+      return (
+        <Container>
+          <Typography variant="h2" component="h1" gutterBottom>
+            Hello, React with Material-UI and Hooks!
+          </Typography>
+          <Typography variant="h5">
+            Count: {count}
+          </Typography>
+          <Button variant="contained" color="primary" onClick={() => setCount(count + 1)}>
+            Increment
+          </Button>
+          <TextField
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+          />
+          <Typography variant="h6">
+            Name: {name}
+          </Typography>
+        </Container>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
 """
 
 def get_fake_data(prompt):
@@ -298,14 +221,16 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
         {
             "role": "system",
             "content": f"""
-                You are writing React and MUI code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
-				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Do not implement the entire design hypothesis - simply create the HTML structure.
+                You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
+				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Do not implement the entire design hypothesis - simply create the necesasry components WITHIN App.jsx
+                The index.html file will load React and MUI libraries from a CDN. Here is an example of the html file that will be generated: {sample_code}
 
 				Idenfity each component of the UI and make sure to give it a logical id. For example, if the UI includes a search bar, the search bar id should be called "searchBar". If the UI has a table, the tableId should be called "table".
 
                 Follow these rules while writing the code.
-				1. Only write React and MUI code.
+				1. Only HTML, Javascript, and CSS code. Particularly, write the script part using React and MUI libraries.
 				2. Do not return separate files code. Compile it all together in one file in one component and only send me the code.
+				3. Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
             """,
         },
         {"role": "user", "content": prompt}
@@ -318,12 +243,38 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
             "role": "system",
             "content": f"""
                 You are writing React and MUI code for creating a UI given a data model.
-				Please edit the existing code to include a "let" variable called "data" that stores the faked_data {faked_data}
+				Please edit the existing code to include a "useState" variable called "data" that stores the faked_data {faked_data}
 				Be sure to populate the faked data in the UI with ALL of the fake data provided. Do not comment "... more objects" or anything similar. PUT ALL THE FAKED DATA IN THE ARRAY.
-
                 Please follow these rules while writing the code.
-				1. Only write React and MUI.
-				2. Do not return separate React and MUI components. Compile it all together in one file and in one component and only send me the code.
+				1. Make sure the React and MUI code is wrapped within an index.html structure. It must be wrapped like this:
+				<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React App with MUI and Hooks</title>
+  <!-- Load React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel for JSX transformation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Load MUI from CDN -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    // REACT AND MUI CODE
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
+				2. Do not return separate React and MUI components. Compile it all together in one file (index.html) and in one component and only send me the code.
+				3. Follow this as a sample structure: {sample_code}
             """,
         },
         {"role": "user", "content": f"This is the existing code {code}"}
