@@ -1,8 +1,8 @@
 # This file handles saving mocked data, generating, and cleaning up the code based on the task list
 
 import globals
+from globals import call_llm
 from utils import (
-    call_llm,
     create_and_write_file,
     create_folder,
     delete_folder,
@@ -133,7 +133,7 @@ def get_fake_data(prompt):
         ]
         Please follow these rules while creating the JSON array
         1. Please only return the JSON array and nothing else.
-        2. Array length should be length 10.
+        2. Array length should be length 4.
         3. Please ensure that the generated data makes sense.
     """
 	user_message = "please generate data given this UI: " + prompt

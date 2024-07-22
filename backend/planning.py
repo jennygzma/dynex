@@ -1,7 +1,7 @@
 # This file handles brainstorming the design hypothesis and creating the task list.
 import json
 
-from utils import call_llm
+from globals import call_llm
 
 
 def get_design_hypothesis(ui_prompt, faked_data):
