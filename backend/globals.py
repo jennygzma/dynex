@@ -9,6 +9,12 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=api_key)
 
+# either anthropic or openai
+LLM = "anthropic"
+
+ANTHROPIC_MODEL = "claude-3-sonnet-20240229"
+GPT_MODEL = "gpt-4"
+
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
 USER_INPUT_FILE_NAME = "user_input.txt"

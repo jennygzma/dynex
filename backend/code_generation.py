@@ -2,6 +2,7 @@
 
 import globals
 from utils import (
+    call_llm,
     create_and_write_file,
     create_folder,
     delete_folder,
@@ -99,50 +100,88 @@ displayCharacter(currentIndex);
 
 def get_fake_data(prompt):
 	print("calling GPT for get_fake_data...")
-	messages = [
+    system_message = """
+    You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. Here is an example:
+    User Input: I want to create a UI that visualizes a beauty store's inventory.
+    
+    System result:
+    [
         {
-            "role": "system",
-            "content": """
-                You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. Here is an example:
-				
-				User Input: I want to create a UI that visualizes a beauty store's inventory.
-				
-				System result:
-				[
-                    {
-                        "id": 11,
-                        "title": "perfume Oil",
-                        "description": "Mega Discount, Impression of A...",
-                        "price": 13,
-                        "discountPercentage": 8.4,
-                        "rating": 4.26,
-                        "stock": 65,
-                        "brand": "Impression of Acqua Di Gio",
-                        "category": "fragrances",
-                    },
-					{
-                        "id": 12,
-                        "title": "perfume Oil",
-                        "description": "Half Off",
-                        "price": 15,
-                        "discountPercentage": 12.3,
-                        "rating": 3.46,
-                        "stock": 2343,
-                        "brand": "Victoria Secret",
-                        "category": "fragrances",
-                    },
-                ]
-                Please follow these rules while creating the JSON array
-                1. Please only return the JSON array and nothing else.
-				2. Array length should be length 10.
-				3. Please ensure that the generated data makes sense. 
-            """,
+            "id": 11,
+            "title": "perfume Oil",
+            "description": "Mega Discount, Impression of A...",
+            "price": 13,
+            "discountPercentage": 8.4,
+            "rating": 4.26,
+            "stock": 65,
+            "brand": "Impression of Acqua Di Gio",
+            "category": "fragrances",
         },
-        {"role": "user", "content": "please generate data given this UI: " + prompt}
+        {
+            "id": 12,
+            "title": "perfume Oil",
+            "description": "Half Off",
+            "price": 15,
+            "discountPercentage": 12.3,
+            "rating": 3.46,
+            "stock": 2343,
+            "brand": "Victoria Secret",
+            "category": "fragrances",
+        },
     ]
-	res = client.chat.completions.create(model="gpt-4", messages=messages)
-	print("sucessfully called GPT for get_fake_data", res)
-	return res.choices[0].message.content
+    Please follow these rules while creating the JSON array
+    1. Please only return the JSON array and nothing else.
+    2. Array length should be length 10.
+    3. Please ensure that the generated data makes sense. 
+"""
+    user_message = "please generate data given this UI: " + prompt
+    res = call_llm(system_message, user_message)
+    print("sucessfully called GPT for get_fake_data", res)
+    return res
+	# messages = [
+    #     {
+    #         "role": "system",
+    #         "content": """
+    #             You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. Here is an example:
+				
+	# 			User Input: I want to create a UI that visualizes a beauty store's inventory.
+				
+	# 			System result:
+	# 			[
+    #                 {
+    #                     "id": 11,
+    #                     "title": "perfume Oil",
+    #                     "description": "Mega Discount, Impression of A...",
+    #                     "price": 13,
+    #                     "discountPercentage": 8.4,
+    #                     "rating": 4.26,
+    #                     "stock": 65,
+    #                     "brand": "Impression of Acqua Di Gio",
+    #                     "category": "fragrances",
+    #                 },
+	# 				{
+    #                     "id": 12,
+    #                     "title": "perfume Oil",
+    #                     "description": "Half Off",
+    #                     "price": 15,
+    #                     "discountPercentage": 12.3,
+    #                     "rating": 3.46,
+    #                     "stock": 2343,
+    #                     "brand": "Victoria Secret",
+    #                     "category": "fragrances",
+    #                 },
+    #             ]
+    #             Please follow these rules while creating the JSON array
+    #             1. Please only return the JSON array and nothing else.
+	# 			2. Array length should be length 10.
+	# 			3. Please ensure that the generated data makes sense. 
+    #         """,
+    #     },
+    #     {"role": "user", "content": "please generate data given this UI: " + prompt}
+    # ]
+	# res = client.chat.completions.create(model="gpt-4", messages=messages)
+	# print("sucessfully called GPT for get_fake_data", res)
+	# return res.choices[0].message.content
 
 # this code generated is one shot
 def implement_plan(prompt, plan, faked_data, design_hypothesis, code_folder_path):
