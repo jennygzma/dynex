@@ -9,6 +9,9 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=api_key)
 
+# either anthropic or openai
+LLM = "anthropic"
+
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
 USER_INPUT_FILE_NAME = "user_input.txt"

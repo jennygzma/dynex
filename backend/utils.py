@@ -1,5 +1,45 @@
 import os
 
+import globals
+from anthropic import Anthropic
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Load variables from .env file
+load_dotenv()
+
+api_key_name = "ANTHROPIC_API_KEY" if globals.LLM == "anthropic" else "OPENAI_API_KEY"
+api_key = os.getenv(api_key_name)
+
+if globals.LLM == "anthropic":
+    client = Anthropic(api_key=api_key)
+else:
+    client = OpenAI(api_key=api_key)
+
+
+def call_llm(system_message, user_message):
+    if globals.LLM == "anthropic":
+        message = client.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=2048,
+            temperature=0,
+            system=system_message,
+            messages=[{"role": "user", "content": user_message}],
+        )
+        return message.content[0].text
+    messages = [
+        {
+            "role": "system",
+            "content": system_message,
+        },
+        {
+            "role": "user",
+            "content": user_message,
+        },
+    ]
+    message = client.chat.completions.create(model="gpt-4", messages=messages)
+    return message.choices[0].message.content
+
 
 def create_folder(folder_path):
     try:
