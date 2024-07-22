@@ -26,7 +26,7 @@ def get_design_hypothesis(ui_prompt, faked_data):
 def get_plan(design_hypothesis):
     print("calling LLM for get_plan...")
     user_message = f"""I want to create a UI with this design: {design_hypothesis}.
-        Give me a detailed implementation plan based on this design - the plan should be a list of tasks.
+        Give me a implementation plan.
 		Assume all the code will exist in one react App.js file, and that the UI will render in one page with no backend.
 		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
         All the code will be in React and MUI.
@@ -34,7 +34,7 @@ def get_plan(design_hypothesis):
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		
-		Please limit the plan to three to six steps.
+		Please limit the plan to ONE step. The array should have length 1.
 		"""
     system_message = "You are a helpful software engineer to answer questions related to implementing this UI."
     res = call_llm(system_message, user_message)
@@ -53,12 +53,7 @@ def cleanup_plan(plan):
                     "task_id": 1,
                     "task": "Create a static table with sample rows",
                     "dep": [],
-                },
-                {
-                    "task_id": 2,
-                    "task": "Add column headers",
-                    "dep": [1],
-                },
+                }
             ]
             """
     res = call_llm(system_message, user_message)
