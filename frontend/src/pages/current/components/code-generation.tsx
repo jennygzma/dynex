@@ -68,6 +68,7 @@ const CodeGeneration = () => {
       .then((response) => {
         console.log("/get_code_per_step request successful:", response.data);
         setCode(response.data.code);
+        // setCode(generatedCode);
       })
       .catch((error) => {
         console.error("Error calling /get_code_per_step request:", error);
@@ -252,8 +253,8 @@ const CodeGeneration = () => {
             <Button
               disabled={!code}
               onClick={() => {
-                setClickedRender(true);
                 renderUI();
+                setClickedRender(true);
               }}
             >
               Render

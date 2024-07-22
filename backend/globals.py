@@ -9,19 +9,22 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=api_key)
 
+# either anthropic or openai
+LLM = "anthropic"
+
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
 USER_INPUT_FILE_NAME = "user_input.txt"
 PLAN_FILE_NAME = "plan.json"
 TASK_MAP_FILE_NAME = "task_map.json"
 GENERATED_FOLDER_PATH = "generated"
-MERGED_CODE_FILE_NAME = "merged.html"
+MERGED_CODE_FILE_NAME = "merged.txt"
 CHECKED_CODE_FILE_NAME = "checked.html"
 CLEANED_CODE_FILE_NAME = "cleaned.html"
-TASK_FILE_NAME = "task.html"
+TASK_FILE_NAME = "task.txt"
 ITERATION_FOLDER_NAME = "iteration"
-ITERATION_FILE_NAME = "iteration.html"
-ITERATION_MERGE_FILE_NAME = "iteration_merged.html"
+ITERATION_FILE_NAME = "iteration.txt"
+ITERATION_MERGE_FILE_NAME = "iteration_merged.txt"
 ITERATION_CLEANED_FILE_NAME = "iteration_clean.html"
 MAIN_CODE_FILE_NAME = "index.html"
 
