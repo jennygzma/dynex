@@ -163,14 +163,17 @@ def get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_co
 				Currently, you are working on this task: {task}.
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
 				Please add to the existing code and implement this task. Write React and MUI code, and html, javascript, and css.
-				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.  This was the faked data: {faked_data}
+				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.
+				DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /* ... (rest of the code) */.
+				RETURN THE ENTIRE RELEVANT CODE TO HAVE THE APP WORK.
+				This was the faked data: {faked_data}. MAKE SURE ALL THE FAKED_DATA IS INSIDE THE CODE.
                 Return the FULL CODE NEEDED TO HAVE THE APP WORK, INSIDE THE INDEX.HTML file.
 """
 	code = call_llm(system_message, user_message)
 	create_and_write_file(task_merged_code_file_path, code)
 	merged_code_lines = len(code.splitlines())
 	previous_code_lines=len(previous_code.splitlines())
-	if previous_code_lines > merged_code_lines:
+	if previous_code_lines-10 > merged_code_lines:
 		print("trying again... writing code failed...")
 		get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
 	print("sucessfully called LLM for get_ui_code", code)
@@ -220,7 +223,7 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
 	print("called LLM for initial html file code", code)
 	user_message = f"This is the existing code {code}"
 	system_message = f"""
-				Make sure the React and MUI code is wrapped within an index.html structure. It must be wrapped like this:
+				Make sure the React and MUI code is wrapped within an index.html structure. MAKE SURE THAT THE INDEX.HTML IS WRAPPED LIKE THIS:
 				<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -356,7 +359,34 @@ def cleanup_code(data, cleaned_code_file_path, code_file_path, task_main_code_fi
                 You are cleaning up React and MUI code to ensure that it runs on first try.
 				If the code runs on first try, return the code. DO NOT RETURN ANYTHING ELSE, DO NOT RETURN SOMETHING LIKE "This code is already cleaned."
 				DO NOT DELETE ANY CODE. Only remove natural language. The goal is to have the code compile. Comments are okay.
-				This is an EXAMPLE of a result: {sample_code}
+				This is an EXAMPLE of a result: {sample_code}.
+				MAKE SURE THAT THE CODE IS WRAPPED LIKE THIS:
+				<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React App with MUI and Hooks</title>
+  <!-- Load React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel for JSX transformation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Load MUI from CDN -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    // REACT AND MUI CODE
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
             """
 	cleaned_code = call_llm(system_message, user_message)
 	create_and_write_file(cleaned_code_file_path, cleaned_code)
