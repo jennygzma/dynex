@@ -1,4 +1,5 @@
 import os
+import secrets
 
 import globals
 from anthropic import Anthropic
@@ -22,10 +23,11 @@ else:
 
 def call_llm(system_message, user_message):
     if globals.LLM == "anthropic":
+        temperature = secrets.randbelow(10**6) / 10**6
         message = client.messages.create(
             model="claude-3-sonnet-20240229",
             max_tokens=4096,
-            temperature=0,
+            temperature=temperature,
             system=system_message,
             messages=[{"role": "user", "content": user_message}],
         )

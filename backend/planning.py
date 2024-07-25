@@ -13,7 +13,7 @@ def get_design_hypothesis(ui_prompt, faked_data):
     system_message = """
                 You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
 				Each design should detail the user interactions and design layout. It should not be more than 100 words long.
-
+                Make sure that the design does not incorporate routes. Everything should exist within one page.
                 Make sure the design is consistent with the json data object provided by the user. All data shown must exist as a field on the JSON object.
 				
 				For example, a response could be: To create an application where the user can store their notes app, I will create a gmail, table-like UI, that shows the "title" field of the note. The user can search for notes, delete notes, and add notes. When the user clicks on a row, they will be brought to the full note.
@@ -26,15 +26,15 @@ def get_design_hypothesis(ui_prompt, faked_data):
 def get_plan(design_hypothesis):
     print("calling LLM for get_plan...")
     user_message = f"""I want to create a UI with this design: {design_hypothesis}.
-        Give me a detailed implementation plan based on this design - the plan should be a list of tasks.
+        Give me a vague implementation plan that is feature-based. Each step should focus on implementing a specific feature. The first step should focus on creating the general structure of the app.
 		Assume all the code will exist in one react App.js file, and that the UI will render in one page with no backend.
 		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
         All the code will be in React and MUI.
+        Make sure that the design does not incorporate routes. Everything should exist within one page.
         Placeholder data already exists. There should be NO task for mocking placeholder data, or populating the cards with placeholder data, since that already exists.
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
-		
-		Please limit the plan to three to six steps.
+		Please limit the plan to 3-5 steps.
 		"""
     system_message = "You are a helpful software engineer to answer questions related to implementing this UI."
     res = call_llm(system_message, user_message)
@@ -56,9 +56,9 @@ def cleanup_plan(plan):
                 },
                 {
                     "task_id": 2,
-                    "task": "Add column headers",
-                    "dep": [1],
-                },
+                    "task": "When clicking a row, a modal should open up.",
+                    "dep": [],
+                }
             ]
             """
     res = call_llm(system_message, user_message)

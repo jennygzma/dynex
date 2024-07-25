@@ -152,22 +152,30 @@ def implement_plan(prompt, plan, faked_data, design_hypothesis, code_folder_path
 	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
 	return main_code_file_path
 
-def get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_path, main_code_file_path):
+def get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path):
 	print("calling LLM for get_ui_code...")
-	user_message = f"This is the UI {prompt}. To build the UI, follow these steps {plan} it should use all this data: {faked_data}"
+	previous_code = read_file(previous_task_main_code_file_path)
+	user_message = f"Please execute this task: {task}"
 	system_message = f"""
-                You are writing FE code for creating a UI given a data model. Please only write in React and use the MUI package. This is the goal: {design_hypothesis}. The design should meet the following user specifications:
-                
-                Please follow these rules while writing the code.
-                1. A code snippet should be followed by a short explanation summarizing what the code is doing as a code comment, not natural language. The explanation should be no more than 15 words long. 
-                2. If previous code exists, please have the new code improve the existing code. Do not start completely from scratch.
-				3. Only write in react using the MUI package code. Do not have any natural language unless it is wrapped in a comment
-				4. Do not return separate files code. Compile it all together in one component and only send me the code. 
-				5. There should be no natural language at all. The entire response should be code. 
-            """
+                You are working on an app dsecribed here: {design_hypothesis}.
+                The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
+				We've broken down the development of it into these tasks: {plan}.
+				Currently, you are working on this task: {task}.
+				There is already existing code in the index.html file. Using the existing code {previous_code}.
+				Please add to the existing code and implement this task. Write React and MUI code, and html, javascript, and css.
+				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.
+				DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /* ... (rest of the code) */.
+				RETURN THE ENTIRE RELEVANT CODE TO HAVE THE APP WORK.
+				This was the faked data: {faked_data}. MAKE SURE ALL THE FAKED_DATA IS INSIDE THE CODE.
+                Return the FULL CODE NEEDED TO HAVE THE APP WORK, INSIDE THE INDEX.HTML file.
+"""
 	code = call_llm(system_message, user_message)
-	create_and_write_file(initial_code_file_path, code)
-	create_and_write_file(main_code_file_path, code)
+	create_and_write_file(task_merged_code_file_path, code)
+	merged_code_lines = len(code.splitlines())
+	previous_code_lines=len(previous_code.splitlines())
+	if previous_code_lines-10 > merged_code_lines:
+		print("trying again... writing code failed...")
+		get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
 
@@ -189,10 +197,11 @@ def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_pa
 		implement_first_task(design_hypothesis, step["task"], faked_data, task_merged_code_file_path)
 		cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 		return task_cleaned_code_file_path
-	task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
+	# task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
 	previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}"
-	identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
-	inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
+	# identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
+	# inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
+	get_ui_code(plan, step["task"], faked_data, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
 	cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 	print("finished executing lock step for task_id", {task_id})
 
@@ -201,10 +210,9 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
                 You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
-				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Do not implement the entire design hypothesis - simply create the necesasry components WITHIN App.jsx
+				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Implement the design hypothesis based on the task.
                 The index.html file will load React and MUI libraries from a CDN. Here is an example of the html file that will be generated: {sample_code}
-
-				Idenfity each component of the UI and make sure to give it a logical id. For example, if the UI includes a search bar, the search bar id should be called "searchBar". If the UI has a table, the tableId should be called "table".
+                Make sure to add the faked_data {faked_data} as an array in the code.
 
                 Follow these rules while writing the code.
 				1. Only HTML, Javascript, and CSS code. Particularly, write the script part using React and MUI libraries.
@@ -215,11 +223,7 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
 	print("called LLM for initial html file code", code)
 	user_message = f"This is the existing code {code}"
 	system_message = f"""
-                You are writing React and MUI code for creating a UI given a data model.
-				Please edit the existing code to include a "useState" variable called "data" that stores the faked_data {faked_data}
-				Be sure to populate the faked data in the UI with ALL of the fake data provided. Do not comment "... more objects" or anything similar. PUT ALL THE FAKED DATA IN THE ARRAY.
-                Please follow these rules while writing the code.
-				1. Make sure the React and MUI code is wrapped within an index.html structure. It must be wrapped like this:
+				Make sure the React and MUI code is wrapped within an index.html structure. MAKE SURE THAT THE INDEX.HTML IS WRAPPED LIKE THIS:
 				<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -246,8 +250,8 @@ def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_f
   </script>
 </body>
 </html>
-				2. Do not return separate React and MUI components. Compile it all together in one file (index.html) and in one component and only send me the code.
-				3. Follow this as a sample structure: {sample_code}
+				Do not return separate React and MUI components. Compile it all together in one file (index.html) and in one component and only send me the code.
+				Follow this as a sample structure: {sample_code}
             """
 	code_with_data = call_llm(system_message, user_message)
 	print("called LLM for initial html file code")
@@ -307,8 +311,8 @@ def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_p
 def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, design_hypothesis):
     print("calling LLM for get_iterate_code...")
     task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
-    task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
-    task_debug_code_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_FILE_NAME}"
+    # task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
+    # task_debug_code_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_FILE_NAME}"
     task_debug_merge_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_MERGE_FILE_NAME}"
     task_debug_cleaned_code_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_CLEANED_FILE_NAME}"
     task_code = read_file(task_main_code_file_path)
@@ -317,16 +321,14 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
                 A coding task has been implemented for a project we are working on.
 				For context, this is the project description: {design_hypothesis}. The task was this: {task}. The faked data is this: {globals.faked_data}. All the faked data should be stored in the data array.
 				However, the task was not implemented fully correctly. The user explains what is wrong in the problem {problem}.
-
-				Using the existing code {task_code}, identify where you would add code to implement ONLY this task and have it fully working.
-				Return the response in an array with this format: [{{"line number": line_number, "action": action, "code": code}}],
-				where the line number is where you would inject the code given the previous code,
-				action is whether or not you are replacing existing code or adding new code (Example: if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. REPLACE the current search bar with the new search bar. Example: Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.),
-				code is the actual code you would inject. Only write React and MUI code.
+				There is already existing code in the index.html file. Using the existing code {task_code}.
+				Please add to the existing code and fix the problem. Write React and MUI code, and html, javascript, and css.
+				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.
+                Return the FULL CODE NEEDED TO HAVE THE APP WORK, INSIDE THE INDEX.HTML file.
             """
     iterated_code = call_llm(system_message, user_message)
-    create_and_write_file(task_debug_code_file_path, iterated_code)
-    inject_code(problem, task_cleaned_code_file_path, task_debug_merge_file_path, task_debug_code_file_path)
+    create_and_write_file(task_debug_merge_file_path, iterated_code)
+    # inject_code(problem, task_cleaned_code_file_path, task_debug_merge_file_path, task_debug_code_file_path)
     cleanup_code(globals.faked_data, task_debug_cleaned_code_file_path, task_debug_merge_file_path, task_main_code_file_path)
     print("successfully called LLM for get_iterate_code...", iterated_code)
     return task_main_code_file_path
@@ -357,7 +359,34 @@ def cleanup_code(data, cleaned_code_file_path, code_file_path, task_main_code_fi
                 You are cleaning up React and MUI code to ensure that it runs on first try.
 				If the code runs on first try, return the code. DO NOT RETURN ANYTHING ELSE, DO NOT RETURN SOMETHING LIKE "This code is already cleaned."
 				DO NOT DELETE ANY CODE. Only remove natural language. The goal is to have the code compile. Comments are okay.
-				This is an EXAMPLE of a result: {sample_code}
+				This is an EXAMPLE of a result: {sample_code}.
+				MAKE SURE THAT THE CODE IS WRAPPED LIKE THIS:
+				<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React App with MUI and Hooks</title>
+  <!-- Load React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel for JSX transformation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Load MUI from CDN -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    // REACT AND MUI CODE
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
             """
 	cleaned_code = call_llm(system_message, user_message)
 	create_and_write_file(cleaned_code_file_path, cleaned_code)
