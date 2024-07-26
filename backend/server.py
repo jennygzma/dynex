@@ -20,6 +20,13 @@ from utils import create_and_write_file, create_folder, folder_exists, read_file
 # Initializing flask app
 app = Flask(__name__)
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    return response
+
 @app.route("/get_user_input", methods=["GET"])
 def get_user_input():
     print("calling get_user_input...")
@@ -200,7 +207,7 @@ def generate_code():
     if folder_exists(task_code_folder_path):
         wipeout_code(globals.folder_path, task_id, globals.plan)
     implement_plan_lock_step(
-        globals.design_hypothesis, globals.plan, globals.faked_data, globals.folder_path, task_id
+        globals.design_hypothesis, globals.plan, globals.folder_path, task_id
     )
     task_main_code_folder_path = f"{globals.folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
     # file_path = implement_plan(globals.prompt, globals.plan, globals.faked_data, globals.design_hypothesis, globals.folder_path)

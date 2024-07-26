@@ -28,6 +28,14 @@ from utils import (
 # checked.html - checked code
 # cleaned.html - cleaned code
 
+get_faked_data_code = """
+useEffect(() => {
+        fetch('http://127.0.0.1:5000/get_faked_data')
+          .then(response => response.json())
+          .then(data => setRecipes(JSON.parse(data.faked_data)))
+          .catch(error => console.error('Error fetching data:', error));
+      }, []);
+"""
 sample_code = """
 <!DOCTYPE html>
 <html lang="en">
@@ -133,7 +141,7 @@ def get_fake_data(prompt):
         ]
         Please follow these rules while creating the JSON array
         1. Please only return the JSON array and nothing else.
-        2. Array length should be length 4.
+        2. Array length should be length 20.
         3. Please ensure that the generated data makes sense.
     """
 	user_message = "please generate data given this UI: " + prompt
@@ -142,17 +150,17 @@ def get_fake_data(prompt):
 	return res
 
 # this code generated is one shot
-def implement_plan(prompt, plan, faked_data, design_hypothesis, code_folder_path):
+def implement_plan(prompt, plan, design_hypothesis, code_folder_path):
 	print("calling LLM for implement_plan...")
 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
 	initial_code_file_path = f"{code_folder_path}/initial.html"
 	main_code_file_path = f"{code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
-	get_ui_code(prompt, plan, faked_data, design_hypothesis, initial_code_file_path, main_code_file_path)
+	get_ui_code(prompt, plan, design_hypothesis, initial_code_file_path, main_code_file_path)
 	# overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
-	cleanup_code(faked_data, cleaned_code_file_path, main_code_file_path)
+	cleanup_code(cleaned_code_file_path, main_code_file_path)
 	return main_code_file_path
 
-def get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path):
+def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path):
 	print("calling LLM for get_ui_code...")
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
@@ -161,12 +169,14 @@ def get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_co
                 The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}.
+				For context, this is the faked_data: {globals.faked_data}
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
+				DO NOT USE MUI ICON.
 				Please add to the existing code and implement this task. Write React and MUI code, and html, javascript, and css.
 				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.
 				DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /* ... (rest of the code) */.
 				RETURN THE ENTIRE RELEVANT CODE TO HAVE THE APP WORK.
-				This was the faked data: {faked_data}. MAKE SURE ALL THE FAKED_DATA IS INSIDE THE CODE.
+				MAKE SURE ALL THE HOOK TO GRAB THE FAKED_DATA IS INSIDE THE CODE.
                 Return the FULL CODE NEEDED TO HAVE THE APP WORK, INSIDE THE INDEX.HTML file.
 """
 	code = call_llm(system_message, user_message)
@@ -175,11 +185,11 @@ def get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_co
 	previous_code_lines=len(previous_code.splitlines())
 	if previous_code_lines-10 > merged_code_lines:
 		print("trying again... writing code failed...")
-		get_ui_code(plan, task, faked_data, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
+		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
 
-def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_path, task_id):
+def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id):
 	print("calling LLM for implement_plan_lock_step...")
 	if len(plan) == 0 or plan is None:
 		print("ERROR: there was no plan...")
@@ -194,25 +204,30 @@ def implement_plan_lock_step(design_hypothesis, plan, faked_data, code_folder_pa
     # TODO: Add this back in the future
     # task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
 	if task_id==1:
-		implement_first_task(design_hypothesis, step["task"], faked_data, task_merged_code_file_path)
-		cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
+		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path)
+		cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 		return task_cleaned_code_file_path
 	# task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
 	previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}"
+    # uncomment below for GPT
 	# identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
 	# inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
-	get_ui_code(plan, step["task"], faked_data, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
-	cleanup_code(faked_data, task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
+	# below is for Claude
+	get_ui_code(plan, step["task"], design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
+	cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 	print("finished executing lock step for task_id", {task_id})
 
-def implement_first_task(design_hypothesis, task, faked_data, task_merged_code_file_path):
+def implement_first_task(design_hypothesis, task, task_merged_code_file_path):
 	print("calling LLM for implement_first_task...")
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
                 You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
-				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Implement the design hypothesis based on the task.
+				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Only implement what is stated in the task.
+				MAKE SURE TO IMPLEMENT ALL FEATURES STATED IN THE TASK. DO NOT LEAVE ANYTHING OUT.
+				DO NOT USE MUI ICON.
                 The index.html file will load React and MUI libraries from a CDN. Here is an example of the html file that will be generated: {sample_code}
-                Make sure to add the faked_data {faked_data} as an array in the code.
+				For context, this is the faked_data: {globals.faked_data}
+                Make sure to grab the faked_data data by using a hook with code similar to this: {get_faked_data_code}
 
                 Follow these rules while writing the code.
 				1. Only HTML, Javascript, and CSS code. Particularly, write the script part using React and MUI libraries.
@@ -319,7 +334,7 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
     user_message = f"Please fix the problem that the user describes: {problem}, please fix the problem in the existing code and return the entire code! Thank you!"
     system_message = f"""
                 A coding task has been implemented for a project we are working on.
-				For context, this is the project description: {design_hypothesis}. The task was this: {task}. The faked data is this: {globals.faked_data}. All the faked data should be stored in the data array.
+				For context, this is the project description: {design_hypothesis}. The task was this: {task}. This is the faked_data: {globals.faked_data}
 				However, the task was not implemented fully correctly. The user explains what is wrong in the problem {problem}.
 				There is already existing code in the index.html file. Using the existing code {task_code}.
 				Please add to the existing code and fix the problem. Write React and MUI code, and html, javascript, and css.
@@ -329,7 +344,7 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
     iterated_code = call_llm(system_message, user_message)
     create_and_write_file(task_debug_merge_file_path, iterated_code)
     # inject_code(problem, task_cleaned_code_file_path, task_debug_merge_file_path, task_debug_code_file_path)
-    cleanup_code(globals.faked_data, task_debug_cleaned_code_file_path, task_debug_merge_file_path, task_main_code_file_path)
+    cleanup_code(task_debug_cleaned_code_file_path, task_debug_merge_file_path, task_main_code_file_path)
     print("successfully called LLM for get_iterate_code...", iterated_code)
     return task_main_code_file_path
 
@@ -351,10 +366,10 @@ def test_code_per_lock_step(task, design_hypothesis):
     print("sucessfully called LLM for test_code_per_lock_step", cases)
     return cases
 
-def cleanup_code(data, cleaned_code_file_path, code_file_path, task_main_code_file_path):
+def cleanup_code(cleaned_code_file_path, code_file_path, task_main_code_file_path):
 	print("calling LLM for cleanup_code...")
 	code = read_file(code_file_path)
-	user_message = f'This is the code: \n {code} \n\n This is the faked data: {data}'
+	user_message = f'This is the code: \n {code}'
 	system_message=f"""
                 You are cleaning up React and MUI code to ensure that it runs on first try.
 				If the code runs on first try, return the code. DO NOT RETURN ANYTHING ELSE, DO NOT RETURN SOMETHING LIKE "This code is already cleaned."
