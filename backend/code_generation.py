@@ -171,6 +171,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 				Currently, you are working on this task: {task}.
 				For context, this is the faked_data: {globals.faked_data}
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
+				DO NOT USE MUI ICON.
 				Please add to the existing code and implement this task. Write React and MUI code, and html, javascript, and css.
 				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.
 				DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /* ... (rest of the code) */.
@@ -208,8 +209,10 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id)
 		return task_cleaned_code_file_path
 	# task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
 	previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}"
+    # uncomment below for GPT
 	# identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
 	# inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
+	# below is for Claude
 	get_ui_code(plan, step["task"], design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path)
 	cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 	print("finished executing lock step for task_id", {task_id})
@@ -219,7 +222,9 @@ def implement_first_task(design_hypothesis, task, task_merged_code_file_path):
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
                 You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
-				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Implement the design hypothesis based on the task.
+				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Only implement what is stated in the task.
+				MAKE SURE TO IMPLEMENT ALL FEATURES STATED IN THE TASK. DO NOT LEAVE ANYTHING OUT.
+				DO NOT USE MUI ICON.
                 The index.html file will load React and MUI libraries from a CDN. Here is an example of the html file that will be generated: {sample_code}
 				For context, this is the faked_data: {globals.faked_data}
                 Make sure to grab the faked_data data by using a hook with code similar to this: {get_faked_data_code}
