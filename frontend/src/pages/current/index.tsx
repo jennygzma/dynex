@@ -3,12 +3,12 @@ import React, { useEffect } from "react";
 import UserInputs from "./components/user-inputs";
 import CodeGeneration from "./components/code-generation";
 import Plan from "./components/plan";
-import { usePlanContext } from "./hooks/plan-context";
+import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
-  const { isLoading } = usePlanContext();
+  const { isLoading } = useAppContext();
   useEffect(() => {}, [isLoading]);
   return (
     <div className={"home"}>

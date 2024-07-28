@@ -1,15 +1,20 @@
 import { Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { usePlanContext } from "../hooks/plan-context";
+import { useAppContext } from "../hooks/app-context";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 import Chip from "../../../components/Chip";
 
 const ProjectFormation = () => {
-  const { updateIsLoading, designHypothesis, updateDesignHypothesis } =
-    usePlanContext();
+  const {
+    updateIsLoading,
+    designHypothesis,
+    updateDesignHypothesis,
+    theoriesToExplore,
+    updateTheoriesToExplore,
+  } = useAppContext();
 
   useEffect(() => {
     getFakedData();
@@ -24,16 +29,17 @@ const ProjectFormation = () => {
   const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
   const [updatedDataInput, setUpdatedDataInput] = useState(false);
   const [theories, setTheories] = useState([]);
-  const [selectedTheories, setSelectedTheories] = useState([]);
   const [newTheoryInput, setNewTheoryInput] = useState("");
+  const [selectedNewTheory, setSelectedNewTheory] = useState(false);
 
   useEffect(() => {}, [designHypothesis, dataInput]);
 
   const handleSelectTheory = (theory) => {
-    if (selectedTheories.includes(theory)) {
-      setSelectedTheories(selectedTheories.filter((t) => t !== theory));
+    if (!selectedNewTheory) setSelectedNewTheory(true);
+    if (theoriesToExplore.includes(theory)) {
+      updateTheoriesToExplore(theoriesToExplore.filter((t) => t !== theory));
     } else {
-      setSelectedTheories([...selectedTheories, theory]);
+      updateTheoriesToExplore([...theoriesToExplore, theory]);
     }
   };
 
@@ -127,7 +133,7 @@ const ProjectFormation = () => {
           "/get_selected_theories request successful:",
           response.data,
         );
-        setSelectedTheories(response.data.selected_theories);
+        updateTheoriesToExplore(response.data.selected_theories);
       })
       .catch((error) => {
         console.error("Error calling /get_selected_theories request:", error);
@@ -143,12 +149,13 @@ const ProjectFormation = () => {
       method: "POST",
       url: "/save_selected_theories",
       data: {
-        selected_theories: selectedTheories,
+        selected_theories: theoriesToExplore,
       },
     })
       .then((response) => {
         console.log("/saveSelectedTheories request successful:", response.data);
         getSelectedTheories();
+        setSelectedNewTheory(false);
       })
       .catch((error) => {
         console.error("Error calling /saveSelectedTheories request:", error);
@@ -325,7 +332,7 @@ const ProjectFormation = () => {
             key={theory}
             label={theory}
             onClick={() => handleSelectTheory(theory)}
-            selected={selectedTheories.includes(theory)}
+            selected={theoriesToExplore.includes(theory)}
             clickable
           />
         ))}
@@ -349,7 +356,7 @@ const ProjectFormation = () => {
         </Stack>
         <Button
           onClick={saveSelectedTheories}
-          disabled={!selectedTheories || !UIPrompt}
+          disabled={!selectedNewTheory || !UIPrompt}
           sx={{
             width: "100%",
           }}

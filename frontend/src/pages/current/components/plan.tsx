@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { usePlanContext } from "../hooks/plan-context";
+import { useAppContext } from "../hooks/app-context";
 import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
 import Button from "../../../components/Button";
@@ -27,7 +27,7 @@ const Plan = () => {
     updateCurrentIteration,
     updateCurrentTask,
     designHypothesis,
-  } = usePlanContext();
+  } = useAppContext();
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
     useState(false);

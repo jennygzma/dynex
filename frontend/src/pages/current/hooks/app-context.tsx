@@ -11,7 +11,7 @@ export interface TaskInfo {
   task: string;
 }
 
-export interface PlanState {
+export interface AppState {
   isLoading: boolean;
   updateIsLoading: Dispatch<SetStateAction<Boolean>>;
   plan: TaskInfo[] | undefined;
@@ -24,11 +24,15 @@ export interface PlanState {
   updateCurrentIteration: Dispatch<SetStateAction<number>>;
   designHypothesis: string;
   updateDesignHypothesis: Dispatch<SetStateAction<string>>;
+  theoriesToExplore: string[];
+  updateTheoriesToExplore: Dispatch<SetStateAction<string[]>>;
+  currentTheory: string[];
+  updateCurrentTheory: Dispatch<SetStateAction<string>>;
 }
 
-export const PlanContext = createContext<PlanState | undefined>(undefined);
+export const AppContext = createContext<AppState | undefined>(undefined);
 
-export const usePlanContext = () => useContext(PlanContext);
+export const useAppContext = () => useContext(AppContext);
 
 export const PlanProvider = ({ children }) => {
   const [plan, updatePlan] = useState(undefined);
@@ -37,9 +41,11 @@ export const PlanProvider = ({ children }) => {
   const [isLoading, updateIsLoading] = useState(false);
   const [iterations, updateIterations] = useState(undefined);
   const [currentIteration, updateCurrentIteration] = useState(0);
+  const [theoriesToExplore, updateTheoriesToExplore] = useState(undefined);
+  const [currentTheory, updateCurrentTheory] = useState(undefined);
 
   return (
-    <PlanContext.Provider
+    <AppContext.Provider
       value={{
         isLoading,
         updateIsLoading,
@@ -53,9 +59,13 @@ export const PlanProvider = ({ children }) => {
         updateCurrentIteration,
         designHypothesis,
         updateDesignHypothesis,
+        theoriesToExplore,
+        updateTheoriesToExplore,
+        currentTheory,
+        updateCurrentTheory,
       }}
     >
       {children}
-    </PlanContext.Provider>
+    </AppContext.Provider>
   );
 };

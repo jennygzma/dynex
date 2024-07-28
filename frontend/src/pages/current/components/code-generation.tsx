@@ -1,7 +1,7 @@
 import { Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { usePlanContext } from "../hooks/plan-context";
+import { useAppContext } from "../hooks/app-context";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
@@ -14,7 +14,7 @@ const CodeGeneration = () => {
     currentTask,
     currentIteration,
     updateCurrentIteration,
-  } = usePlanContext();
+  } = useAppContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
   const [problemDescription, setProblemDescription] = useState(undefined);
