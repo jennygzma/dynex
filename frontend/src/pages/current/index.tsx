@@ -45,7 +45,7 @@ const Home = () => {
               fontFamily: "monospace",
             }}
           >
-            FRANKY
+            THEORY2CODE
           </Typography>
         </Stack>
         <UserInputs />

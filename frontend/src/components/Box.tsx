@@ -1,14 +1,14 @@
 import React, { ReactElement, ReactNode } from "react";
-import { Box as ReactBox, BoxProps as ReactBoxProps } from "@mui/material";
+import { Box as MuiBox, BoxProps as MuiBoxProps } from "@mui/material";
 
-interface BoxProps extends ReactBoxProps {
+interface BoxProps extends MuiBoxProps {
   children?: ReactNode;
   border?: number;
 }
 
 const Box = ({ children, border, sx, ...props }: BoxProps): ReactElement => {
   return (
-    <ReactBox
+    <MuiBox
       sx={{
         padding: "10px",
         border: border ?? 10,
@@ -19,7 +19,7 @@ const Box = ({ children, border, sx, ...props }: BoxProps): ReactElement => {
       {...props}
     >
       {children}
-    </ReactBox>
+    </MuiBox>
   );
 };
 

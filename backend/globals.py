@@ -49,6 +49,8 @@ def call_llm(system_message, user_message):
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
 USER_INPUT_FILE_NAME = "user_input.txt"
+THEORIES_FILE_NAME = "theories.txt"
+SELECTED_THEORIES_FILE_NAME = "selected_theories.txt"
 PLAN_FILE_NAME = "plan.json"
 TASK_MAP_FILE_NAME = "task_map.json"
 GENERATED_FOLDER_PATH = "generated"
@@ -68,13 +70,17 @@ CURRENT_DEBUG_ITERATION = "current_debug_iteration"
 
 # user provided prompt for what UI should look like
 prompt = None
-# GPT generated faked data
+# LLM generated theories
+theories = []
+# user selected theories to test
+selected_theories = []
+# LLM generated faked data
 faked_data = None
 # user provided data model
 data_model = None
-# GPT generated design
+# LLM generated design
 design_hypothesis = None
-# GPT generated implementation plan
+# LLM generated implementation plan
 plan = None
 # folder for this code generation, in the form of a UUID
 folder_path = None

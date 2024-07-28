@@ -1,10 +1,10 @@
 import React, { ReactElement } from "react";
 import {
-  TextField as ReactTextField,
-  TextFieldProps as ReactTextFieldProps,
+  TextField as MuiTextField,
+  TextFieldProps as MuiTextFieldProps,
 } from "@mui/material";
 
-interface TextFieldProps extends Omit<ReactTextFieldProps, "inputProps"> {
+interface TextFieldProps extends Omit<MuiTextFieldProps, "inputProps"> {
   code?: boolean;
 }
 
@@ -21,7 +21,7 @@ const TextField = ({
   ...props
 }: TextFieldProps): ReactElement => {
   return (
-    <ReactTextField
+    <MuiTextField
       className={className}
       label={label}
       multiline
