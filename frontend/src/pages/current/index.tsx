@@ -2,9 +2,10 @@ import { Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import UserInputs from "./components/user-inputs";
 import CodeGeneration from "./components/code-generation";
-import Plan from "./components/plan";
 import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
+import ControlPanel from "./components/control-panel";
+import ProjectFormation from "./components/project-formation";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
@@ -50,8 +51,11 @@ const Home = () => {
         </Stack>
         <UserInputs />
         <Stack direction="row">
-          <Plan />
-          <CodeGeneration />
+          <ControlPanel />
+          <Stack>
+            <ProjectFormation />
+            <CodeGeneration />
+          </Stack>
         </Stack>
       </Stack>
     </div>

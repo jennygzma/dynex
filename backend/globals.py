@@ -48,7 +48,8 @@ def call_llm(system_message, user_message):
 
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
-USER_INPUT_FILE_NAME = "user_input.txt"
+USE_CASE_FILE_NAME = "use_case.txt"
+PROMPT_FILE_NAME = "prompt.txt"
 THEORIES_FILE_NAME = "theories.txt"
 SELECTED_THEORIES_FILE_NAME = "selected_theories.txt"
 PLAN_FILE_NAME = "plan.json"
@@ -68,21 +69,23 @@ MAIN_CODE_FILE_NAME = "index.html"
 DEBUG_ITERATION_MAP = "debug_iteration_map"
 CURRENT_DEBUG_ITERATION = "current_debug_iteration"
 
-# user provided prompt for what UI should look like
-prompt = None
+# use case provided by user
+use_case = None
+# prompt based on use case and theory
+# prompt = None
 # LLM generated theories
 theories = []
 # user selected theories to test
 selected_theories = []
 # LLM generated faked data
-faked_data = None
+# faked_data = None
 # user provided data model
-data_model = None
+# data_model = None
 # LLM generated design
-design_hypothesis = None
+# design_hypothesis = None
 # LLM generated implementation plan
-plan = None
+# plan = None
 # folder for this code generation, in the form of a UUID
 folder_path = None
 # stores metadata info for each task
-task_map = None
+# task_map = None

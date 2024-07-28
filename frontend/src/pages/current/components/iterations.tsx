@@ -15,7 +15,7 @@ const mapPlan = (jsonPlan) => {
   });
 };
 
-const Plan = () => {
+const Iterations = () => {
   const {
     updateIsLoading,
     plan,
@@ -27,6 +27,7 @@ const Plan = () => {
     updateCurrentIteration,
     updateCurrentTask,
     designHypothesis,
+    currentTheory,
   } = useAppContext();
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
@@ -42,6 +43,9 @@ const Plan = () => {
     axios({
       method: "POST",
       url: "/generate_plan",
+      data: {
+        theory: currentTheory,
+      },
     })
       .then((response) => {
         console.log("/generate_plan request successful:", response.data);
@@ -60,6 +64,9 @@ const Plan = () => {
     axios({
       method: "GET",
       url: "/get_plan",
+      params: {
+        theory: currentTheory,
+      },
     })
       .then((response) => {
         console.log("/get_plan request successful:", response.data);
@@ -82,6 +89,7 @@ const Plan = () => {
       data: {
         task_id: currentTask.taskId,
         task_description: newTaskDescription,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -105,6 +113,7 @@ const Plan = () => {
       data: {
         current_task_id: currentTask.taskId,
         new_task_description: addStepNewTaskDescription,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -129,6 +138,7 @@ const Plan = () => {
       url: "/remove_step_in_plan",
       data: {
         task_id: currentTask.taskId,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -150,6 +160,7 @@ const Plan = () => {
       url: "/get_iteration_map_per_step",
       params: {
         task_id: currentTask.taskId,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -183,6 +194,7 @@ const Plan = () => {
       params: {
         task_id: currentTask.taskId,
         iteration: iteration,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -211,6 +223,7 @@ const Plan = () => {
       url: "/get_test_cases_per_lock_step",
       params: {
         task_id: currentTask.taskId,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -249,9 +262,8 @@ const Plan = () => {
     getIterations();
   }, [currentIteration, currentTask]);
 
-  if (!designHypothesis) return <></>;
   return (
-    <Box sx={{ width: "25%" }}>
+    <Box sx={{ width: "90%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -261,7 +273,7 @@ const Plan = () => {
             fontFamily: "monospace",
           }}
         >
-          Planning
+          Iterations
         </Typography>
         <Button
           onClick={generatePlan}
@@ -395,7 +407,7 @@ const Plan = () => {
                 fontFamily: "monospace",
               }}
             >
-              Iterate, Debug, or Repair Versions
+              Iterate
             </Typography>
             {iterations && (
               <Button
@@ -444,4 +456,4 @@ const Plan = () => {
   );
 };
 
-export default Plan;
+export default Iterations;

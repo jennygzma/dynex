@@ -26,7 +26,7 @@ export interface AppState {
   updateDesignHypothesis: Dispatch<SetStateAction<string>>;
   theoriesToExplore: string[];
   updateTheoriesToExplore: Dispatch<SetStateAction<string[]>>;
-  currentTheory: string[];
+  currentTheory: string;
   updateCurrentTheory: Dispatch<SetStateAction<string>>;
 }
 

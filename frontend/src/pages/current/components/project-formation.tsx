@@ -5,49 +5,35 @@ import { useAppContext } from "../hooks/app-context";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
-import Chip from "../../../components/Chip";
 
-const UserInput = () => {
+const ProjectFormation = () => {
   const {
     updateIsLoading,
     designHypothesis,
     updateDesignHypothesis,
-    theoriesToExplore,
-    updateTheoriesToExplore,
+    currentTheory,
   } = useAppContext();
 
   useEffect(() => {
     getFakedData();
     getDesignHypothesis();
     getUserInput();
-    getTheories();
-    getSelectedTheories();
   }, []);
 
   const [dataInput, setDataInput] = useState("");
   const [UIPrompt, setUIPrompt] = useState("");
   const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
   const [updatedDataInput, setUpdatedDataInput] = useState(false);
-  const [theories, setTheories] = useState([]);
-  const [newTheoryInput, setNewTheoryInput] = useState("");
-  const [selectedNewTheory, setSelectedNewTheory] = useState(false);
-
   useEffect(() => {}, [designHypothesis, dataInput]);
-
-  const handleSelectTheory = (theory) => {
-    if (!selectedNewTheory) setSelectedNewTheory(true);
-    if (theoriesToExplore.includes(theory)) {
-      updateTheoriesToExplore(theoriesToExplore.filter((t) => t !== theory));
-    } else {
-      updateTheoriesToExplore([...theoriesToExplore, theory]);
-    }
-  };
 
   const getUserInput = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
       url: "/get_user_input",
+      params: {
+        theory: currentTheory,
+      },
     })
       .then((response) => {
         console.log("/get_user_input request successful:", response.data);
@@ -61,110 +47,6 @@ const UserInput = () => {
       });
   };
 
-  const brainstormTheories = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/brainstorm_theories",
-      data: {
-        prompt: UIPrompt,
-      },
-    })
-      .then((response) => {
-        console.log("/brainstorm_theories request successful:", response.data);
-        getTheories();
-      })
-      .catch((error) => {
-        console.error("Error calling /brainstorm_theories request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const getTheories = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_theories",
-    })
-      .then((response) => {
-        console.log("/get_theories request successful:", response.data);
-        setTheories(response.data.theories);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_theories request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const saveTheory = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_theory",
-      data: {
-        theory: newTheoryInput,
-      },
-    })
-      .then((response) => {
-        console.log("/save_theory request successful:", response.data);
-        getTheories();
-        setNewTheoryInput("");
-      })
-      .catch((error) => {
-        console.error("Error calling /save_theory request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const getSelectedTheories = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_selected_theories",
-    })
-      .then((response) => {
-        console.log(
-          "/get_selected_theories request successful:",
-          response.data,
-        );
-        updateTheoriesToExplore(response.data.selected_theories);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_selected_theories request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const saveSelectedTheories = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_selected_theories",
-      data: {
-        selected_theories: theoriesToExplore,
-      },
-    })
-      .then((response) => {
-        console.log("/saveSelectedTheories request successful:", response.data);
-        getSelectedTheories();
-        setSelectedNewTheory(false);
-      })
-      .catch((error) => {
-        console.error("Error calling /saveSelectedTheories request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
   const generateFakeData = () => {
     updateIsLoading(true);
     axios({
@@ -172,6 +54,7 @@ const UserInput = () => {
       url: "/generate_fake_data",
       data: {
         prompt: UIPrompt,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -193,6 +76,7 @@ const UserInput = () => {
       url: "/save_faked_data",
       data: {
         faked_data: dataInput,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -212,6 +96,9 @@ const UserInput = () => {
     axios({
       method: "GET",
       url: "/get_faked_data",
+      params: {
+        theory: currentTheory,
+      },
     })
       .then((response) => {
         console.log("/get_faked_data request successful:", response.data);
@@ -233,6 +120,7 @@ const UserInput = () => {
       url: "/generate_design_hypothesis",
       data: {
         prompt: UIPrompt,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -260,6 +148,7 @@ const UserInput = () => {
       url: "/save_design_hypothesis",
       data: {
         design_hypothesis: designHypothesis,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -282,6 +171,9 @@ const UserInput = () => {
     axios({
       method: "GET",
       url: "/get_design_hypothesis",
+      params: {
+        theory: currentTheory,
+      },
     })
       .then((response) => {
         console.log(
@@ -300,7 +192,7 @@ const UserInput = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
       <Stack spacing="20px">
         <Typography
           variant="h4"
@@ -318,51 +210,6 @@ const UserInput = () => {
           value={UIPrompt}
           onChange={(e) => setUIPrompt(e.target.value)}
         />
-        <Button
-          onClick={brainstormTheories}
-          disabled={!UIPrompt}
-          sx={{
-            width: "100%",
-          }}
-        >
-          Brainstorm Theories
-        </Button>
-        {theories.map((theory) => (
-          <Chip
-            key={theory}
-            label={theory}
-            onClick={() => handleSelectTheory(theory)}
-            selected={theoriesToExplore.includes(theory)}
-            clickable
-          />
-        ))}
-        <Stack direction="row" spacing="10px">
-          <TextField
-            className={"theory"}
-            label="Theory"
-            value={newTheoryInput}
-            onChange={(e) => setNewTheoryInput(e.target.value)}
-            sx={{ width: "90%" }}
-          />
-          <Button
-            onClick={saveTheory}
-            disabled={!newTheoryInput}
-            sx={{
-              width: "10%",
-            }}
-          >
-            Submit
-          </Button>
-        </Stack>
-        <Button
-          onClick={saveSelectedTheories}
-          disabled={!selectedNewTheory || !UIPrompt}
-          sx={{
-            width: "100%",
-          }}
-        >
-          Explore Theories For Use Case
-        </Button>
         <Stack direction="row" spacing="10px" width="100%">
           <Stack spacing="10px" width="50%">
             <Button
@@ -434,4 +281,4 @@ const UserInput = () => {
   );
 };
 
-export default UserInput;
+export default ProjectFormation;

@@ -14,6 +14,7 @@ const CodeGeneration = () => {
     currentTask,
     currentIteration,
     updateCurrentIteration,
+    currentTheory,
   } = useAppContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
@@ -41,6 +42,7 @@ const CodeGeneration = () => {
       data: {
         task_id: currentTask.taskId,
         code: code,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -63,6 +65,7 @@ const CodeGeneration = () => {
       url: "/get_code_per_step",
       params: {
         task_id: currentTask.taskId,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -86,6 +89,7 @@ const CodeGeneration = () => {
       params: {
         task_id: currentTask.taskId,
         iteration: iteration,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -113,6 +117,7 @@ const CodeGeneration = () => {
       url: "/generate_code",
       data: {
         task_id: currentTask.taskId,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -135,6 +140,7 @@ const CodeGeneration = () => {
       data: {
         task_id: currentTask.taskId,
         problem: problemDescription,
+        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -158,7 +164,6 @@ const CodeGeneration = () => {
     setClickedRender(false);
   }, [plan, designHypothesis, currentTask, currentIteration]);
 
-  if (!designHypothesis) return <></>;
   return (
     <Box sx={{ width: "75%" }}>
       <Stack spacing="10px">
