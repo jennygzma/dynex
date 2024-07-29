@@ -14,18 +14,19 @@ const ProjectFormation = () => {
     currentTheory,
   } = useAppContext();
 
+  const [dataInput, setDataInput] = useState("");
+  const [UIPrompt, setUIPrompt] = useState("");
+  const [updatedPrompt, setUpdatedPrompt] = useState(false);
+  const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
+  const [updatedDataInput, setUpdatedDataInput] = useState(false);
+
+  useEffect(() => {}, [designHypothesis, dataInput, UIPrompt]);
   useEffect(() => {
     if (!currentTheory) return;
     getFakedData();
     getDesignHypothesis();
     getPrompt();
   }, [currentTheory]);
-
-  const [dataInput, setDataInput] = useState("");
-  const [UIPrompt, setUIPrompt] = useState("");
-  const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
-  const [updatedDataInput, setUpdatedDataInput] = useState(false);
-  useEffect(() => {}, [designHypothesis, dataInput]);
 
   const getPrompt = () => {
     updateIsLoading(true);
@@ -39,6 +40,28 @@ const ProjectFormation = () => {
       })
       .catch((error) => {
         console.error("Error calling /get_prompt request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const savePrompt = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/save_prompt",
+      data: {
+        prompt: UIPrompt,
+      },
+    })
+      .then((response) => {
+        console.log("/save_prompt request successful:", response.data);
+        getPrompt();
+        setUpdatedPrompt(false);
+      })
+      .catch((error) => {
+        console.error("Error calling /save_prompt request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -186,12 +209,26 @@ const ProjectFormation = () => {
         >
           Project Formation
         </Typography>
-        <TextField
-          className={"prompt"}
-          label="Prompt"
-          value={UIPrompt}
-          onChange={(e) => setUIPrompt(e.target.value)}
-        />
+        <Stack spacing="10px">
+          <TextField
+            className={"prompt"}
+            label="Prompt"
+            value={UIPrompt}
+            onChange={(e) => {
+              setUIPrompt(e.target.value);
+              setUpdatedPrompt(true);
+            }}
+          />
+          <Button
+            onClick={savePrompt}
+            disabled={!updatedPrompt}
+            sx={{
+              width: "100%",
+            }}
+          >
+            Update Prompt
+          </Button>
+        </Stack>
         <Stack spacing="10px" width="100%">
           <Stack spacing="10px">
             <Typography

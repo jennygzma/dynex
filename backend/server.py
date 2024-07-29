@@ -15,6 +15,7 @@ from code_generation import (
 from flask import Flask, jsonify, request
 from planning import get_design_hypothesis as get_generated_design_hypothesis
 from planning import get_plan as get_generated_plan
+from planning import get_plan_from_task_map
 from planning import get_theories as get_generated_theories
 from utils import (
     create_and_write_file,
@@ -36,13 +37,12 @@ def add_cors_headers(response):
     return response
 
 
-# hi jenny change name perhaps to get_use_case
-@app.route("/get_user_input", methods=["GET"])
-def get_user_input():
-    print("calling get_user_input...")
+@app.route("/get_use_case", methods=["GET"])
+def get_use_case():
+    print("calling get_use_case...")
     print(globals.use_case)
     return (
-        jsonify({"message": "getting user input", "user_input": globals.use_case}),
+        jsonify({"message": "getting user input", "use_case": globals.use_case}),
         200,
     )
 
@@ -58,8 +58,7 @@ def set_current_theory():
 @app.route("/brainstorm_theories", methods=["POST"])
 def brainstorm_theories():
     print("calling brainstorm_theories...")
-    # hi jenny change this perhaps to read from use_case
-    globals.use_case = request.json["prompt"]
+    globals.use_case = request.json["use_case"]
     date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if globals.folder_path is None:
         globals.folder_path = (
@@ -144,14 +143,34 @@ def get_prompt():
     )
 
 
-# hi jenny call in FE
 @app.route("/save_prompt", methods=["POST"])
 def save_prompt():
     print("calling save_prompt...")
     prompt = request.json["prompt"]
+    folder_path = f"{globals.folder_path}/{globals.theory}"
     create_and_write_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.PROMPT_FILE_NAME}",
+        f"{folder_path}/{globals.PROMPT_FILE_NAME}",
         prompt,
+    )
+    task_map_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
+        else {}
+    )
+    task_map = {int(key): value for key, value in task_map_json.items()}
+    if folder_exists(f"{folder_path}/1"):
+        wipeout_code(folder_path, 1, task_map, globals.theory)
+    create_and_write_file(
+        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
+        "",
+    )
+    create_and_write_file(
+        f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}",
+        "",
+    )
+    create_and_write_file(
+        f"{folder_path}/{globals.TASK_MAP_FILE_NAME}",
+        "",
     )
     return jsonify({"message": "Saved prompt"}), 200
 
@@ -209,13 +228,8 @@ def generate_design_hypothesis():
         else {}
     )
     task_map = {int(key): value for key, value in task_map_json.items()}
-    plan = (
-        json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
-        if file_exists(f"{folder_path}/{globals.PLAN_FILE_NAME}")
-        else []
-    )
     if folder_exists(f"{folder_path}/1"):
-        wipeout_code(folder_path, 1, plan, task_map, globals.theory)
+        wipeout_code(folder_path, 1, task_map, globals.theory)
     create_and_write_file(
         f"{folder_path}/{globals.PROMPT_FILE_NAME}",
         prompt,
@@ -247,20 +261,11 @@ def save_design_hypothesis():
         else {}
     )
     task_map = {int(key): value for key, value in task_map_json.items()}
-    plan = (
-        json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
-        if file_exists(f"{folder_path}/{globals.PLAN_FILE_NAME}")
-        else []
-    )
     if folder_exists(f"{folder_path}/1"):
-        wipeout_code(folder_path, 1, plan, task_map, globals.theory)
+        wipeout_code(folder_path, 1, task_map, globals.theory)
     create_and_write_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
         design_hypothesis,
-    )
-    create_and_write_file(
-        f"{folder_path}/{globals.PLAN_FILE_NAME}",
-        "",
     )
     return (
         jsonify({"message": "Saved design hypothesis", "data": design_hypothesis}),
@@ -300,8 +305,7 @@ def generate_plan():
     )
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(f"{folder_path}/1"):
-        wipeout_code(folder_path, 1, plan, task_map, globals.theory)
-    create_and_write_file(f"{folder_path}/{globals.PLAN_FILE_NAME}", json.dumps(plan))
+        wipeout_code(folder_path, 1, task_map, globals.theory)
     task_map = {
         int(task["task_id"]): {
             "task": task["task"],
@@ -322,17 +326,8 @@ def generate_plan():
 def get_plan():
     print("calling get_plan...")
     folder_path = f"{globals.folder_path}/{globals.theory}"
-    task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
-    task_map = {int(key): value for key, value in task_map_json.items()}
-    print("task_map", task_map)
-    task_list = [
-        {
-            "task_id": task_id,
-            "task": task_info["task"],
-        }
-        for task_id, task_info in sorted(task_map.items())
-    ]
-    return jsonify({"message": "getting plan", "plan": json.dumps(task_list)}), 200
+    plan = get_plan_from_task_map(folder_path)
+    return jsonify({"message": "getting plan", "plan": plan}), 200
 
 
 @app.route("/update_step_in_plan", methods=["POST"])
@@ -341,20 +336,17 @@ def update_step_in_plan():
     data = request.json
     task_id = int(data["task_id"])
     new_task_description = data["task_description"]
-    index = task_id - 1
     folder_path = f"{globals.folder_path}/{globals.theory}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
-    plan = json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
-    plan[index]["task"] = new_task_description
     task_map[task_id]["task"] = new_task_description
     if folder_exists(f"{folder_path}/{task_id}"):
-        wipeout_code(folder_path, task_id, plan, task_map, globals.theory)
-    create_and_write_file(f"{folder_path}/{globals.PLAN_FILE_NAME}", json.dumps(plan))
+        wipeout_code(folder_path, task_id, task_map, globals.theory)
     create_and_write_file(
         f"{folder_path}/{globals.TASK_MAP_FILE_NAME}",
         json.dumps(task_map),
     )
+    plan = json.loads(get_plan_from_task_map(folder_path))
     return (
         jsonify({"message": f"Updated step in plan for {task_id}", "data": plan}),
         200,
@@ -369,17 +361,8 @@ def add_step_in_plan():
     folder_path = f"{globals.folder_path}/{globals.theory}"
     new_task_id = curr_task_id + 1
     new_task_description = data["new_task_description"]
-    injected_index = new_task_id - 1
-    new_task = {"task_id": None, "task": new_task_description, "dep": []}
-
-    plan = json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
-
-    plan.insert(injected_index, new_task)
-    for i in range(injected_index, len(plan)):
-        plan[i]["task_id"] = i + 1
-
     keys_to_shift = sorted(
         [key for key in task_map if key >= new_task_id], reverse=True
     )
@@ -391,14 +374,13 @@ def add_step_in_plan():
         globals.DEBUG_ITERATION_MAP: {},
     }
     task_map = {key: task_map[key] for key in sorted(task_map)}
-
     if folder_exists(f"{folder_path}/{new_task_id}"):
-        wipeout_code(folder_path, new_task_id, plan, task_map, globals.theory)
-    create_and_write_file(f"{folder_path}/{globals.PLAN_FILE_NAME}", json.dumps(plan))
+        wipeout_code(folder_path, new_task_id, task_map, globals.theory)
     create_and_write_file(
         f"{folder_path}/{globals.TASK_MAP_FILE_NAME}",
         json.dumps(task_map),
     )
+    plan = json.loads(get_plan_from_task_map(folder_path))
     return (
         jsonify({"message": f"Added step in plan for {new_task_id}", "data": plan}),
         200,
@@ -410,26 +392,20 @@ def remove_step_in_plan():
     print("calling remove_step_in_plan")
     data = request.json
     task_id = int(data["task_id"])
-    index = task_id - 1
     folder_path = f"{globals.folder_path}/{globals.theory}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
-    plan = json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
-    plan.pop(index)
-    for i in range(index, len(plan)):
-        plan[i]["task_id"] = i + 1
-
     task_map.pop(task_id)
     keys_to_shift = sorted([key for key in task_map if key > task_id])
     for key in keys_to_shift:
         task_map[key - 1] = task_map.pop(key)
     if folder_exists(f"{folder_path}/{task_id}"):
-        wipeout_code(folder_path, task_id, plan, task_map, globals.theory)
-    create_and_write_file(f"{folder_path}/{globals.PLAN_FILE_NAME}", json.dumps(plan))
+        wipeout_code(folder_path, task_id, task_map, globals.theory)
     create_and_write_file(
         f"{folder_path}/{globals.TASK_MAP_FILE_NAME}",
         json.dumps(task_map),
     )
+    plan = json.loads(get_plan_from_task_map(folder_path))
     return (
         jsonify({"message": f"Removed step in plan for {task_id}", "data": plan}),
         200,
@@ -444,15 +420,15 @@ def generate_code():
     task_id = int(data["task_id"])
     folder_path = f"{globals.folder_path}/{globals.theory}"
     task_code_folder_path = f"{folder_path}/{task_id}"
-    plan = json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
     design_hypothesis = read_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(task_code_folder_path):
-        wipeout_code(folder_path, task_id, plan, task_map, globals.theory)
+        wipeout_code(folder_path, task_id, task_map, globals.theory)
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
+    plan = json.loads(get_plan_from_task_map(folder_path))
     implement_plan_lock_step(design_hypothesis, plan, folder_path, task_id, faked_data)
     task_main_code_folder_path = (
         f"{folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
@@ -629,28 +605,15 @@ def get_test_cases_per_lock_step():
 # For testing only. Run curl http://127.0.0.1:5000/set_globals_for_uuid/uuid
 @app.route("/set_globals_for_uuid/<generated_uuid>", methods=["GET"])
 def set_globals_for_uuid(generated_uuid):
-    # backend/generated/generations_2024-07-11_11-34-47_321a5bcc-953c-4fed-abd6-53ad7daae446
     print("calling set_globals_for_uuid")
     globals.folder_path = f"{globals.GENERATED_FOLDER_PATH}/{generated_uuid}"
-    # globals.faked_data = read_file(
-    #     f"{globals.folder_path}/{globals.FAKED_DATA_FILE_NAME}"
-    # )
-    # globals.design_hypothesis = read_file(
-    #     f"{globals.folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
-    # )
     globals.use_case = read_file(f"{globals.folder_path}/{globals.USE_CASE_FILE_NAME}")
-    # plan = read_file(f"{globals.folder_path}/{globals.PLAN_FILE_NAME}")
-    # globals.plan = json.loads(plan)
     globals.theories = json.loads(
         read_file(f"{globals.folder_path}/{globals.THEORIES_FILE_NAME}")
     )
     globals.selected_theories = json.loads(
         read_file(f"{globals.folder_path}/{globals.SELECTED_THEORIES_FILE_NAME}")
     )
-    # task_map = json.loads(
-    #     read_file(f"{globals.folder_path}/{globals.TASK_MAP_FILE_NAME}")
-    # )
-    # globals.task_map = {int(key): value for key, value in task_map.items()}
     return jsonify({"message": "Successfully set global fields"}), 200
 
 

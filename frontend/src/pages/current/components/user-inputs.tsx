@@ -8,16 +8,11 @@ import Box from "../../../components/Box";
 import Chip from "../../../components/Chip";
 
 const UserInput = () => {
-  const {
-    updateIsLoading,
-    designHypothesis,
-    updateDesignHypothesis,
-    theoriesToExplore,
-    updateTheoriesToExplore,
-  } = useAppContext();
+  const { updateIsLoading, theoriesToExplore, updateTheoriesToExplore } =
+    useAppContext();
 
   useEffect(() => {
-    getUserInput();
+    getUseCase();
     getTheories();
     getSelectedTheories();
   }, []);
@@ -36,18 +31,18 @@ const UserInput = () => {
     }
   };
 
-  const getUserInput = () => {
+  const getUseCase = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_user_input",
+      url: "/get_use_case",
     })
       .then((response) => {
-        console.log("/get_user_input request successful:", response.data);
-        setUseCase(response.data.user_input);
+        console.log("/get_use_case request successful:", response.data);
+        setUseCase(response.data.user_case);
       })
       .catch((error) => {
-        console.error("Error calling /get_user_input request:", error);
+        console.error("Error calling /get_use_case request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -60,7 +55,7 @@ const UserInput = () => {
       method: "POST",
       url: "/brainstorm_theories",
       data: {
-        prompt: useCase,
+        use_case: useCase,
       },
     })
       .then((response) => {

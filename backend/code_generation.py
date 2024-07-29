@@ -202,8 +202,6 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
 	task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
 	task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
-    # TODO: Add this back in the future
-    # task_checked_code_file_path = f"{task_code_folder_path}/{globals.CHECKED_CODE_FILE_NAME}"
 	if task_id==1:
 		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path, faked_data)
 		cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
@@ -327,8 +325,6 @@ def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_p
 def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, design_hypothesis, faked_data):
     print("calling LLM for get_iterate_code...")
     task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
-    # task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
-    # task_debug_code_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_FILE_NAME}"
     task_debug_merge_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_MERGE_FILE_NAME}"
     task_debug_cleaned_code_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_CLEANED_FILE_NAME}"
     task_code = read_file(task_main_code_file_path)
@@ -344,6 +340,7 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
             """
     iterated_code = call_llm(system_message, user_message)
     create_and_write_file(task_debug_merge_file_path, iterated_code)
+	# Uncomment for GPT
     # inject_code(problem, task_cleaned_code_file_path, task_debug_merge_file_path, task_debug_code_file_path)
     cleanup_code(task_debug_cleaned_code_file_path, task_debug_merge_file_path, task_main_code_file_path)
     print("successfully called LLM for get_iterate_code...", iterated_code)
@@ -410,20 +407,18 @@ def cleanup_code(cleaned_code_file_path, code_file_path, task_main_code_file_pat
 	create_and_write_file(task_main_code_file_path, cleaned_code)
 	print("successfully called LLM for cleanup_code: " + cleaned_code)
 
-def wipeout_code(code_folder_path, task_id, plan, task_map, theory):
+def wipeout_code(code_folder_path, task_id, task_map, theory):
 	print(f"wiping out code from task id {task_id}")
-	num_steps = len(plan)
-	initial_index = task_id-1
-	for i in range(initial_index, num_steps):
-		step = plan[i]
-		task_code_folder_path = f"{code_folder_path}/{step["task_id"]}"
+	num_steps = len(task_map)
+	for i in range(task_id, num_steps+1):
+		task_code_folder_path = f"{code_folder_path}/{i}"
 		if not folder_exists(task_code_folder_path):
 			break
 		delete_folder(task_code_folder_path)
-		task_code_iteration_folder_path = f"{code_folder_path}/{step["task_id"]}/{globals.ITERATION_FOLDER_NAME}"
+		task_code_iteration_folder_path = f"{code_folder_path}/{i}/{globals.ITERATION_FOLDER_NAME}"
 		delete_folder(task_code_iteration_folder_path)
-		task_map[initial_index+1][globals.CURRENT_DEBUG_ITERATION] = 0
-		task_map[initial_index+1][globals.DEBUG_ITERATION_MAP] = {}
+		task_map[i][globals.CURRENT_DEBUG_ITERATION] = 0
+		task_map[i][globals.DEBUG_ITERATION_MAP] = {}
 	if task_map:
 		create_and_write_file(f"{globals.folder_path}/{theory}/{globals.TASK_MAP_FILE_NAME}", json.dumps(task_map))
 	print(f"successfully wiped out code from task id {task_id}")
