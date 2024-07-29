@@ -1,26 +1,45 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAppContext } from "../hooks/app-context";
 import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
 import Button from "../../../components/Button";
-import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 import Iterations from "./iterations";
+import ProjectFormation from "./project-formation";
 
 const ControlPanel = () => {
   const {
     iterations,
-    updateIterations,
-    currentIteration,
     updateCurrentIteration,
-    designHypothesis,
     theoriesToExplore,
     currentTheory,
     updateCurrentTheory,
+    updateIsLoading,
   } = useAppContext();
-  if (!theoriesToExplore) return <></>;
+
+  const setCurrentTheory = (theory) => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/set_current_theory",
+      data: {
+        theory: theory,
+      },
+    })
+      .then((response) => {
+        console.log("/set_current_theory request successful:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error calling /set_current_theory request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  if (theoriesToExplore?.length === 0) return <></>;
   return (
-    <Box sx={{ width: "25%" }}>
+    <Box sx={{ width: "30%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -50,7 +69,10 @@ const ControlPanel = () => {
                       }}
                     >
                       <CardActionArea
-                        onClick={() => updateCurrentTheory(theory)}
+                        onClick={() => {
+                          updateCurrentTheory(theory);
+                          setCurrentTheory(theory);
+                        }}
                         sx={{ padding: "15px" }}
                       >
                         <Typography>{theory}</Typography>
@@ -65,6 +87,7 @@ const ControlPanel = () => {
                             alignItems: "center",
                           }}
                         >
+                          <ProjectFormation />
                           <Iterations />
                         </Stack>
                       )}

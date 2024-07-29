@@ -27,7 +27,6 @@ const Iterations = () => {
     updateCurrentIteration,
     updateCurrentTask,
     designHypothesis,
-    currentTheory,
   } = useAppContext();
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
@@ -43,9 +42,6 @@ const Iterations = () => {
     axios({
       method: "POST",
       url: "/generate_plan",
-      data: {
-        theory: currentTheory,
-      },
     })
       .then((response) => {
         console.log("/generate_plan request successful:", response.data);
@@ -64,9 +60,6 @@ const Iterations = () => {
     axios({
       method: "GET",
       url: "/get_plan",
-      params: {
-        theory: currentTheory,
-      },
     })
       .then((response) => {
         console.log("/get_plan request successful:", response.data);
@@ -89,7 +82,6 @@ const Iterations = () => {
       data: {
         task_id: currentTask.taskId,
         task_description: newTaskDescription,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -113,7 +105,6 @@ const Iterations = () => {
       data: {
         current_task_id: currentTask.taskId,
         new_task_description: addStepNewTaskDescription,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -138,7 +129,6 @@ const Iterations = () => {
       url: "/remove_step_in_plan",
       data: {
         task_id: currentTask.taskId,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -160,7 +150,6 @@ const Iterations = () => {
       url: "/get_iteration_map_per_step",
       params: {
         task_id: currentTask.taskId,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -194,7 +183,6 @@ const Iterations = () => {
       params: {
         task_id: currentTask.taskId,
         iteration: iteration,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -223,7 +211,6 @@ const Iterations = () => {
       url: "/get_test_cases_per_lock_step",
       params: {
         task_id: currentTask.taskId,
-        theory: currentTheory,
       },
     })
       .then((response) => {

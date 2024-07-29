@@ -1,7 +1,7 @@
 import { Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import UserInputs from "./components/user-inputs";
-import CodeGeneration from "./components/code-generation";
+import CodeGeneration from "./components/implementation";
 import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
 import ControlPanel from "./components/control-panel";
@@ -52,10 +52,7 @@ const Home = () => {
         <UserInputs />
         <Stack direction="row">
           <ControlPanel />
-          <Stack>
-            <ProjectFormation />
-            <CodeGeneration />
-          </Stack>
+          <CodeGeneration />
         </Stack>
       </Stack>
     </div>

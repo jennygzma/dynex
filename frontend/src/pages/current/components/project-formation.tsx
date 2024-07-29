@@ -15,10 +15,11 @@ const ProjectFormation = () => {
   } = useAppContext();
 
   useEffect(() => {
+    if (!currentTheory) return;
     getFakedData();
     getDesignHypothesis();
-    getUserInput();
-  }, []);
+    getPrompt();
+  }, [currentTheory]);
 
   const [dataInput, setDataInput] = useState("");
   const [UIPrompt, setUIPrompt] = useState("");
@@ -26,21 +27,18 @@ const ProjectFormation = () => {
   const [updatedDataInput, setUpdatedDataInput] = useState(false);
   useEffect(() => {}, [designHypothesis, dataInput]);
 
-  const getUserInput = () => {
+  const getPrompt = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_user_input",
-      params: {
-        theory: currentTheory,
-      },
+      url: "/get_prompt",
     })
       .then((response) => {
-        console.log("/get_user_input request successful:", response.data);
-        setUIPrompt(response.data.user_input);
+        console.log("/get_prompt request successful:", response.data);
+        setUIPrompt(response.data.prompt);
       })
       .catch((error) => {
-        console.error("Error calling /get_user_input request:", error);
+        console.error("Error calling /get_prompt request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -52,10 +50,6 @@ const ProjectFormation = () => {
     axios({
       method: "POST",
       url: "/generate_fake_data",
-      data: {
-        prompt: UIPrompt,
-        theory: currentTheory,
-      },
     })
       .then((response) => {
         console.log("/generate_fake_data request successful:", response.data);
@@ -76,7 +70,6 @@ const ProjectFormation = () => {
       url: "/save_faked_data",
       data: {
         faked_data: dataInput,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -96,9 +89,6 @@ const ProjectFormation = () => {
     axios({
       method: "GET",
       url: "/get_faked_data",
-      params: {
-        theory: currentTheory,
-      },
     })
       .then((response) => {
         console.log("/get_faked_data request successful:", response.data);
@@ -118,10 +108,6 @@ const ProjectFormation = () => {
     axios({
       method: "POST",
       url: "/generate_design_hypothesis",
-      data: {
-        prompt: UIPrompt,
-        theory: currentTheory,
-      },
     })
       .then((response) => {
         console.log(
@@ -148,7 +134,6 @@ const ProjectFormation = () => {
       url: "/save_design_hypothesis",
       data: {
         design_hypothesis: designHypothesis,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -171,9 +156,6 @@ const ProjectFormation = () => {
     axios({
       method: "GET",
       url: "/get_design_hypothesis",
-      params: {
-        theory: currentTheory,
-      },
     })
       .then((response) => {
         console.log(
@@ -190,28 +172,38 @@ const ProjectFormation = () => {
         updateIsLoading(false);
       });
   };
-
+  if (!currentTheory) return <></>;
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "90%" }}>
       <Stack spacing="20px">
         <Typography
-          variant="h4"
+          variant="body1"
           sx={{
             fontWeight: "bold",
             alignSelf: "center",
             fontFamily: "monospace",
           }}
         >
-          Use Case + Theory
+          Project Formation
         </Typography>
         <TextField
-          className={"user-input"}
-          label="User Input"
+          className={"prompt"}
+          label="Prompt"
           value={UIPrompt}
           onChange={(e) => setUIPrompt(e.target.value)}
         />
-        <Stack direction="row" spacing="10px" width="100%">
-          <Stack spacing="10px" width="50%">
+        <Stack spacing="10px" width="100%">
+          <Stack spacing="10px">
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: "bold",
+                alignSelf: "center",
+                fontFamily: "monospace",
+              }}
+            >
+              Fake Data
+            </Typography>
             <Button
               onClick={generateFakeData}
               disabled={!UIPrompt}
@@ -242,7 +234,17 @@ const ProjectFormation = () => {
               </>
             )}
           </Stack>
-          <Stack spacing="10px" width="50%">
+          <Stack spacing="10px">
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: "bold",
+                alignSelf: "center",
+                fontFamily: "monospace",
+              }}
+            >
+              Design Hypothesis
+            </Typography>
             <Button
               onClick={generateDesignHypothesis}
               disabled={!UIPrompt || !dataInput}

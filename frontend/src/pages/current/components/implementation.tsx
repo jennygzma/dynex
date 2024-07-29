@@ -6,7 +6,7 @@ import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 
-const CodeGeneration = () => {
+const Implementation = () => {
   const {
     updateIsLoading,
     plan,
@@ -42,7 +42,6 @@ const CodeGeneration = () => {
       data: {
         task_id: currentTask.taskId,
         code: code,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -65,13 +64,11 @@ const CodeGeneration = () => {
       url: "/get_code_per_step",
       params: {
         task_id: currentTask.taskId,
-        theory: currentTheory,
       },
     })
       .then((response) => {
         console.log("/get_code_per_step request successful:", response.data);
         setCode(response.data.code);
-        // setCode(generatedCode);
       })
       .catch((error) => {
         console.error("Error calling /get_code_per_step request:", error);
@@ -89,7 +86,6 @@ const CodeGeneration = () => {
       params: {
         task_id: currentTask.taskId,
         iteration: iteration,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -117,7 +113,6 @@ const CodeGeneration = () => {
       url: "/generate_code",
       data: {
         task_id: currentTask.taskId,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -140,7 +135,6 @@ const CodeGeneration = () => {
       data: {
         task_id: currentTask.taskId,
         problem: problemDescription,
-        theory: currentTheory,
       },
     })
       .then((response) => {
@@ -157,15 +151,16 @@ const CodeGeneration = () => {
   };
 
   useEffect(() => {
-    if (currentTask === undefined) return;
+    if (currentTask === undefined || !currentTheory) return;
     getCode();
     getCodeForIteration(currentIteration);
     setProblemDescription("");
     setClickedRender(false);
-  }, [plan, designHypothesis, currentTask, currentIteration]);
+  }, [plan, designHypothesis, currentTask, currentIteration, currentTheory]);
 
+  if (!currentTheory) return <></>;
   return (
-    <Box sx={{ width: "75%" }}>
+    <Box sx={{ width: "100%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -290,4 +285,4 @@ const CodeGeneration = () => {
   );
 };
 
-export default CodeGeneration;
+export default Implementation;

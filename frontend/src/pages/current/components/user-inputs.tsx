@@ -17,22 +17,15 @@ const UserInput = () => {
   } = useAppContext();
 
   useEffect(() => {
-    getFakedData();
-    getDesignHypothesis();
     getUserInput();
     getTheories();
     getSelectedTheories();
   }, []);
 
-  const [dataInput, setDataInput] = useState("");
-  const [UIPrompt, setUIPrompt] = useState("");
-  const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
-  const [updatedDataInput, setUpdatedDataInput] = useState(false);
+  const [useCase, setUseCase] = useState("");
   const [theories, setTheories] = useState([]);
   const [newTheoryInput, setNewTheoryInput] = useState("");
   const [selectedNewTheory, setSelectedNewTheory] = useState(false);
-
-  useEffect(() => {}, [designHypothesis, dataInput]);
 
   const handleSelectTheory = (theory) => {
     if (!selectedNewTheory) setSelectedNewTheory(true);
@@ -51,7 +44,7 @@ const UserInput = () => {
     })
       .then((response) => {
         console.log("/get_user_input request successful:", response.data);
-        setUIPrompt(response.data.user_input);
+        setUseCase(response.data.user_input);
       })
       .catch((error) => {
         console.error("Error calling /get_user_input request:", error);
@@ -67,7 +60,7 @@ const UserInput = () => {
       method: "POST",
       url: "/brainstorm_theories",
       data: {
-        prompt: UIPrompt,
+        prompt: useCase,
       },
     })
       .then((response) => {
@@ -165,140 +158,6 @@ const UserInput = () => {
       });
   };
 
-  const generateFakeData = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/generate_fake_data",
-      data: {
-        prompt: UIPrompt,
-      },
-    })
-      .then((response) => {
-        console.log("/generate_fake_data request successful:", response.data);
-        getFakedData();
-      })
-      .catch((error) => {
-        console.error("Error calling /generate_fake_data request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const saveFakedData = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_faked_data",
-      data: {
-        faked_data: dataInput,
-      },
-    })
-      .then((response) => {
-        console.log("/save_faked_data request successful:", response.data);
-        getFakedData();
-      })
-      .catch((error) => {
-        console.error("Error calling /save_faked_data request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const getFakedData = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_faked_data",
-    })
-      .then((response) => {
-        console.log("/get_faked_data request successful:", response.data);
-        setDataInput(response.data.faked_data);
-        setUpdatedDataInput(false);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_faked_data request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const generateDesignHypothesis = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/generate_design_hypothesis",
-      data: {
-        prompt: UIPrompt,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/generate_design_hypothesis request successful:",
-          response.data,
-        );
-        getDesignHypothesis();
-      })
-      .catch((error) => {
-        console.error(
-          "Error calling /generate_design_hypotheses request:",
-          error,
-        );
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const saveDesignHypothesis = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_design_hypothesis",
-      data: {
-        design_hypothesis: designHypothesis,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/save_design_hypothesis request successful:",
-          response.data,
-        );
-        getDesignHypothesis();
-      })
-      .catch((error) => {
-        console.error("Error calling /save_design_hypothesis request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const getDesignHypothesis = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_design_hypothesis",
-    })
-      .then((response) => {
-        console.log(
-          "/get_design_hypothesis request successful:",
-          response.data,
-        );
-        updateDesignHypothesis(response.data.design_hypothesis);
-        setUpdatedDesignHypothesis(false);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_design_hypothesis request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
   return (
     <Box>
       <Stack spacing="20px">
@@ -313,14 +172,14 @@ const UserInput = () => {
           Use Case + Theory
         </Typography>
         <TextField
-          className={"user-input"}
-          label="User Input"
-          value={UIPrompt}
-          onChange={(e) => setUIPrompt(e.target.value)}
+          className={"use-case"}
+          label="Use Case"
+          value={useCase}
+          onChange={(e) => setUseCase(e.target.value)}
         />
         <Button
           onClick={brainstormTheories}
-          disabled={!UIPrompt}
+          disabled={!useCase}
           sx={{
             width: "100%",
           }}
@@ -332,7 +191,7 @@ const UserInput = () => {
             key={theory}
             label={theory}
             onClick={() => handleSelectTheory(theory)}
-            selected={theoriesToExplore.includes(theory)}
+            selected={theoriesToExplore?.includes(theory)}
             clickable
           />
         ))}
@@ -356,79 +215,13 @@ const UserInput = () => {
         </Stack>
         <Button
           onClick={saveSelectedTheories}
-          disabled={!selectedNewTheory || !UIPrompt}
+          disabled={!selectedNewTheory || !useCase}
           sx={{
             width: "100%",
           }}
         >
           Explore Theories For Use Case
         </Button>
-        <Stack direction="row" spacing="10px" width="100%">
-          <Stack spacing="10px" width="50%">
-            <Button
-              onClick={generateFakeData}
-              disabled={!UIPrompt}
-              sx={{
-                width: "100%",
-              }}
-            >
-              {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
-            </Button>
-            {dataInput !== "null" && dataInput && (
-              <>
-                <TextField
-                  code={true}
-                  className={"generated-data"}
-                  label="Data Input"
-                  variant="outlined"
-                  multiline
-                  rows={13}
-                  value={dataInput}
-                  onChange={(e) => {
-                    setDataInput(e.target.value);
-                    setUpdatedDataInput(true);
-                  }}
-                />
-                <Button onClick={saveFakedData} disabled={!updatedDataInput}>
-                  Update faked data
-                </Button>
-              </>
-            )}
-          </Stack>
-          <Stack spacing="10px" width="50%">
-            <Button
-              onClick={generateDesignHypothesis}
-              disabled={!UIPrompt || !dataInput}
-              sx={{
-                width: "100%",
-              }}
-            >
-              {designHypothesis
-                ? "Generate new design hypothesis"
-                : "Generate design hypothesis"}
-            </Button>
-            {designHypothesis && (
-              <>
-                <TextField
-                  className={"design-hypothesis"}
-                  label="Design Hypothesis"
-                  rows={13}
-                  value={designHypothesis}
-                  onChange={(e) => {
-                    updateDesignHypothesis(e.target.value);
-                    setUpdatedDesignHypothesis(true);
-                  }}
-                />
-                <Button
-                  onClick={saveDesignHypothesis}
-                  disabled={!updatedDesignHypothesis}
-                >
-                  Update design hypothesis
-                </Button>
-              </>
-            )}
-          </Stack>
-        </Stack>
       </Stack>
     </Box>
   );

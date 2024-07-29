@@ -77,6 +77,8 @@ use_case = None
 theories = []
 # user selected theories to test
 selected_theories = []
+# current theory
+theory = None
 # LLM generated faked data
 # faked_data = None
 # user provided data model
