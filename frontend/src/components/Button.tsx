@@ -1,10 +1,10 @@
 import React, { ReactElement, ReactNode } from "react";
 import {
-  Button as ReactButton,
-  ButtonProps as ReactButtonProps,
+  Button as MuiButton,
+  ButtonProps as MuiButtonProps,
 } from "@mui/material";
 
-interface ButtonProps extends ReactButtonProps {
+interface ButtonProps extends MuiButtonProps {
   children: ReactNode;
 }
 
@@ -17,7 +17,7 @@ const Button = ({
   ...props
 }: ButtonProps): ReactElement => {
   return (
-    <ReactButton
+    <MuiButton
       variant={variant}
       onClick={onClick}
       disabled={disabled}
@@ -31,7 +31,7 @@ const Button = ({
       {...props}
     >
       {children}
-    </ReactButton>
+    </MuiButton>
   );
 };
 

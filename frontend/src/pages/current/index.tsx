@@ -1,14 +1,15 @@
 import { Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import UserInputs from "./components/user-inputs";
-import CodeGeneration from "./components/code-generation";
-import Plan from "./components/plan";
-import { usePlanContext } from "./hooks/plan-context";
+import CodeGeneration from "./components/implementation";
+import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
+import ControlPanel from "./components/control-panel";
+import ProjectFormation from "./components/project-formation";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
-  const { isLoading } = usePlanContext();
+  const { isLoading } = useAppContext();
   useEffect(() => {}, [isLoading]);
   return (
     <div className={"home"}>
@@ -45,12 +46,12 @@ const Home = () => {
               fontFamily: "monospace",
             }}
           >
-            FRANKY
+            THEORY2CODE
           </Typography>
         </Stack>
         <UserInputs />
         <Stack direction="row">
-          <Plan />
+          <ControlPanel />
           <CodeGeneration />
         </Stack>
       </Stack>

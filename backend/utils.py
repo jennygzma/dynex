@@ -43,6 +43,15 @@ def folder_exists(folder_path):
         return False
 
 
+def file_exists(file_path):
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        print(f"File '{file_path}' exists.")
+        return True
+    else:
+        print(f"File '{file_path}' does not exist.")
+        return False
+
+
 def delete_folder(folder_path):
     try:
         if os.path.exists(folder_path):

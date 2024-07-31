@@ -48,8 +48,10 @@ def call_llm(system_message, user_message):
 
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
-USER_INPUT_FILE_NAME = "user_input.txt"
-PLAN_FILE_NAME = "plan.json"
+USE_CASE_FILE_NAME = "use_case.txt"
+PROMPT_FILE_NAME = "prompt.txt"
+THEORIES_FILE_NAME = "theories.txt"
+SELECTED_THEORIES_FILE_NAME = "selected_theories.txt"
 TASK_MAP_FILE_NAME = "task_map.json"
 GENERATED_FOLDER_PATH = "generated"
 MERGED_CODE_FILE_NAME = "merged.txt"
@@ -66,17 +68,25 @@ MAIN_CODE_FILE_NAME = "index.html"
 DEBUG_ITERATION_MAP = "debug_iteration_map"
 CURRENT_DEBUG_ITERATION = "current_debug_iteration"
 
-# user provided prompt for what UI should look like
-prompt = None
-# GPT generated faked data
-faked_data = None
+# use case provided by user
+use_case = None
+# prompt based on use case and theory
+# prompt = None
+# LLM generated theories
+theories = []
+# user selected theories to test
+selected_theories = []
+# current theory
+theory = None
+# LLM generated faked data
+# faked_data = None
 # user provided data model
-data_model = None
-# GPT generated design
-design_hypothesis = None
-# GPT generated implementation plan
-plan = None
+# data_model = None
+# LLM generated design
+# design_hypothesis = None
+# LLM generated implementation plan
+# plan = None
 # folder for this code generation, in the form of a UUID
 folder_path = None
 # stores metadata info for each task
-task_map = None
+# task_map = None

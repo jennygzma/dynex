@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { usePlanContext } from "../hooks/plan-context";
+import { useAppContext } from "../hooks/app-context";
 import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
 import Button from "../../../components/Button";
@@ -15,7 +15,7 @@ const mapPlan = (jsonPlan) => {
   });
 };
 
-const Plan = () => {
+const Iterations = () => {
   const {
     updateIsLoading,
     plan,
@@ -27,7 +27,7 @@ const Plan = () => {
     updateCurrentIteration,
     updateCurrentTask,
     designHypothesis,
-  } = usePlanContext();
+  } = useAppContext();
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
     useState(false);
@@ -249,9 +249,8 @@ const Plan = () => {
     getIterations();
   }, [currentIteration, currentTask]);
 
-  if (!designHypothesis) return <></>;
   return (
-    <Box sx={{ width: "25%" }}>
+    <Box sx={{ width: "90%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -261,7 +260,7 @@ const Plan = () => {
             fontFamily: "monospace",
           }}
         >
-          Planning
+          Iterations
         </Typography>
         <Button
           onClick={generatePlan}
@@ -395,7 +394,7 @@ const Plan = () => {
                 fontFamily: "monospace",
               }}
             >
-              Iterate, Debug, or Repair Versions
+              Iterate
             </Typography>
             {iterations && (
               <Button
@@ -444,4 +443,4 @@ const Plan = () => {
   );
 };
 
-export default Plan;
+export default Iterations;

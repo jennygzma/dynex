@@ -1,7 +1,22 @@
 # This file handles brainstorming the design hypothesis and creating the task list.
 import json
 
-from globals import call_llm
+from globals import TASK_MAP_FILE_NAME, call_llm
+from utils import read_file
+
+
+def get_plan_from_task_map(folder_path):
+    task_map_json = json.loads(read_file(f"{folder_path}/{TASK_MAP_FILE_NAME}"))
+    task_map = {int(key): value for key, value in task_map_json.items()}
+    print("task_map", task_map)
+    task_list = [
+        {
+            "task_id": task_id,
+            "task": task_info["task"],
+        }
+        for task_id, task_info in sorted(task_map.items())
+    ]
+    return json.dumps(task_list)
 
 
 def get_design_hypothesis(ui_prompt, faked_data):
@@ -21,6 +36,42 @@ def get_design_hypothesis(ui_prompt, faked_data):
     res = call_llm(system_message, user_message)
     print("sucessfully called LLM for get_design_hypothesis", res)
     return res
+
+
+def get_theories(user_prompt, existing_theories):
+    print("calling LLM for get_theories...")
+    user_message = f"This is the user prompt: {user_prompt}. These are the existing theories: {existing_theories}"
+    system_message = """You are a helpful assistant that finds theories relevant to a specific domain given a user prompt.
+    For example, if the user prompt is "create a UI to help me learn chinese", you should determine that the relevant theories would be in the "learning" domain, and return theories like spaced repetition, generation and elaboration, culturally relevant education, etc.
+    However, you cannot return theories that the user already knows. This will be provided as existing theories.
+    Format the theories in an array like so: ["spaced repetitition", "generation and elaboration"]
+    Only return 3 theories.
+    """
+    res = "here are the theories: " + call_llm(system_message, user_message)
+    theories = cleanup_theories(res)
+    print("sucessfully called LLM for get_theories", res)
+    return theories
+
+
+#  To do: make this recursive so that if the plan cannot be parsed into a json file, we recall GPT until its a valid JSON array
+def cleanup_theories(theories):
+    print("calling LLM for cleanup_theories...")
+    user_message = f"Please clean up the theories so it only returns the array of theories. These are the theories: {theories}"
+    system_message = """You are an assistant to clean up GPT responses into an array.
+			The response should be as formatted: "[
+                "spaced repetition", "generation and elaboration", "culturally relevant education", "social learning"
+            ]"
+            Only the string form of the array should be returned. NOTHING OUTSIDE OF THE ARRAY SHOULD BE RETURNED.
+            """
+    res = call_llm(system_message, user_message)
+    print("sucessfully called LLM for cleanup_theories", res)
+    cleaned_theories = res
+    try:
+        cleaned_theories_json = json.loads(cleaned_theories)
+        return cleaned_theories_json
+    except json.JSONDecodeError:
+        print("Error decoding JSON, retrying...")
+        return cleanup_theories(theories)
 
 
 def get_plan(design_hypothesis):
