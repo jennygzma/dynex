@@ -229,49 +229,7 @@ const ProjectFormation = () => {
             Update Prompt
           </Button>
         </Stack>
-        <Stack spacing="10px" width="100%">
-          <Stack spacing="10px">
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: "bold",
-                alignSelf: "center",
-                fontFamily: "monospace",
-              }}
-            >
-              Fake Data
-            </Typography>
-            <Button
-              onClick={generateFakeData}
-              disabled={!UIPrompt}
-              sx={{
-                width: "100%",
-              }}
-            >
-              {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
-            </Button>
-            {dataInput !== "null" && dataInput && (
-              <>
-                <TextField
-                  code={true}
-                  className={"generated-data"}
-                  label="Data Input"
-                  variant="outlined"
-                  multiline
-                  rows={13}
-                  value={dataInput}
-                  onChange={(e) => {
-                    setDataInput(e.target.value);
-                    setUpdatedDataInput(true);
-                  }}
-                />
-                <Button onClick={saveFakedData} disabled={!updatedDataInput}>
-                  Update faked data
-                </Button>
-              </>
-            )}
-          </Stack>
-          <Stack spacing="10px">
+        <Stack spacing="10px">
             <Typography
               variant="body2"
               sx={{
@@ -284,7 +242,7 @@ const ProjectFormation = () => {
             </Typography>
             <Button
               onClick={generateDesignHypothesis}
-              disabled={!UIPrompt || !dataInput}
+              disabled={!UIPrompt}
               sx={{
                 width: "100%",
               }}
@@ -310,6 +268,48 @@ const ProjectFormation = () => {
                   disabled={!updatedDesignHypothesis}
                 >
                   Update design hypothesis
+                </Button>
+              </>
+            )}
+          </Stack>
+        <Stack spacing="10px" width="100%">
+          <Stack spacing="10px">
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: "bold",
+                alignSelf: "center",
+                fontFamily: "monospace",
+              }}
+            >
+              Fake Data
+            </Typography>
+            <Button
+              onClick={generateFakeData}
+              disabled={!UIPrompt || !designHypothesis}
+              sx={{
+                width: "100%",
+              }}
+            >
+              {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
+            </Button>
+            {dataInput !== "null" && dataInput && (
+              <>
+                <TextField
+                  code={true}
+                  className={"generated-data"}
+                  label="Data Input"
+                  variant="outlined"
+                  multiline
+                  rows={13}
+                  value={dataInput}
+                  onChange={(e) => {
+                    setDataInput(e.target.value);
+                    setUpdatedDataInput(true);
+                  }}
+                />
+                <Button onClick={saveFakedData} disabled={!updatedDataInput}>
+                  Update faked data
                 </Button>
               </>
             )}

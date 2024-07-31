@@ -108,12 +108,12 @@ sample_code = """
 </html>
 """
 
-def get_fake_data(prompt):
+def get_fake_data(design_hypothesis):
 	print("calling LLM for get_fake_data...")
 	system_message = """
-        You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. Here is an example:
+        You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. THE USER INPUT WILL INCLUDE THE DATA FIELDS. PLEASE INCLUDE ALL FIELDS THE USER INPUT SUGGEST. Here is an example:
 
-        User Input: I want to create a UI that visualizes a beauty store's inventory.
+        Input: I want to create a UI that visualizes a beauty store's inventory... It should have the fields `title`, `description`, `price`, `discountPercentage`, `rating`, `stock`, `brand`, `category`
 
         System result:
         [
@@ -145,7 +145,7 @@ def get_fake_data(prompt):
         2. Array length should be length 20.
         3. Please ensure that the generated data makes sense.
     """
-	user_message = "please generate data given this UI: " + prompt
+	user_message = "please generate data given this UI: " + design_hypothesis
 	res = call_llm(system_message, user_message)
 	print("sucessfully called LLM for get_fake_data", res)
 	return res

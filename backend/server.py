@@ -178,10 +178,10 @@ def save_prompt():
 @app.route("/generate_fake_data", methods=["POST"])
 def generate_fake_data():
     print("calling generate_fake_data...")
-    prompt = read_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.PROMPT_FILE_NAME}"
+    design_hypothesis = read_file(
+        f"{globals.folder_path}/{globals.theory}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
-    data = get_generated_fake_data(prompt)
+    data = get_generated_fake_data(design_hypothesis)
     faked_data = data
     create_and_write_file(
         f"{globals.folder_path}/{globals.theory}/{globals.FAKED_DATA_FILE_NAME}",
