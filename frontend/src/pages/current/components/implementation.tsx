@@ -275,7 +275,7 @@ const Implementation = () => {
               <Paper
                 id="output"
                 className="output"
-                sx={{ height: clickedRender ? "800px" : "0px" }}
+                sx={{ height: clickedRender ? "1200px" : "0px" }}
               />
             </Box>
           </>
