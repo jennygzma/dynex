@@ -70,6 +70,12 @@ MAIN_CODE_FILE_NAME = "index.html"
 DEBUG_ITERATION_MAP = "debug_iteration_map"
 CURRENT_DEBUG_ITERATION = "current_debug_iteration"
 
+# theory paradigm map fields
+DESCRIPTION = "description"
+PARADIGMS = "paradigms"
+THEORY = "theory"
+PARADIGM = "paradigm"
+
 # use case and idea provided by user
 idea = None
 # user of application

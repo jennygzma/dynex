@@ -7,6 +7,37 @@ import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 import Chip from "../../../components/Chip";
 
+const mapTheories = (jsonTheories) => {
+  return jsonTheories.map((jsonTheory) => {
+    return {
+      theory: jsonTheory.theory,
+      description: jsonTheory.description,
+    };
+  });
+};
+
+const mapParadigms = (jsonParadigms) => {
+  return jsonParadigms.map((jsonParadigm) => {
+    return {
+      paradigm: jsonParadigm.theory,
+      description: jsonParadigm.description,
+    };
+  });
+};
+
+const getTheoryDescription = (theory, theories, exampleTheories) => {
+  for (const item of theories) {
+    if (item.theory === theory) {
+      return item.description;
+    }
+  }
+  for (const item of exampleTheories) {
+    if (item.theory === theory) {
+      return item.description;
+    }
+  }
+};
+
 const UserSpecification = () => {
   const { updateIsLoading, updateTheoriesAndParadigmsToExplore } =
     useAppContext();
@@ -36,6 +67,11 @@ const UserSpecification = () => {
   const [theory, setTheory] = useState(""); // currently selected theory
   const [theories, setTheories] = useState([]); // all theories
   const [theoryExamples, setTheoryExamples] = useState([]);
+  const theoryDescription = getTheoryDescription(
+    theory,
+    theories,
+    theoryExamples,
+  );
   const [newTheoryInput, setNewTheoryInput] = useState("");
 
   const [paradigms, setParadigms] = useState([]); // all paradigms for theory
@@ -231,7 +267,7 @@ const UserSpecification = () => {
     })
       .then((response) => {
         console.log("/brainstorm_theories request successful:", response.data);
-        setTheoryExamples(response.data.examples);
+        setTheoryExamples([...theoryExamples, ...response.data.examples]);
       })
       .catch((error) => {
         console.error("Error calling /brainstorm_theories request:", error);
@@ -273,7 +309,7 @@ const UserSpecification = () => {
           "/brainstorm_ui_paradigms request successful:",
           response.data,
         );
-        setParadigmExamples(response.data.examples);
+        setParadigmExamples([...paradigmExamples, ...response.data.examples]);
       })
       .catch((error) => {
         console.error("Error calling /brainstorm_ui_paradigms request:", error);
@@ -338,6 +374,7 @@ const UserSpecification = () => {
       data: {
         theory: theory,
         paradigms: paradigms,
+        theoryDescription: theoryDescription,
       },
     })
       .then((response) => {
@@ -483,7 +520,7 @@ const UserSpecification = () => {
               <Stack direction="row" spacing="10px" sx={{ width: "100%" }}>
                 <Button
                   onClick={brainstormGoalExamples}
-                  disabled={!idea}
+                  disabled={!idea || !user}
                   sx={{
                     width: "100%",
                   }}
@@ -543,28 +580,37 @@ const UserSpecification = () => {
             >
               Brainstorm Theories
             </Button>
-            {theoryExamples.map((theoryExample) => (
-              <Chip
-                key={theoryExample}
-                label={theoryExample}
-                onClick={() => setTheory(theoryExample)}
-                selected={theory === theoryExample}
-                clickable
-              />
-            ))}
+            {theoryExamples.map((theoryExample) => {
+              return (
+                <Tooltip
+                  key={theoryExample.theory}
+                  title={theoryExample.description}
+                >
+                  <Chip
+                    key={theoryExample.theory}
+                    label={theoryExample.theory}
+                    onClick={() => setTheory(theoryExample.theory)}
+                    selected={theory === theoryExample.theory}
+                    clickable
+                  />
+                </Tooltip>
+              );
+            })}
             {theories.map((t) =>
               theoryExamples.includes(t) ? (
                 <></>
               ) : (
-                <Chip
-                  key={t}
-                  label={t}
-                  onClick={() => {
-                    setTheory(t);
-                  }}
-                  selected={theory === t}
-                  clickable
-                />
+                <Tooltip key={t.theory} title={t.description}>
+                  <Chip
+                    key={t.theory}
+                    label={t.theory}
+                    onClick={() => {
+                      setTheory(t.theory);
+                    }}
+                    selected={theory === t.theory}
+                    clickable
+                  />
+                </Tooltip>
               ),
             )}
             <Stack direction="row" spacing="10px">
@@ -592,7 +638,7 @@ const UserSpecification = () => {
           <Stack spacing="5px" sx={{ width: "100%" }}>
             <Button
               onClick={brainstormParadigms}
-              disabled={!idea}
+              disabled={!theory}
               sx={{
                 width: "100%",
               }}
@@ -600,19 +646,31 @@ const UserSpecification = () => {
               Brainstorm UI Paradigms
             </Button>
             {paradigmExamples?.map((paradigmExample) => (
-              <Chip
-                key={paradigmExample}
-                label={paradigmExample}
-                onClick={() => handleSelectParadigm(paradigmExample)}
-                selected={paradigms?.includes(paradigmExample)}
-                clickable
-              />
+              <Tooltip
+                key={paradigmExample.paradigm}
+                title={paradigmExample.description}
+              >
+                <Chip
+                  key={paradigmExample.paradigm}
+                  label={paradigmExample.paradigm}
+                  onClick={() => handleSelectParadigm(paradigmExample)}
+                  selected={paradigms?.includes(paradigmExample)}
+                  clickable
+                />
+              </Tooltip>
             ))}
             {paradigms?.map((p) =>
               paradigmExamples.includes(p) ? (
                 <></>
               ) : (
-                <Chip key={p} label={p} selected clickable />
+                <Tooltip key={p.paradigm} title={p.description}>
+                  <Chip
+                    key={p.paradigm}
+                    label={p.paradigm}
+                    selected
+                    clickable
+                  />
+                </Tooltip>
               ),
             )}
             <Stack direction="row" spacing="10px">

@@ -1,10 +1,6 @@
 import os
 
 
-def get_theories_array(theories_and_paradigms):
-    return list(theories_and_paradigms.keys())
-
-
 def create_folder(folder_path):
     try:
         if not os.path.exists(folder_path):

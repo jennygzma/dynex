@@ -18,6 +18,7 @@ from planning import get_goal_examples as get_generated_goal_examples
 from planning import get_plan as get_generated_plan
 from planning import get_plan_from_task_map
 from planning import get_theories as get_generated_theories
+from planning import get_theories_array
 from planning import get_ui_paradigms as get_generated_ui_paradigms
 from planning import get_user_examples as get_generated_user_examples
 from utils import (
@@ -25,7 +26,6 @@ from utils import (
     create_folder,
     file_exists,
     folder_exists,
-    get_theories_array,
     read_file,
 )
 
@@ -161,8 +161,11 @@ def get_theories():
 def brainstorm_ui_paradigms():
     print("calling brainstorm_ui_paradigms...")
     theory = request.args.get("theory")
+    paradigms = globals.theories_and_paradigms.get(theory, {}).get(
+        globals.PARADIGMS, {}
+    )
     paradigm_examples = get_generated_ui_paradigms(
-        globals.idea, globals.user, globals.goal, theory
+        globals.idea, globals.user, globals.goal, theory, paradigms
     )
     return (
         jsonify({"message": "Generated UI Paradigms", "examples": paradigm_examples}),
@@ -175,7 +178,9 @@ def get_ui_paradigms():
     print("calling get_ui_paradigms...")
     print(request.args)
     theory = request.args.get("theory")
-    paradigms = globals.theories_and_paradigms[theory]
+    paradigms = globals.theories_and_paradigms.get(theory, {}).get(
+        globals.PARADIGMS, []
+    )
     return (
         jsonify(
             {
@@ -191,9 +196,9 @@ def get_ui_paradigms():
 def get_theories_and_paradigms():
     print("calling get_theories_and_paradigms...")
     theories_and_paradigms_array = [
-        f"{key}+{value}"
-        for key, values in globals.theories_and_paradigms.items()
-        for value in values
+        f"{theory}+{paradigm[globals.PARADIGM]}"
+        for theory, details in globals.theories_and_paradigms.items()
+        for paradigm in details[globals.PARADIGMS]
     ]
     return (
         jsonify(
@@ -212,16 +217,28 @@ def save_selected_theory_and_paradigms():
     data = request.json
     theory = data["theory"]
     paradigms = data["paradigms"]
-    globals.theories_and_paradigms[theory] = paradigms
+    theory_description = data["theoryDescription"]
+    if theory not in globals.theories_and_paradigms:
+        globals.theories_and_paradigms[theory] = {}
+    if globals.PARADIGMS not in globals.theories_and_paradigms[theory]:
+        globals.theories_and_paradigms[theory][globals.PARADIGMS] = []
+    globals.theories_and_paradigms[theory][globals.PARADIGMS] = paradigms
+    globals.theories_and_paradigms[theory][globals.DESCRIPTION] = theory_description
     create_and_write_file(
         f"{globals.folder_path}/{globals.THEORIES_AND_PARADIGMS_FILE_NAME}",
         json.dumps(globals.theories_and_paradigms),
     )
     for theory in get_theories_array(globals.theories_and_paradigms):
-        for paradigm in globals.theories_and_paradigms[theory]:
-            folder_path = f"{globals.folder_path}/{theory}+{paradigm}"
+        for paradigm in globals.theories_and_paradigms[theory[globals.THEORY]][
+            globals.PARADIGMS
+        ]:
+            folder_path = f"{globals.folder_path}/{theory[globals.THEORY]}+{paradigm[globals.PARADIGM]}"
+            paradigm_name = paradigm[globals.PARADIGM]
+            paradigm_description = paradigm[globals.DESCRIPTION]
+            theory_name = theory[globals.THEORY]
+            theory_description = theory[globals.DESCRIPTION]
             create_folder(f"{folder_path}")
-            prompt = f"Create a web UI based on this idea: {globals.idea}, for users: {globals.user}, where the application goal is: {globals.goal}. Use the theory of {theory} with interaction pattern {paradigm} to guide the design."
+            prompt = f"Create a web UI based on this idea: {globals.idea}, for users: {globals.user}, where the application goal is: {globals.goal}. Use the theory of {theory_name} ({theory_description}), which with interaction pattern {paradigm_name} ({paradigm_description}) to guide the design."
             create_and_write_file(f"{folder_path}/{globals.PROMPT_FILE_NAME}", prompt)
     return jsonify({"message": "Saved selected theories"}), 200
 
