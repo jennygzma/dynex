@@ -14,14 +14,18 @@ from code_generation import (
 )
 from flask import Flask, jsonify, request
 from planning import get_design_hypothesis as get_generated_design_hypothesis
+from planning import get_goal_examples as get_generated_goal_examples
 from planning import get_plan as get_generated_plan
 from planning import get_plan_from_task_map
 from planning import get_theories as get_generated_theories
+from planning import get_ui_paradigms as get_generated_ui_paradigms
+from planning import get_user_examples as get_generated_user_examples
 from utils import (
     create_and_write_file,
     create_folder,
     file_exists,
     folder_exists,
+    get_theories_array,
     read_file,
 )
 
@@ -37,28 +41,20 @@ def add_cors_headers(response):
     return response
 
 
-@app.route("/get_use_case", methods=["GET"])
-def get_use_case():
-    print("calling get_use_case...")
-    print(globals.use_case)
+@app.route("/get_idea", methods=["GET"])
+def get_idea():
+    print("calling get_idea...")
+    print(globals.idea)
     return (
-        jsonify({"message": "getting user input", "use_case": globals.use_case}),
+        jsonify({"message": "getting user input", "idea": globals.idea}),
         200,
     )
 
 
-@app.route("/set_current_theory", methods=["POST"])
-def set_current_theory():
-    print("calling set_current_theory...")
-    data = request.json
-    globals.theory = data["theory"]
-    return jsonify({"message": "Set Current Theory", "theory": globals.theory}), 200
-
-
-@app.route("/brainstorm_theories", methods=["POST"])
-def brainstorm_theories():
-    print("calling brainstorm_theories...")
-    globals.use_case = request.json["use_case"]
+@app.route("/save_idea", methods=["POST"])
+def save_idea():
+    print("calling save_idea...")
+    globals.idea = request.json["idea"]
     date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if globals.folder_path is None:
         globals.folder_path = (
@@ -66,60 +62,180 @@ def brainstorm_theories():
         )
         create_folder(globals.folder_path)
     create_and_write_file(
-        f"{globals.folder_path}/{globals.USE_CASE_FILE_NAME}", globals.use_case
+        f"{globals.folder_path}/{globals.IDEA_FILE_NAME}", globals.idea
     )
-    new_theories = get_generated_theories(globals.use_case, globals.theories)
-    globals.theories.extend(new_theories)
-    create_and_write_file(
-        f"{globals.folder_path}/{globals.THEORIES_FILE_NAME}",
-        json.dumps(globals.theories),
-    )
-    return jsonify({"message": "Generated theories"}), 200
+    return jsonify({"message": "Saved idea"}), 200
 
 
-@app.route("/save_theory", methods=["POST"])
-def save_theory():
-    print("calling save_theory...")
-    data = request.json
-    globals.theories.append(data["theory"])
-    create_and_write_file(
-        f"{globals.folder_path}/{globals.THEORIES_FILE_NAME}",
-        json.dumps(globals.theories),
+@app.route("/get_user", methods=["GET"])
+def get_user():
+    print("calling get_user...")
+    print(globals.user)
+    return (
+        jsonify({"message": "getting user", "user": globals.user}),
+        200,
     )
-    return jsonify({"message": "Saved theory"}), 200
+
+
+@app.route("/save_user", methods=["POST"])
+def save_user():
+    print("calling save_user...")
+    globals.user = request.json["user"]
+    create_and_write_file(
+        f"{globals.folder_path}/{globals.USER_FILE_NAME}", globals.user
+    )
+    return jsonify({"message": "Saved user"}), 200
+
+
+@app.route("/brainstorm_user_examples", methods=["GET"])
+def brainstorm_user_examples():
+    print("calling brainstorm_user_examples...")
+    user_examples = get_generated_user_examples(globals.idea)
+    return (
+        jsonify(
+            {"message": "Generated brainstorm_user_examples", "examples": user_examples}
+        ),
+        200,
+    )
+
+
+@app.route("/get_goal", methods=["GET"])
+def get_goal():
+    print("calling get_goal...")
+    print(globals.goal)
+    return (
+        jsonify({"message": "getting goal", "goal": globals.goal}),
+        200,
+    )
+
+
+@app.route("/save_goal", methods=["POST"])
+def save_goal():
+    print("calling save_goal...")
+    globals.goal = request.json["goal"]
+    create_and_write_file(
+        f"{globals.folder_path}/{globals.GOAL_FILE_NAME}", globals.goal
+    )
+    return jsonify({"message": "Saved goal"}), 200
+
+
+@app.route("/brainstorm_goal_examples", methods=["GET"])
+def brainstorm_goal_examples():
+    print("calling brainstorm_goal_examples...")
+    goal_examples = get_generated_goal_examples(globals.idea, globals.user)
+    return (
+        jsonify(
+            {"message": "Generated brainstorm_goal_examples", "examples": goal_examples}
+        ),
+        200,
+    )
+
+
+@app.route("/brainstorm_theories", methods=["POST"])
+def brainstorm_theories():
+    print("calling brainstorm_theories...")
+    theory_examples = get_generated_theories(
+        globals.idea,
+        globals.user,
+        globals.goal,
+        get_theories_array(globals.theories_and_paradigms),
+    )
+    return jsonify({"message": "Generated theories", "examples": theory_examples}), 200
 
 
 @app.route("/get_theories", methods=["GET"])
 def get_theories():
     print("calling get_theories...")
-    return jsonify({"message": "getting theories", "theories": globals.theories}), 200
-
-
-@app.route("/save_selected_theories", methods=["POST"])
-def save_selected_theories():
-    print("calling save_selected_theories...")
-    data = request.json
-    globals.selected_theories = data["selected_theories"]
-    create_and_write_file(
-        f"{globals.folder_path}/{globals.SELECTED_THEORIES_FILE_NAME}",
-        json.dumps(globals.selected_theories),
-    )
-    for theory in globals.selected_theories:
-        folder_path = f"{globals.folder_path}/{theory}"
-        create_folder(f"{folder_path}")
-        prompt = f"Create a web UI based on this user input: {globals.use_case}. Use the theory of {theory} to guide the design."
-        create_and_write_file(f"{folder_path}/{globals.PROMPT_FILE_NAME}", prompt)
-    return jsonify({"message": "Saved selected theories"}), 200
-
-
-@app.route("/get_selected_theories", methods=["GET"])
-def get_selected_theories():
-    print("calling get_selected_theories...")
     return (
         jsonify(
             {
-                "message": "getting selected theories",
-                "selected_theories": globals.selected_theories,
+                "message": "getting theories",
+                "theories": get_theories_array(globals.theories_and_paradigms),
+            }
+        ),
+        200,
+    )
+
+
+@app.route("/brainstorm_ui_paradigms", methods=["GET"])
+def brainstorm_ui_paradigms():
+    print("calling brainstorm_ui_paradigms...")
+    theory = request.args.get("theory")
+    paradigm_examples = get_generated_ui_paradigms(
+        globals.idea, globals.user, globals.goal, theory
+    )
+    return (
+        jsonify({"message": "Generated UI Paradigms", "examples": paradigm_examples}),
+        200,
+    )
+
+
+@app.route("/get_ui_paradigms", methods=["GET"])
+def get_ui_paradigms():
+    print("calling get_ui_paradigms...")
+    print(request.args)
+    theory = request.args.get("theory")
+    paradigms = globals.theories_and_paradigms[theory]
+    return (
+        jsonify(
+            {
+                "message": "get_ui_paradigms",
+                "paradigms": paradigms,
+            }
+        ),
+        200,
+    )
+
+
+@app.route("/get_theories_and_paradigms", methods=["GET"])
+def get_theories_and_paradigms():
+    print("calling get_theories_and_paradigms...")
+    theories_and_paradigms_array = [
+        f"{key}+{value}"
+        for key, values in globals.theories_and_paradigms.items()
+        for value in values
+    ]
+    return (
+        jsonify(
+            {
+                "message": "Retrieved theories and paradigms",
+                "theories_and_paradigms": theories_and_paradigms_array,
+            }
+        ),
+        200,
+    )
+
+
+@app.route("/save_selected_theory_and_paradigms", methods=["POST"])
+def save_selected_theory_and_paradigms():
+    print("calling save_selected_theory_and_paradigms...")
+    data = request.json
+    theory = data["theory"]
+    paradigms = data["paradigms"]
+    globals.theories_and_paradigms[theory] = paradigms
+    create_and_write_file(
+        f"{globals.folder_path}/{globals.THEORIES_AND_PARADIGMS_FILE_NAME}",
+        json.dumps(globals.theories_and_paradigms),
+    )
+    for theory in get_theories_array(globals.theories_and_paradigms):
+        for paradigm in globals.theories_and_paradigms[theory]:
+            folder_path = f"{globals.folder_path}/{theory}+{paradigm}"
+            create_folder(f"{folder_path}")
+            prompt = f"Create a web UI based on this idea: {globals.idea}, for users: {globals.user}, where the application goal is: {globals.goal}. Use the theory of {theory} with interaction pattern {paradigm} to guide the design."
+            create_and_write_file(f"{folder_path}/{globals.PROMPT_FILE_NAME}", prompt)
+    return jsonify({"message": "Saved selected theories"}), 200
+
+
+@app.route("/set_current_theory_and_paradigm", methods=["POST"])
+def set_current_theory_and_paradigm():
+    print("calling set_current_theory_and_paradigm...")
+    data = request.json
+    globals.current_theory_and_paradigm = data["theoryAndParadigm"]
+    return (
+        jsonify(
+            {
+                "message": "Set Current Theory",
+                "theory_and_paradigm": globals.current_theory_and_paradigm,
             }
         ),
         200,
@@ -130,7 +246,7 @@ def get_selected_theories():
 def get_prompt():
     print("calling get_prompt...")
     prompt = read_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.PROMPT_FILE_NAME}"
+        f"{globals.folder_path}/{globals.current_theory_and_paradigm}/{globals.PROMPT_FILE_NAME}"
     )
     return (
         jsonify(
@@ -147,7 +263,7 @@ def get_prompt():
 def save_prompt():
     print("calling save_prompt...")
     prompt = request.json["prompt"]
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     create_and_write_file(
         f"{folder_path}/{globals.PROMPT_FILE_NAME}",
         prompt,
@@ -159,7 +275,7 @@ def save_prompt():
     )
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(f"{folder_path}/1"):
-        wipeout_code(folder_path, 1, task_map, globals.theory)
+        wipeout_code(folder_path, 1, task_map, globals.current_theory_and_paradigm)
     create_and_write_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
         "",
@@ -179,12 +295,12 @@ def save_prompt():
 def generate_fake_data():
     print("calling generate_fake_data...")
     design_hypothesis = read_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+        f"{globals.folder_path}/{globals.current_theory_and_paradigm}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
     data = get_generated_fake_data(design_hypothesis)
     faked_data = data
     create_and_write_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.FAKED_DATA_FILE_NAME}",
+        f"{globals.folder_path}/{globals.current_theory_and_paradigm}/{globals.FAKED_DATA_FILE_NAME}",
         faked_data,
     )
     return jsonify({"message": "Generated data"}), 200
@@ -195,7 +311,7 @@ def save_faked_data():
     print("calling save_faked_data...")
     faked_data = request.json["faked_data"]
     create_and_write_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.FAKED_DATA_FILE_NAME}",
+        f"{globals.folder_path}/{globals.current_theory_and_paradigm}/{globals.FAKED_DATA_FILE_NAME}",
         faked_data,
     )
     return jsonify({"message": "Saved faked data"}), 200
@@ -205,7 +321,7 @@ def save_faked_data():
 def get_faked_data():
     print("calling get_faked_data...")
     faked_data = read_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.FAKED_DATA_FILE_NAME}"
+        f"{globals.folder_path}/{globals.current_theory_and_paradigm}/{globals.FAKED_DATA_FILE_NAME}"
     )
     return (
         jsonify({"message": "getting faked data", "faked_data": faked_data}),
@@ -217,9 +333,9 @@ def get_faked_data():
 def generate_design_hypothesis():
     print("calling generate_design_hypothesis...")
     prompt = read_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.PROMPT_FILE_NAME}"
+        f"{globals.folder_path}/{globals.current_theory_and_paradigm}/{globals.PROMPT_FILE_NAME}"
     )
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
     design_hypothesis = get_generated_design_hypothesis(prompt, faked_data)
     task_map_json = (
@@ -229,7 +345,7 @@ def generate_design_hypothesis():
     )
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(f"{folder_path}/1"):
-        wipeout_code(folder_path, 1, task_map, globals.theory)
+        wipeout_code(folder_path, 1, task_map, globals.current_theory_and_paradigm)
     create_and_write_file(
         f"{folder_path}/{globals.PROMPT_FILE_NAME}",
         prompt,
@@ -254,7 +370,7 @@ def save_design_hypothesis():
     print("calling save_design_hypothesis...")
     data = request.json
     design_hypothesis = data["design_hypothesis"]
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
@@ -262,7 +378,7 @@ def save_design_hypothesis():
     )
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(f"{folder_path}/1"):
-        wipeout_code(folder_path, 1, task_map, globals.theory)
+        wipeout_code(folder_path, 1, task_map, globals.current_theory_and_paradigm)
     create_and_write_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
         design_hypothesis,
@@ -277,7 +393,7 @@ def save_design_hypothesis():
 def get_design_hypothesis():
     print("calling get_design_hypothesis...")
     design_hypothesis = read_file(
-        f"{globals.folder_path}/{globals.theory}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+        f"{globals.folder_path}/{globals.current_theory_and_paradigm}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
     return (
         jsonify(
@@ -293,7 +409,7 @@ def get_design_hypothesis():
 @app.route("/generate_plan", methods=["POST"])
 def generate_plan():
     print("calling generate_plan...")
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     design_hypothesis = read_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
@@ -305,7 +421,7 @@ def generate_plan():
     )
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(f"{folder_path}/1"):
-        wipeout_code(folder_path, 1, task_map, globals.theory)
+        wipeout_code(folder_path, 1, task_map, globals.current_theory_and_paradigm)
     task_map = {
         int(task["task_id"]): {
             "task": task["task"],
@@ -325,7 +441,7 @@ def generate_plan():
 @app.route("/get_plan", methods=["GET"])
 def get_plan():
     print("calling get_plan...")
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     plan = get_plan_from_task_map(folder_path)
     return jsonify({"message": "getting plan", "plan": plan}), 200
 
@@ -336,12 +452,14 @@ def update_step_in_plan():
     data = request.json
     task_id = int(data["task_id"])
     new_task_description = data["task_description"]
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     task_map[task_id]["task"] = new_task_description
     if folder_exists(f"{folder_path}/{task_id}"):
-        wipeout_code(folder_path, task_id, task_map, globals.theory)
+        wipeout_code(
+            folder_path, task_id, task_map, globals.current_theory_and_paradigm
+        )
     create_and_write_file(
         f"{folder_path}/{globals.TASK_MAP_FILE_NAME}",
         json.dumps(task_map),
@@ -358,7 +476,7 @@ def add_step_in_plan():
     print("calling add_step_in_plan")
     data = request.json
     curr_task_id = int(data["current_task_id"])
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     new_task_id = curr_task_id + 1
     new_task_description = data["new_task_description"]
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
@@ -375,7 +493,9 @@ def add_step_in_plan():
     }
     task_map = {key: task_map[key] for key in sorted(task_map)}
     if folder_exists(f"{folder_path}/{new_task_id}"):
-        wipeout_code(folder_path, new_task_id, task_map, globals.theory)
+        wipeout_code(
+            folder_path, new_task_id, task_map, globals.current_theory_and_paradigm
+        )
     create_and_write_file(
         f"{folder_path}/{globals.TASK_MAP_FILE_NAME}",
         json.dumps(task_map),
@@ -392,7 +512,7 @@ def remove_step_in_plan():
     print("calling remove_step_in_plan")
     data = request.json
     task_id = int(data["task_id"])
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     task_map.pop(task_id)
@@ -400,7 +520,9 @@ def remove_step_in_plan():
     for key in keys_to_shift:
         task_map[key - 1] = task_map.pop(key)
     if folder_exists(f"{folder_path}/{task_id}"):
-        wipeout_code(folder_path, task_id, task_map, globals.theory)
+        wipeout_code(
+            folder_path, task_id, task_map, globals.current_theory_and_paradigm
+        )
     create_and_write_file(
         f"{folder_path}/{globals.TASK_MAP_FILE_NAME}",
         json.dumps(task_map),
@@ -418,7 +540,7 @@ def generate_code():
     print("calling generate_code...")
     data = request.json
     task_id = int(data["task_id"])
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_code_folder_path = f"{folder_path}/{task_id}"
     design_hypothesis = read_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
@@ -426,7 +548,9 @@ def generate_code():
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(task_code_folder_path):
-        wipeout_code(folder_path, task_id, task_map, globals.theory)
+        wipeout_code(
+            folder_path, task_id, task_map, globals.current_theory_and_paradigm
+        )
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
     plan = json.loads(get_plan_from_task_map(folder_path))
     implement_plan_lock_step(design_hypothesis, plan, folder_path, task_id, faked_data)
@@ -441,7 +565,7 @@ def generate_code():
 def get_code_per_step():
     print("calling get_code_per_step...")
     task_id = request.args.get("task_id")
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_main_code_folder_path = (
         f"{folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
     )
@@ -453,7 +577,7 @@ def get_code_per_step():
 def get_iteration_map_per_step():
     print("calling get_iteration_map_per_step...")
     task_id = int(request.args.get("task_id"))
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     print(task_map[task_id][globals.DEBUG_ITERATION_MAP])
@@ -473,7 +597,7 @@ def get_code_per_step_per_iteration():
     print("calling get_code_per_step_per_iteration...")
     task_id = request.args.get("task_id")
     iteration = request.args.get("iteration")
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     code_folder_path = ""
     if iteration == "0":
         code_folder_path = f"{folder_path}/{task_id}/{globals.CLEANED_CODE_FILE_NAME}"
@@ -500,7 +624,7 @@ def delete_code_per_step_per_iteration():
     data = request.json
     task_id = int(data["task_id"])
     iteration = data["iteration"]
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     task_map[task_id][globals.DEBUG_ITERATION_MAP].pop(iteration, None)
@@ -520,7 +644,7 @@ def save_code_per_step():
     data = request.json
     task_id = data["task_id"]
     code = data["code"]
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_main_code_folder_path = (
         f"{folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
     )
@@ -535,7 +659,7 @@ def iterate_code():
     data = request.json
     task_id = data["task_id"]
     problem = data["problem"]
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     task_map[task_id][globals.CURRENT_DEBUG_ITERATION] = (
@@ -583,7 +707,7 @@ def iterate_code():
 def get_test_cases_per_lock_step():
     print("calling get_test_cases_per_lock_step...")
     task_id = int(request.args.get("task_id"))
-    folder_path = f"{globals.folder_path}/{globals.theory}"
+    folder_path = f"{globals.folder_path}/{globals.current_theory_and_paradigm}"
     index = task_id - 1
     plan = json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
     task = plan[index]["task"]
@@ -607,12 +731,19 @@ def get_test_cases_per_lock_step():
 def set_globals_for_uuid(generated_uuid):
     print("calling set_globals_for_uuid")
     globals.folder_path = f"{globals.GENERATED_FOLDER_PATH}/{generated_uuid}"
-    globals.use_case = read_file(f"{globals.folder_path}/{globals.USE_CASE_FILE_NAME}")
-    globals.theories = json.loads(
-        read_file(f"{globals.folder_path}/{globals.THEORIES_FILE_NAME}")
-    )
-    globals.selected_theories = json.loads(
-        read_file(f"{globals.folder_path}/{globals.SELECTED_THEORIES_FILE_NAME}")
+    globals.idea = read_file(f"{globals.folder_path}/{globals.IDEA_FILE_NAME}")
+    globals.user = read_file(f"{globals.folder_path}/{globals.USER_FILE_NAME}")
+    globals.goal = read_file(f"{globals.folder_path}/{globals.GOAL_FILE_NAME}")
+    globals.theories_and_paradigms = (
+        json.loads(
+            read_file(
+                f"{globals.folder_path}/{globals.THEORIES_AND_PARADIGMS_FILE_NAME}"
+            )
+        )
+        if file_exists(
+            f"{globals.folder_path}/{globals.THEORIES_AND_PARADIGMS_FILE_NAME}"
+        )
+        else {}
     )
     return jsonify({"message": "Successfully set global fields"}), 200
 

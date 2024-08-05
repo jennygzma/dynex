@@ -38,40 +38,89 @@ def get_design_hypothesis(ui_prompt, faked_data):
     return res
 
 
-def get_theories(user_prompt, existing_theories):
+def get_user_examples(idea):
+    print("calling LLM for get_user_examples...")
+    user_message = f"This is the idea you are brainstorming users for: {idea}."
+    system_message = """You are a helpful assistant that helps brainstorm who the target user is given a specific idea.
+    For example, if the idea is "learn chinese", some examples of users are "30 year old english-speaking student" or "5 yeear old native".
+    If the idea is "journaling app", some examples of users are "someone struggling with depression" or "someone going through a breakup".
+    If the idea is "finding a nail salon", some examples are "celebrity assistant" or "female teenager".
+    Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
+    Only return 3 brainstorms.
+    """
+    res = "here are the users: " + call_llm(system_message, user_message)
+    theories = cleanup_brainstorms(res)
+    print("sucessfully called LLM for get_user_examples", res)
+    return theories
+
+
+def get_goal_examples(idea, user):
+    print("calling LLM for get_goal_examples...")
+    user_message = (
+        f"This is the idea: {idea}, for users : {user}. Brainstorm some goals"
+    )
+    system_message = """You are a helpful assistant that helps brainstorm goals of an application given an idea and user.
+    For example, if the idea is to "learn chinese" for "a 30 year old english-speaking student", some example goals of the application could be "gain vocabulary to travel to China for a week and learn Chinese in 3 weeks", versus "learn grammar".
+    If the idea is "finding a nail salon" for "a female teenager", the goal of the application could be to "explore a all the nail salons in NYC to formulate where to go when I visit", or "go to a nail salon ASAP for prom"
+    Format the brainstormed goals in an array like so: ["get nails for prom as soon as possible", "explore nail salons in NYC"]
+    Only return 3 brainstorms.
+    """
+    res = "here are the goal examples: " + call_llm(system_message, user_message)
+    theories = cleanup_brainstorms(res)
+    print("sucessfully called LLM for get_goal_examples", res)
+    return theories
+
+
+def get_theories(idea, user, goal, existing_theories):
     print("calling LLM for get_theories...")
-    user_message = f"This is the user prompt: {user_prompt}. These are the existing theories: {existing_theories}"
-    system_message = """You are a helpful assistant that finds theories relevant to a specific domain given a user prompt.
-    For example, if the user prompt is "create a UI to help me learn chinese", you should determine that the relevant theories would be in the "learning" domain, and return theories like spaced repetition, generation and elaboration, culturally relevant education, etc.
+    user_message = f"This is the idea of the application: {idea}. Here is the core user: {user}. Here is the goal of the application {goal}. These are the existing theories: {existing_theories}"
+    system_message = """You are a helpful assistant that finds theories relevant to a specific domain given a user specification of an application.
+    For example, if the user prompt is "create a UI to help me learn chinese for a 30 year old business professional with the goal of gaining conversational fluency to conduct business meetings in China within a couple weeks", you should determine that the relevant theories would be in the "learning" domain, and return theories like spaced repetition, generation and elaboration, culturally relevant education, etc.
     However, you cannot return theories that the user already knows. This will be provided as existing theories.
     Format the theories in an array like so: ["spaced repetitition", "generation and elaboration"]
     Only return 3 theories.
     """
     res = "here are the theories: " + call_llm(system_message, user_message)
-    theories = cleanup_theories(res)
+    theories = cleanup_brainstorms(res)
     print("sucessfully called LLM for get_theories", res)
     return theories
 
 
-#  To do: make this recursive so that if the plan cannot be parsed into a json file, we recall GPT until its a valid JSON array
-def cleanup_theories(theories):
-    print("calling LLM for cleanup_theories...")
-    user_message = f"Please clean up the theories so it only returns the array of theories. These are the theories: {theories}"
+def get_ui_paradigms(idea, user, goal, theory):
+    print("calling LLM for get_paradigms...")
+    user_message = f"This is the idea of the application: {idea}. Here is the core user: {user}. Here is the goal of the application {goal}. Here is the relevant theory: {theory}"
+    system_message = """You are a helpful assistant that finds UI paradigms, including interactions and layouts of the UI, relevant to a specific domain given a user specification of an application.
+    For example, if the user prompt is "create a UI to help me learn chinese for a 30 year old business professional with the goal of gaining conversational fluency to conduct business meetings in China within a couple weeks using the theory of spaced repetition",
+    you could use flashcards and indicating whether or not the user got it right or wrong, and keep showing wrong cards, to enact spaced repetition algorithm.
+    Or, you could create a quiz UI, and everytime the answer is wrong, the spaced repetition algorithm will bring back the wrong quiz questions.
+    Please keep your descriptions under 20 words, but think of how you would actualize the theory given the use case.
+    Format the theories in an array like so: ["flashcards with spaced repetition applied when the answer is right or wrong", "quiz with spaced repeition applied when the answer is right or wrong"]
+    Only return 3 theories.
+    """
+    res = "here are the paradigms: " + call_llm(system_message, user_message)
+    theories = cleanup_brainstorms(res)
+    print("sucessfully called LLM for get_paradigms", res)
+    return theories
+
+
+def cleanup_brainstorms(brainstorms):
+    print("calling LLM for cleanup_brainstorms...")
+    user_message = f"Please clean up the response so it only returns the array. This is the response: {brainstorms}"
     system_message = """You are an assistant to clean up GPT responses into an array.
 			The response should be as formatted: "[
-                "spaced repetition", "generation and elaboration", "culturally relevant education", "social learning"
+                "a", "b", "c"
             ]"
             Only the string form of the array should be returned. NOTHING OUTSIDE OF THE ARRAY SHOULD BE RETURNED.
             """
     res = call_llm(system_message, user_message)
-    print("sucessfully called LLM for cleanup_theories", res)
-    cleaned_theories = res
+    print("sucessfully called LLM for cleanup_brainstorms", res)
+    cleaned = res
     try:
-        cleaned_theories_json = json.loads(cleaned_theories)
-        return cleaned_theories_json
+        cleaned_json = json.loads(cleaned)
+        return cleaned_json
     except json.JSONDecodeError:
         print("Error decoding JSON, retrying...")
-        return cleanup_theories(theories)
+        return cleanup_brainstorms(brainstorms)
 
 
 def get_plan(design_hypothesis):

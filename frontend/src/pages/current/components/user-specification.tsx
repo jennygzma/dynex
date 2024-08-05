@@ -1,4 +1,4 @@
-import { Divider, Stack, Typography } from "@mui/material";
+import { Divider, Stack, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAppContext } from "../hooks/app-context";
@@ -8,46 +8,215 @@ import Box from "../../../components/Box";
 import Chip from "../../../components/Chip";
 
 const UserSpecification = () => {
-  const { updateIsLoading, theoriesToExplore, updateTheoriesToExplore } =
+  const { updateIsLoading, updateTheoriesAndParadigmsToExplore } =
     useAppContext();
 
   useEffect(() => {
-    getUseCase();
+    getIdea();
+    getUser();
+    getGoal();
     getTheories();
-    getSelectedTheories();
+    getTheoriesAndParadigms();
   }, []);
 
-  const [useCase, setUseCase] = useState("");
+  const [idea, setIdea] = useState("");
   const [user, setUser] = useState("");
   const [goal, setGoal] = useState("");
-  const [theories, setTheories] = useState([]);
-  const [newTheoryInput, setNewTheoryInput] = useState("");
-  const [selectedNewTheory, setSelectedNewTheory] = useState(false);
-  const [paradigms, setParadigmss] = useState([]);
-  const [newParadigmInput, setNewParadigmInput] = useState("");
-  const [selectedParadigms, setSelectedParadigms] = useState(false);
+  const [userExamples, setUserExamples] = useState([]);
+  const [goalExamples, setGoalExamples] = useState([]);
 
-  const handleSelectTheory = (theory) => {
-    if (!selectedNewTheory) setSelectedNewTheory(true);
-    if (theoriesToExplore.includes(theory)) {
-      updateTheoriesToExplore(theoriesToExplore.filter((t) => t !== theory));
+  const [submittedIdea, setSubmittedIdea] = useState(false);
+  const [submittedUser, setSubmittedUser] = useState(false);
+  const [submittedGoal, setSubmittedGoal] = useState(false);
+
+  const ideaSubmitDisabled = !(idea && !submittedIdea);
+  const userSubmitDisabled = !(user && !submittedUser);
+  const goalSumbmitDisabled = !(goal && !submittedGoal);
+
+  const [theory, setTheory] = useState(""); // currently selected theory
+  const [theories, setTheories] = useState([]); // all theories
+  const [theoryExamples, setTheoryExamples] = useState([]);
+  const [newTheoryInput, setNewTheoryInput] = useState("");
+
+  const [paradigms, setParadigms] = useState([]); // all paradigms for theory
+  const [paradigmExamples, setParadigmExamples] = useState([]);
+  const [newParadigmInput, setNewParadigmInput] = useState("");
+  const [selectedNewParadigm, setSelectedNewParadigm] = useState(false);
+
+  useEffect(() => {
+    if (theory) getParadigms();
+  }, [theory]);
+
+  const handleSelectParadigm = (selectedParadigm) => {
+    if (!selectedNewParadigm) setSelectedNewParadigm(true);
+    if (paradigms.includes(selectedParadigm)) {
+      setParadigms(paradigms.filter((p) => p !== selectedParadigm));
     } else {
-      updateTheoriesToExplore([...theoriesToExplore, theory]);
+      setParadigms([...paradigms, selectedParadigm]);
     }
   };
 
-  const getUseCase = () => {
+  const getIdea = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_use_case",
+      url: "/get_idea",
     })
       .then((response) => {
-        console.log("/get_use_case request successful:", response.data);
-        setUseCase(response.data.user_case);
+        console.log("/get_idea request successful:", response.data);
+        setIdea(response.data.idea);
       })
       .catch((error) => {
-        console.error("Error calling /get_use_case request:", error);
+        console.error("Error calling /get_idea request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const saveIdea = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/save_idea",
+      data: {
+        idea: idea,
+      },
+    })
+      .then((response) => {
+        console.log("/save_idea request successful:", response.data);
+        setSubmittedIdea(true);
+      })
+      .catch((error) => {
+        console.error("Error calling /save_idea request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const getUser = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_user",
+    })
+      .then((response) => {
+        console.log("/get_user request successful:", response.data);
+        setUser(response.data.user);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_user request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const saveUser = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/save_user",
+      data: {
+        user: user,
+      },
+    })
+      .then((response) => {
+        console.log("/save_user request successful:", response.data);
+        getUser();
+        setSubmittedUser(true);
+      })
+      .catch((error) => {
+        console.error("Error calling /save_user request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const brainstormUserExamples = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/brainstorm_user_examples",
+    })
+      .then((response) => {
+        console.log(
+          "/brainstorm_user_examples request successful:",
+          response.data,
+        );
+        setUserExamples(response.data.examples);
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /brainstorm_user_examples request:",
+          error,
+        );
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const getGoal = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_goal",
+    })
+      .then((response) => {
+        console.log("/get_goal request successful:", response.data);
+        setGoal(response.data.goal);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_goal request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const saveGoal = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/save_goal",
+      data: {
+        goal: goal,
+      },
+    })
+      .then((response) => {
+        console.log("/save_goal request successful:", response.data);
+        getGoal();
+        setSubmittedGoal(true);
+      })
+      .catch((error) => {
+        console.error("Error calling /save_goal request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const brainstormGoalExamples = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/brainstorm_goal_examples",
+    })
+      .then((response) => {
+        console.log(
+          "/brainstorm_goal_examples request successful:",
+          response.data,
+        );
+        setGoalExamples(response.data.examples);
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /brainstorm_goal_examples request:",
+          error,
+        );
       })
       .finally(() => {
         updateIsLoading(false);
@@ -59,13 +228,10 @@ const UserSpecification = () => {
     axios({
       method: "POST",
       url: "/brainstorm_theories",
-      data: {
-        use_case: useCase,
-      },
     })
       .then((response) => {
         console.log("/brainstorm_theories request successful:", response.data);
-        getTheories();
+        setTheoryExamples(response.data.examples);
       })
       .catch((error) => {
         console.error("Error calling /brainstorm_theories request:", error);
@@ -93,65 +259,99 @@ const UserSpecification = () => {
       });
   };
 
-  const saveTheory = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_theory",
-      data: {
-        theory: newTheoryInput,
-      },
-    })
-      .then((response) => {
-        console.log("/save_theory request successful:", response.data);
-        getTheories();
-        setNewTheoryInput("");
-      })
-      .catch((error) => {
-        console.error("Error calling /save_theory request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const getSelectedTheories = () => {
+  const brainstormParadigms = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_selected_theories",
+      url: "/brainstorm_ui_paradigms",
+      params: {
+        theory: theory,
+      },
     })
       .then((response) => {
         console.log(
-          "/get_selected_theories request successful:",
+          "/brainstorm_ui_paradigms request successful:",
           response.data,
         );
-        updateTheoriesToExplore(response.data.selected_theories);
+        setParadigmExamples(response.data.examples);
       })
       .catch((error) => {
-        console.error("Error calling /get_selected_theories request:", error);
+        console.error("Error calling /brainstorm_ui_paradigms request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
       });
   };
 
-  const saveSelectedTheories = () => {
+  const getParadigms = () => {
     updateIsLoading(true);
     axios({
-      method: "POST",
-      url: "/save_selected_theories",
-      data: {
-        selected_theories: theoriesToExplore,
+      method: "GET",
+      url: "/get_ui_paradigms",
+      params: {
+        theory: theory,
       },
     })
       .then((response) => {
-        console.log("/saveSelectedTheories request successful:", response.data);
-        getSelectedTheories();
-        setSelectedNewTheory(false);
+        console.log("/get_ui_paradigms request successful:", response.data);
+        setParadigms(response.data.paradigms);
       })
       .catch((error) => {
-        console.error("Error calling /saveSelectedTheories request:", error);
+        console.error("Error calling /get_ui_paradigms request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const getTheoriesAndParadigms = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_theories_and_paradigms",
+    })
+      .then((response) => {
+        console.log(
+          "/get_theories_and_paradigms request successful:",
+          response.data,
+        );
+        updateTheoriesAndParadigmsToExplore(
+          response.data.theories_and_paradigms,
+        );
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /get_theories_and_paradigms request:",
+          error,
+        );
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const saveSelectedTheoryAndParadigms = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/save_selected_theory_and_paradigms",
+      data: {
+        theory: theory,
+        paradigms: paradigms,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/save_selected_theory_and_paradigms request successful:",
+          response.data,
+        );
+        getTheoriesAndParadigms();
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /save_selected_theory_and_paradigms request:",
+          error,
+        );
       })
       .finally(() => {
         updateIsLoading(false);
@@ -188,13 +388,16 @@ const UserSpecification = () => {
               <TextField
                 className={"idea"}
                 label="Idea"
-                value={useCase}
+                value={idea}
                 rows={1}
-                onChange={(e) => setUseCase(e.target.value)}
+                onChange={(e) => {
+                  setIdea(e.target.value);
+                  setSubmittedIdea(false);
+                }}
               />
               <Button
-                onClick={brainstormTheories}
-                disabled={!useCase}
+                onClick={saveIdea}
+                disabled={ideaSubmitDisabled}
                 sx={{
                   width: "10%",
                 }}
@@ -216,31 +419,46 @@ const UserSpecification = () => {
             <Stack direction="row" spacing="20px">
               <Stack direction="row" spacing="10px" sx={{ width: "100%" }}>
                 <Button
-                  onClick={brainstormTheories}
-                  disabled={!useCase}
+                  onClick={brainstormUserExamples}
+                  disabled={!idea}
                   sx={{
                     width: "100%",
                   }}
                 >
                   Brainstorm Examples
                 </Button>
+                {userExamples.map((userExample) => (
+                  <Tooltip key={userExample} title={userExample}>
+                    <Chip
+                      key={userExample}
+                      label={userExample}
+                      onClick={() => setUser(userExample)}
+                      selected={userExample === user}
+                      sx={{ maxWidth: "200px" }}
+                      clickable
+                    />
+                  </Tooltip>
+                ))}
               </Stack>
               <Divider
                 orientation="vertical"
                 flexItem
-                sx={{ bgcolor: "#9a4e4e", borderWidth: "4px" }} // Change the color here
+                sx={{ bgcolor: "#9a4e4e", borderWidth: "4px" }}
               />
               <Stack direction="row" spacing="10px" sx={{ width: "100%" }}>
                 <TextField
                   className={"user"}
                   label="User"
-                  value={useCase}
+                  value={user}
                   rows={1}
-                  onChange={(e) => setUseCase(e.target.value)}
+                  onChange={(e) => {
+                    setUser(e.target.value);
+                    setSubmittedUser(false);
+                  }}
                 />
                 <Button
-                  onClick={brainstormTheories}
-                  disabled={!useCase}
+                  onClick={saveUser}
+                  disabled={userSubmitDisabled}
                   sx={{
                     width: "10%",
                   }}
@@ -264,31 +482,46 @@ const UserSpecification = () => {
             <Stack direction="row" spacing="20px">
               <Stack direction="row" spacing="10px" sx={{ width: "100%" }}>
                 <Button
-                  onClick={brainstormTheories}
-                  disabled={!useCase}
+                  onClick={brainstormGoalExamples}
+                  disabled={!idea}
                   sx={{
                     width: "100%",
                   }}
                 >
                   Brainstorm Examples
                 </Button>
+                {goalExamples.map((goalExample) => (
+                  <Tooltip key={goalExample} title={goalExample}>
+                    <Chip
+                      key={goalExample}
+                      label={goalExample}
+                      onClick={() => setGoal(goalExample)}
+                      selected={goalExample === goal}
+                      clickable
+                      sx={{ maxWidth: "200px" }}
+                    />
+                  </Tooltip>
+                ))}
               </Stack>
               <Divider
                 orientation="vertical"
                 flexItem
-                sx={{ bgcolor: "#9a4e4e", borderWidth: "4px" }} // Change the color here
+                sx={{ bgcolor: "#9a4e4e", borderWidth: "4px" }}
               />
               <Stack direction="row" spacing="10px" sx={{ width: "100%" }}>
                 <TextField
                   className={"goal"}
                   label="Goal"
-                  value={useCase}
+                  value={goal}
                   rows={1}
-                  onChange={(e) => setUseCase(e.target.value)}
+                  onChange={(e) => {
+                    setGoal(e.target.value);
+                    setSubmittedGoal(false);
+                  }}
                 />
                 <Button
-                  onClick={brainstormTheories}
-                  disabled={!useCase}
+                  onClick={saveGoal}
+                  disabled={goalSumbmitDisabled}
                   sx={{
                     width: "10%",
                   }}
@@ -299,87 +532,113 @@ const UserSpecification = () => {
             </Stack>
           </Stack>
         </Stack>
-        <Stack spacing="5px">
-          <Button
-            onClick={brainstormTheories}
-            disabled={!useCase}
-            sx={{
-              width: "100%",
-            }}
-          >
-            Brainstorm Theories
-          </Button>
-          {theories.map((theory) => (
-            <Chip
-              key={theory}
-              label={theory}
-              onClick={() => handleSelectTheory(theory)}
-              selected={theoriesToExplore?.includes(theory)}
-              clickable
-            />
-          ))}
-          <Stack direction="row" spacing="10px">
-            <TextField
-              className={"theory"}
-              label="Theory"
-              value={newTheoryInput}
-              rows={1}
-              onChange={(e) => setNewTheoryInput(e.target.value)}
-              sx={{ width: "90%" }}
-            />
+        <Stack direction="row" spacing="15px">
+          <Stack spacing="5px" sx={{ width: "100%" }}>
             <Button
-              onClick={saveTheory}
-              disabled={!newTheoryInput}
+              onClick={brainstormTheories}
+              disabled={!idea || !user || !goal}
               sx={{
-                width: "10%",
+                width: "100%",
               }}
             >
-              Submit
+              Brainstorm Theories
             </Button>
+            {theoryExamples.map((theoryExample) => (
+              <Chip
+                key={theoryExample}
+                label={theoryExample}
+                onClick={() => setTheory(theoryExample)}
+                selected={theory === theoryExample}
+                clickable
+              />
+            ))}
+            {theories.map((t) =>
+              theoryExamples.includes(t) ? (
+                <></>
+              ) : (
+                <Chip
+                  key={t}
+                  label={t}
+                  onClick={() => {
+                    setTheory(t);
+                  }}
+                  selected={theory === t}
+                  clickable
+                />
+              ),
+            )}
+            <Stack direction="row" spacing="10px">
+              <TextField
+                className={"theory"}
+                label="Theory"
+                value={newTheoryInput}
+                rows={1}
+                onChange={(e) => setNewTheoryInput(e.target.value)}
+                sx={{ width: "90%" }}
+              />
+              <Button
+                onClick={() =>
+                  setTheoryExamples([...theoryExamples, newTheoryInput])
+                }
+                disabled={!newTheoryInput}
+                sx={{
+                  width: "10%",
+                }}
+              >
+                Submit
+              </Button>
+            </Stack>
           </Stack>
-        </Stack>
-        <Stack spacing="5px">
-          <Button
-            onClick={brainstormTheories}
-            disabled={!useCase}
-            sx={{
-              width: "100%",
-            }}
-          >
-            Brainstorm UI Paradigms
-          </Button>
-          {theories.map((theory) => (
-            <Chip
-              key={theory}
-              label={theory}
-              onClick={() => handleSelectTheory(theory)}
-              selected={theoriesToExplore?.includes(theory)}
-              clickable
-            />
-          ))}
-          <Stack direction="row" spacing="10px">
-            <TextField
-              className={"paradigm"}
-              label="UI paradigm"
-              value={newTheoryInput}
-              rows={1}
-              onChange={(e) => setNewTheoryInput(e.target.value)}
-              sx={{ width: "90%" }}
-            />
+          <Stack spacing="5px" sx={{ width: "100%" }}>
             <Button
-              onClick={saveTheory}
-              disabled={!newTheoryInput}
+              onClick={brainstormParadigms}
+              disabled={!idea}
               sx={{
-                width: "10%",
+                width: "100%",
               }}
             >
-              Submit
+              Brainstorm UI Paradigms
             </Button>
+            {paradigmExamples?.map((paradigmExample) => (
+              <Chip
+                key={paradigmExample}
+                label={paradigmExample}
+                onClick={() => handleSelectParadigm(paradigmExample)}
+                selected={paradigms?.includes(paradigmExample)}
+                clickable
+              />
+            ))}
+            {paradigms?.map((p) =>
+              paradigmExamples.includes(p) ? (
+                <></>
+              ) : (
+                <Chip key={p} label={p} selected clickable />
+              ),
+            )}
+            <Stack direction="row" spacing="10px">
+              <TextField
+                className={"paradigm"}
+                label="UI paradigm"
+                value={newParadigmInput}
+                rows={1}
+                onChange={(e) => setNewParadigmInput(e.target.value)}
+                sx={{ width: "90%" }}
+              />
+              <Button
+                onClick={() => setParadigms([...paradigms, newParadigmInput])}
+                disabled={!newParadigmInput}
+                sx={{
+                  width: "10%",
+                }}
+              >
+                Submit
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
         <Button
-          onClick={saveSelectedTheories}
-          disabled={!selectedNewTheory || !useCase}
+          onClick={saveSelectedTheoryAndParadigms}
+          disabled={!selectedNewParadigm || !idea}
           sx={{
             width: "100%",
           }}

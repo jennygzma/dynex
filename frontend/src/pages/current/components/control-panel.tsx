@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAppContext } from "../hooks/app-context";
 import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
@@ -11,33 +11,40 @@ const ControlPanel = () => {
   const {
     iterations,
     updateCurrentIteration,
-    theoriesToExplore,
-    currentTheory,
-    updateCurrentTheory,
+    theoriesAndParadigmsToExplore,
+    currentTheoryAndParadigm,
+    updateCurrentTheoryAndParadigm,
     updateIsLoading,
   } = useAppContext();
 
-  const setCurrentTheory = (theory) => {
+  const setCurrentTheoryAndParadigm = (theoryAndParadigm) => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/set_current_theory",
+      url: "/set_current_theory_and_paradigm",
       data: {
-        theory: theory,
+        theoryAndParadigm: theoryAndParadigm,
       },
     })
       .then((response) => {
-        console.log("/set_current_theory request successful:", response.data);
+        console.log(
+          "/set_current_theory_and_paradigm request successful:",
+          response.data,
+        );
       })
       .catch((error) => {
-        console.error("Error calling /set_current_theory request:", error);
+        console.error(
+          "Error calling /set_current_theory_and_paradigm request:",
+          error,
+        );
       })
       .finally(() => {
         updateIsLoading(false);
       });
   };
 
-  if (theoriesToExplore?.length === 0) return <></>;
+  if (theoriesAndParadigmsToExplore?.length === 0) return <></>;
+
   return (
     <Box sx={{ width: "30%" }}>
       <Stack spacing="10px">
@@ -51,10 +58,10 @@ const ControlPanel = () => {
         >
           Control Panel
         </Typography>
-        {theoriesToExplore && (
+        {theoriesAndParadigmsToExplore && (
           <Stack direction="row" spacing="10px">
             <Stack sx={{ width: "100%" }}>
-              {theoriesToExplore.map((theory) => {
+              {theoriesAndParadigmsToExplore.map((theory) => {
                 return (
                   <Stack spacing="10px">
                     <Card
@@ -63,21 +70,21 @@ const ControlPanel = () => {
                         fontSize: "20px",
                         lineHeight: "30px",
                         backgroundColor:
-                          currentTheory === theory
+                          currentTheoryAndParadigm === theory
                             ? "lightblue"
                             : "transparent",
                       }}
                     >
                       <CardActionArea
                         onClick={() => {
-                          updateCurrentTheory(theory);
-                          setCurrentTheory(theory);
+                          updateCurrentTheoryAndParadigm(theory);
+                          setCurrentTheoryAndParadigm(theory);
                         }}
                         sx={{ padding: "15px" }}
                       >
                         <Typography>{theory}</Typography>
                       </CardActionArea>
-                      {currentTheory === theory && (
+                      {currentTheoryAndParadigm === theory && (
                         <Stack
                           spacing="10px"
                           padding="15px"
