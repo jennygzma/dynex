@@ -46,7 +46,7 @@ const ControlPanel = () => {
   if (theoriesAndParadigmsToExplore?.length === 0) return <></>;
 
   return (
-    <Box sx={{ width: "30%" }}>
+    <Box sx={{ width: "40%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"

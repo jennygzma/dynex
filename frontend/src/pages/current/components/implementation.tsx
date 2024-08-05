@@ -166,7 +166,7 @@ const Implementation = () => {
 
   if (!currentTheoryAndParadigm) return <></>;
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "60%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"

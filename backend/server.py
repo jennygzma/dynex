@@ -232,6 +232,10 @@ def save_selected_theory_and_paradigms():
         for paradigm in globals.theories_and_paradigms[theory[globals.THEORY]][
             globals.PARADIGMS
         ]:
+            print("theory: {}".format(theory.get("theory", "N/A")))
+            print("description: {}".format(theory.get("description", "N/A")))
+            print("paradigm: {}".format(paradigm.get("paradigm", "N/A")))
+            print("description: {}".format(paradigm.get("description", "N/A")))
             folder_path = f"{globals.folder_path}/{theory[globals.THEORY]}+{paradigm[globals.PARADIGM]}"
             paradigm_name = paradigm[globals.PARADIGM]
             paradigm_description = paradigm[globals.DESCRIPTION]

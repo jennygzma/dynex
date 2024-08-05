@@ -214,6 +214,7 @@ const ProjectFormation = () => {
             className={"prompt"}
             label="Prompt"
             value={UIPrompt}
+            rows={8}
             onChange={(e) => {
               setUIPrompt(e.target.value);
               setUpdatedPrompt(true);

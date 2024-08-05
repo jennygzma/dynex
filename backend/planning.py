@@ -34,7 +34,7 @@ def get_design_hypothesis(ui_prompt, faked_data):
     """
     system_message = """
                 You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
-				Each design should detail the user interactions and design layout. It should not be more than 100 words long.
+				Each design should detail the user interactions and design layout. It should not be more than 200 words long.
                 Make sure that the design does not incorporate routes. Everything should exist within one page.
                 Make sure the design is consistent with the json data object provided by the user. All data shown must exist as a field on the JSON object.
 				
@@ -166,6 +166,9 @@ def get_plan(design_hypothesis):
         All the code will be in React and MUI.
         Make sure that the design does not incorporate routes. Everything should exist within one page.
         Placeholder data already exists. There should be NO task for mocking placeholder data, or populating the cards with placeholder data, since that already exists.
+        Additionally, keep in mind that we are attempting to test the application created. So, if the application for example implements spaced repetition that has different algorithms each day,
+        MAKE SURE to factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in
+        using the app to test the spaced repetition. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc.
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		Please limit the plan to 3-5 steps.
