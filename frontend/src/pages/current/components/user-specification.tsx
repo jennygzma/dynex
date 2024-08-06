@@ -624,7 +624,10 @@ const UserSpecification = () => {
               />
               <Button
                 onClick={() =>
-                  setTheoryExamples([...theoryExamples, newTheoryInput])
+                  setTheoryExamples([
+                    ...theoryExamples,
+                    { theory: newTheoryInput, description: "" },
+                  ])
                 }
                 disabled={!newTheoryInput}
                 sx={{
@@ -683,7 +686,12 @@ const UserSpecification = () => {
                 sx={{ width: "90%" }}
               />
               <Button
-                onClick={() => setParadigms([...paradigms, newParadigmInput])}
+                onClick={() =>
+                  setParadigms([
+                    ...paradigms,
+                    { paradigm: newParadigmInput, description: "" },
+                  ])
+                }
                 disabled={!newParadigmInput}
                 sx={{
                   width: "10%",

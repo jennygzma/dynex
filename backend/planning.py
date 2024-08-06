@@ -34,11 +34,15 @@ def get_design_hypothesis(ui_prompt, faked_data):
     """
     system_message = """
                 You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
-				Each design should detail the user interactions and design layout. It should not be more than 200 words long.
+				Each design should detail the user interactions and design layout. IT SHOULD BE LESS THAN 150 WORDS.
                 Make sure that the design does not incorporate routes. Everything should exist within one page.
                 Make sure the design is consistent with the json data object provided by the user. All data shown must exist as a field on the JSON object.
-				
-				For example, a response could be: To create an application where the user can store their notes app, I will create a gmail, table-like UI, that shows the "title" field of the note. The user can search for notes, delete notes, and add notes. When the user clicks on a row, they will be brought to the full note.
+				Keep in mind that we do not have the capacity to build a super fancy application. Keep the application in scope. For example, if this is the prompt:
+                "Create a web UI based on this idea: learn chinese, for users: Retired person seeking a mentally stimulating hobby and a way to connect with their cultural heritage, where the application goal is: To gain conversational fluency to communicate with family members and explore ancestral roots. Use the theory of Spaced Repetition (Reviewing information at optimal intervals reinforces memory and aids long-term retention of the language.), which with interaction pattern Interactive storytelling (A narrative-driven approach with dialogues and scenarios, reinforcing vocabulary and phrases through an engaging story with spaced repetition of key elements.) to guide the design."
+                Focus on implementing the spaced repetition part - unnecessary features like a social community feature, or working with multiple different stories is overly complex, as is is multiple decks, a setting bar, a profile page.
+                KEEP THE APPLICATION IN SCOPE TO THE USER PROBLEM AND THEORY AS MUCH AS POSSIBLE BECAUSE THERE IS LIMITED CODE WE CAN WRITE.
+                DO NOT REQUIRE APPLICATIONS THAT REQUIRE MULTIMEDIA SUCH AS VIDEOS, AUDIO, IMAGE BASED, OR DRAG AND DROP.
+                Instead, the scope should be using one traditional chinese narrative to implement spaced repetition. Focus on what the interaction will be - will it be card-swiping, gmail-like, or something else?
             """
     res = call_llm(system_message, user_message)
     print("sucessfully called LLM for get_design_hypothesis", res)
@@ -49,7 +53,7 @@ def get_user_examples(idea):
     print("calling LLM for get_user_examples...")
     user_message = f"This is the idea you are brainstorming users for: {idea}."
     system_message = """You are a helpful assistant that helps brainstorm who the target user is given a specific idea.
-    For example, if the idea is "learn chinese", some examples of users are "30 year old english-speaking student" or "5 yeear old native".
+    For example, if the idea is "learn chinese", some examples of users are "30 year old english-speaking student" or or "busy professional who only has 30 minutes a day to learn chinese"
     If the idea is "journaling app", some examples of users are "someone struggling with depression" or "someone going through a breakup".
     If the idea is "finding a nail salon", some examples are "celebrity assistant" or "female teenager".
     Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
@@ -104,6 +108,7 @@ def get_theories(idea, user, goal, existing_theories):
     system_message = """You are a helpful assistant that finds theories relevant to a specific domain given a user specification of an application.
     For example, if the user prompt is "create a UI to help me learn chinese for a 30 year old business professional with the goal of gaining conversational fluency to conduct business meetings in China within a couple weeks",
     you should determine that the relevant theories would be in the "learning" domain, and return theories like spaced repetition, generation and elaboration, culturally relevant education, etc.
+    If the task is "finding a nail salon for an beginner to nails with the purpose of getting a sense of the nail salons", the domain would not be nail or beauty related, but would be search or matchmaking or decision-making related.
     Make sure to also add a description as to WHY this theory is suitable for the idea and user. Keep the description under 40 words.
     You also cannot return theories that the user already knows. This will be provided as existing theories.
     Format the theories in an array like so: [{"theory": "spaced repetitition", "description": "This is good for a business professional visiting china because it optimizes review timing and enhacnes memory retention to recall focusing on information just before it is forgotten."},
@@ -123,10 +128,13 @@ def get_ui_paradigms(idea, user, goal, theory, existing_paradigms):
     For example, if the user prompt is "create a UI to help me learn chinese for a 30 year old business professional with the goal of gaining conversational fluency to conduct business meetings in China within a couple weeks using the theory of spaced repetition",
     you could use flashcards and indicating whether or not the user got it right or wrong, and keep showing wrong cards, to enact spaced repetition algorithm.
     Or, you could create a quiz UI, and everytime the answer is wrong, the spaced repetition algorithm will bring back the wrong quiz questions.
-    Please keep your descriptions under 40 words, but be elaborate in how you would actualize the theory given the use case.
+    Please keep your descriptions under 40 words, but be elaborate in how you would actualize the theory given the use case. HOW WOULD YOU ACTUALIZE THE THEORY IN THIS SITUATION? RETURN UI PARADIGMS THAT WOULD HELP ACTUALIZE THIS THEORY GIVEN THE GOAL, USER, AND IDEA.
+    However, keep the UI paradigm in scope. For example, if the theory is spaced repetition, there is NO NEED to have a "community section", or to "Create personalized flashcard decks" or a "settings" or "profile" component.
+    Keep in mind that we do not have the capacity to build a super fancy application. Keep the application in scope to the user problem and theory as much as possible.
+    DO NOT REQUIRE APPLICATIONS THAT REQUIRE MULTIMEDIA SUCH AS VIDEOS, AUDIO, IMAGE BASED, OR DRAG AND DROP.
     You also cannot return paradigms that the user already knows. This will be provided as existing paradigms.
-    Format the paradigms in an array like so: [{"paradigm": "flashcards", "description: "flashcards with spaced repetition applied when the answer is right or wrong"},
-    {"paradigm": "quiz", "description": "quiz with spaced repeition applied when the answer is right or wrong"}]
+    Format the paradigms in an array like so: [{"paradigm": "flashcards with card swipe interface", "description: "flashcards with spaced repetition applied when the answer is right or wrong"},
+    {"paradigm": "quiz with gmail-like interface", "description": "quiz with spaced repeition applied when the answer is right or wrong"}]
     Only return 3 paradigms.
     """
     res = "here are the paradigms: " + call_llm(system_message, user_message)
@@ -167,8 +175,8 @@ def get_plan(design_hypothesis):
         Make sure that the design does not incorporate routes. Everything should exist within one page.
         Placeholder data already exists. There should be NO task for mocking placeholder data, or populating the cards with placeholder data, since that already exists.
         Additionally, keep in mind that we are attempting to test the application created. So, if the application for example implements spaced repetition that has different algorithms each day,
-        MAKE SURE to factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in
-        using the app to test the spaced repetition. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc.
+        If necessary, factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in
+        using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		Please limit the plan to 3-5 steps.
