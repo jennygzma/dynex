@@ -1,11 +1,10 @@
 import { Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
-import UserInputs from "./components/user-inputs";
+import UserSpecification from "./components/user-specification";
 import CodeGeneration from "./components/implementation";
 import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
 import ControlPanel from "./components/control-panel";
-import ProjectFormation from "./components/project-formation";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
@@ -49,7 +48,7 @@ const Home = () => {
             THEORY2CODE
           </Typography>
         </Stack>
-        <UserInputs />
+        <UserSpecification />
         <Stack direction="row">
           <ControlPanel />
           <CodeGeneration />

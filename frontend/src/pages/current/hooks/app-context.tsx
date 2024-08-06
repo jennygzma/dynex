@@ -24,10 +24,10 @@ export interface AppState {
   updateCurrentIteration: Dispatch<SetStateAction<number>>;
   designHypothesis: string;
   updateDesignHypothesis: Dispatch<SetStateAction<string>>;
-  theoriesToExplore: string[];
-  updateTheoriesToExplore: Dispatch<SetStateAction<string[]>>;
-  currentTheory: string;
-  updateCurrentTheory: Dispatch<SetStateAction<string>>;
+  theoriesAndParadigmsToExplore: string[];
+  updateTheoriesAndParadigmsToExplore: Dispatch<SetStateAction<string[]>>;
+  currentTheoryAndParadigm: string;
+  updateCurrentTheoryAndParadigm: Dispatch<SetStateAction<string>>;
 }
 
 export const AppContext = createContext<AppState | undefined>(undefined);
@@ -41,8 +41,10 @@ export const PlanProvider = ({ children }) => {
   const [isLoading, updateIsLoading] = useState(false);
   const [iterations, updateIterations] = useState(undefined);
   const [currentIteration, updateCurrentIteration] = useState(0);
-  const [theoriesToExplore, updateTheoriesToExplore] = useState(undefined);
-  const [currentTheory, updateCurrentTheory] = useState(undefined);
+  const [theoriesAndParadigmsToExplore, updateTheoriesAndParadigmsToExplore] =
+    useState(undefined);
+  const [currentTheoryAndParadigm, updateCurrentTheoryAndParadigm] =
+    useState(undefined);
 
   return (
     <AppContext.Provider
@@ -59,10 +61,10 @@ export const PlanProvider = ({ children }) => {
         updateCurrentIteration,
         designHypothesis,
         updateDesignHypothesis,
-        theoriesToExplore,
-        updateTheoriesToExplore,
-        currentTheory,
-        updateCurrentTheory,
+        theoriesAndParadigmsToExplore,
+        updateTheoriesAndParadigmsToExplore,
+        currentTheoryAndParadigm,
+        updateCurrentTheoryAndParadigm,
       }}
     >
       {children}

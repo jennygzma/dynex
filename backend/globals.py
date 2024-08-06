@@ -48,11 +48,13 @@ def call_llm(system_message, user_message):
 
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
-USE_CASE_FILE_NAME = "use_case.txt"
+IDEA_FILE_NAME = "idea.txt"
+USER_FILE_NAME = "user.txt"
+GOAL_FILE_NAME = "goal.txt"
 PROMPT_FILE_NAME = "prompt.txt"
-THEORIES_FILE_NAME = "theories.txt"
-SELECTED_THEORIES_FILE_NAME = "selected_theories.txt"
+THEORIES_AND_PARADIGMS_FILE_NAME = "theories_and_paradigms.txt"
 TASK_MAP_FILE_NAME = "task_map.json"
+
 GENERATED_FOLDER_PATH = "generated"
 MERGED_CODE_FILE_NAME = "merged.txt"
 CHECKED_CODE_FILE_NAME = "checked.html"
@@ -68,25 +70,21 @@ MAIN_CODE_FILE_NAME = "index.html"
 DEBUG_ITERATION_MAP = "debug_iteration_map"
 CURRENT_DEBUG_ITERATION = "current_debug_iteration"
 
-# use case provided by user
-use_case = None
-# prompt based on use case and theory
-# prompt = None
-# LLM generated theories
-theories = []
+# theory paradigm map fields
+DESCRIPTION = "description"
+PARADIGMS = "paradigms"
+THEORY = "theory"
+PARADIGM = "paradigm"
+
+# use case and idea provided by user
+idea = None
+# user of application
+user = None
+# goal application is trying to solve
+goal = None
 # user selected theories to test
-selected_theories = []
-# current theory
-theory = None
-# LLM generated faked data
-# faked_data = None
-# user provided data model
-# data_model = None
-# LLM generated design
-# design_hypothesis = None
-# LLM generated implementation plan
-# plan = None
+theories_and_paradigms = {}
+# current theory and paradigm
+current_theory_and_paradigm = None
 # folder for this code generation, in the form of a UUID
 folder_path = None
-# stores metadata info for each task
-# task_map = None

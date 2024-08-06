@@ -14,7 +14,7 @@ const Implementation = () => {
     currentTask,
     currentIteration,
     updateCurrentIteration,
-    currentTheory,
+    currentTheoryAndParadigm,
   } = useAppContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
@@ -151,16 +151,22 @@ const Implementation = () => {
   };
 
   useEffect(() => {
-    if (currentTask === undefined || !currentTheory) return;
+    if (currentTask === undefined || !currentTheoryAndParadigm) return;
     getCode();
     getCodeForIteration(currentIteration);
     setProblemDescription("");
     setClickedRender(false);
-  }, [plan, designHypothesis, currentTask, currentIteration, currentTheory]);
+  }, [
+    plan,
+    designHypothesis,
+    currentTask,
+    currentIteration,
+    currentTheoryAndParadigm,
+  ]);
 
-  if (!currentTheory) return <></>;
+  if (!currentTheoryAndParadigm) return <></>;
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "60%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -275,7 +281,7 @@ const Implementation = () => {
               <Paper
                 id="output"
                 className="output"
-                sx={{ height: clickedRender ? "800px" : "0px" }}
+                sx={{ height: clickedRender ? "1200px" : "0px" }}
               />
             </Box>
           </>

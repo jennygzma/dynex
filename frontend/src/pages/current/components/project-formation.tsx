@@ -11,7 +11,7 @@ const ProjectFormation = () => {
     updateIsLoading,
     designHypothesis,
     updateDesignHypothesis,
-    currentTheory,
+    currentTheoryAndParadigm,
   } = useAppContext();
 
   const [dataInput, setDataInput] = useState("");
@@ -22,11 +22,11 @@ const ProjectFormation = () => {
 
   useEffect(() => {}, [designHypothesis, dataInput, UIPrompt]);
   useEffect(() => {
-    if (!currentTheory) return;
+    if (!currentTheoryAndParadigm) return;
     getFakedData();
     getDesignHypothesis();
     getPrompt();
-  }, [currentTheory]);
+  }, [currentTheoryAndParadigm]);
 
   const getPrompt = () => {
     updateIsLoading(true);
@@ -195,7 +195,7 @@ const ProjectFormation = () => {
         updateIsLoading(false);
       });
   };
-  if (!currentTheory) return <></>;
+  if (!currentTheoryAndParadigm) return <></>;
   return (
     <Box sx={{ width: "90%" }}>
       <Stack spacing="20px">
@@ -214,6 +214,7 @@ const ProjectFormation = () => {
             className={"prompt"}
             label="Prompt"
             value={UIPrompt}
+            rows={8}
             onChange={(e) => {
               setUIPrompt(e.target.value);
               setUpdatedPrompt(true);
@@ -230,48 +231,48 @@ const ProjectFormation = () => {
           </Button>
         </Stack>
         <Stack spacing="10px">
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: "bold",
-                alignSelf: "center",
-                fontFamily: "monospace",
-              }}
-            >
-              Design Hypothesis
-            </Typography>
-            <Button
-              onClick={generateDesignHypothesis}
-              disabled={!UIPrompt}
-              sx={{
-                width: "100%",
-              }}
-            >
-              {designHypothesis
-                ? "Generate new design hypothesis"
-                : "Generate design hypothesis"}
-            </Button>
-            {designHypothesis && (
-              <>
-                <TextField
-                  className={"design-hypothesis"}
-                  label="Design Hypothesis"
-                  rows={13}
-                  value={designHypothesis}
-                  onChange={(e) => {
-                    updateDesignHypothesis(e.target.value);
-                    setUpdatedDesignHypothesis(true);
-                  }}
-                />
-                <Button
-                  onClick={saveDesignHypothesis}
-                  disabled={!updatedDesignHypothesis}
-                >
-                  Update design hypothesis
-                </Button>
-              </>
-            )}
-          </Stack>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: "bold",
+              alignSelf: "center",
+              fontFamily: "monospace",
+            }}
+          >
+            Design Hypothesis
+          </Typography>
+          <Button
+            onClick={generateDesignHypothesis}
+            disabled={!UIPrompt}
+            sx={{
+              width: "100%",
+            }}
+          >
+            {designHypothesis
+              ? "Generate new design hypothesis"
+              : "Generate design hypothesis"}
+          </Button>
+          {designHypothesis && (
+            <>
+              <TextField
+                className={"design-hypothesis"}
+                label="Design Hypothesis"
+                rows={13}
+                value={designHypothesis}
+                onChange={(e) => {
+                  updateDesignHypothesis(e.target.value);
+                  setUpdatedDesignHypothesis(true);
+                }}
+              />
+              <Button
+                onClick={saveDesignHypothesis}
+                disabled={!updatedDesignHypothesis}
+              >
+                Update design hypothesis
+              </Button>
+            </>
+          )}
+        </Stack>
         <Stack spacing="10px" width="100%">
           <Stack spacing="10px">
             <Typography
