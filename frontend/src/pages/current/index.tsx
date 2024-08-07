@@ -5,6 +5,7 @@ import CodeGeneration from "./components/implementation";
 import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
 import ControlPanel from "./components/control-panel";
+import ProblemSpecification from "./components/problem-specification";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
@@ -45,9 +46,10 @@ const Home = () => {
               fontFamily: "monospace",
             }}
           >
-            THEORY2CODE
+            DYNAEXPRO
           </Typography>
         </Stack>
+        <ProblemSpecification />
         <UserSpecification />
         <Stack direction="row">
           <ControlPanel />
