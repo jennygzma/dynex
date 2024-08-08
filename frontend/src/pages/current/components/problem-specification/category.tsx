@@ -6,66 +6,195 @@ import TextField from "../../../../components/TextField";
 import Button from "../../../../components/Button";
 import InputWithButton from "../../../../components/InputWithButton";
 import { useAppContext } from "../../hooks/app-context";
+import { CategoryType } from "../../hooks/matrix-context";
+import Chip from "../../../../components/Chip";
 
 interface CategoryProps {
-  title: string; // hi jenny specify this
+  category: CategoryType;
   description: string;
-  needsSpecification: boolean;
 }
 
-const Category = ({
-  description,
-  title,
-  needsSpecification,
-}: CategoryProps) => {
-  const [input, setInput] = useState("");
-  const { updateIsLoading } = useAppContext();
-  const [questions, setQuestions] = useState([]);
+interface Specification {
+  question: string;
+  brainstorm: string[];
+  answer: string;
+}
 
-  // hi jenny get input
-  // hi jenny impelment in backend
-  const saveInput = () => {
+const mapQuestionsToSpecifications = (
+  questions: Array<string>,
+): Array<Specification> =>
+  questions.map((question) => ({
+    question: question,
+    brainstorm: [],
+    answer: "",
+  }));
+
+const Category = ({ description, category }: CategoryProps) => {
+  const { updateIsLoading } = useAppContext();
+  const [input, setInput] = useState("");
+  const [needsSpecification, setNeedsSpecification] = useState(false);
+  const [specifications, setSpecifications] = useState([]);
+
+  const updateSpecificationBrainstorm = (
+    index: number,
+    brainstorm: string[],
+  ) => {
+    const updatedSpecifications = specifications.map((spec, i) =>
+      i === index ? { ...spec, brainstorm: brainstorm } : spec,
+    );
+    setSpecifications(updatedSpecifications);
+  };
+
+  const updateSpecificationAnswer = (index: number, answer: string) => {
+    const updatedSpecifications = specifications.map((spec, i) =>
+      i === index ? { ...spec, answer: answer } : spec,
+    );
+    setSpecifications(updatedSpecifications);
+  };
+
+  const getNeedsSpecification = () => {
     updateIsLoading(true);
     axios({
-      method: "POST",
-      url: "/save_problem",
+      method: "GET",
+      url: "/get_needs_specification",
       data: {
-        title: title,
-        input: input,
+        category: category,
       },
     })
       .then((response) => {
-        console.log("/save_problem request successful:", response.data);
+        console.log(
+          "/get_needs_specification request successful:",
+          response.data,
+        );
+        setNeedsSpecification(response.data.needs_specification);
       })
       .catch((error) => {
-        console.error("Error calling /save_problem request:", error);
+        console.error("Error calling /get_needs_specification request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
       });
   };
 
-  // hi jenny implement this to retrieve questions
+  const getInput = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_input",
+      params: {
+        category: category,
+      },
+    })
+      .then((response) => {
+        console.log("/get_input request successful:", response.data);
+        setInput(response.data.input);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_input request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const updateInput = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/update_input",
+      data: {
+        category: category,
+        input: input,
+      },
+    })
+      .then((response) => {
+        console.log("/update_input request successful:", response.data);
+        getInput();
+      })
+      .catch((error) => {
+        console.error("Error calling /update_input request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   const getQuestions = () => {
     updateIsLoading(true);
     axios({
-      method: "POST",
-      url: "/save_problem",
-      data: {
-        title: title,
-        input: input,
+      method: "GET",
+      url: "/get_questions",
+      params: {
+        category: category,
       },
     })
       .then((response) => {
-        console.log("/save_problem request successful:", response.data);
+        console.log("/get_questions request successful:", response.data);
+        setSpecifications(
+          mapQuestionsToSpecifications(response.data.questions),
+        );
       })
       .catch((error) => {
-        console.error("Error calling /save_problem request:", error);
+        console.error("Error calling /get_questions request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
       });
   };
+
+  const getBrainstorm = (question: string, index: number) => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_questions",
+      params: {
+        category: category,
+        question: question,
+      },
+    })
+      .then((response) => {
+        console.log("/get_questions request successful:", response.data);
+        updateSpecificationBrainstorm(index, response.data.brainstorm);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_questions request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const updateSpecifications = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/update_specifications",
+      data: {
+        category: category,
+        specifications: specifications,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/update_specifications request successful:",
+          response.data,
+        );
+        getInput();
+        getNeedsSpecification();
+      })
+      .catch((error) => {
+        console.error("Error calling /update_specifications request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    getInput();
+    getNeedsSpecification();
+  }, []);
+
   return (
     <Box border={5} sx={{ padding: "10px" }}>
       <Stack spacing="10px">
@@ -94,7 +223,7 @@ const Category = ({
             fontFamily: "monospace",
           }}
         >
-          {title}
+          {category}
         </Typography>
         <Typography
           variant="body2"
@@ -109,7 +238,7 @@ const Category = ({
           label="Input"
           input={input}
           setInput={setInput}
-          onClick={saveInput}
+          onClick={updateInput}
           direction="column"
         />
         <Button
@@ -121,30 +250,54 @@ const Category = ({
         >
           Specify
         </Button>
-        {questions.map((question, index) => {
+        {specifications.map(({ question, brainstorms, answer }, index) => {
           return (
             <Stack key={index} spacing="5px">
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: "bold",
-                  fontFamily: "monospace",
+              <Stack direction="row" spacing="5px">
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {question}
+                </Typography>{" "}
+                <Button onClick={() => getBrainstorm(question, index)}>
+                  💡
+                </Button>
+              </Stack>
+              {brainstorms.map((brainstorm) => {
+                <Chip
+                  key={brainstorm}
+                  label={brainstorm}
+                  onClick={() => {
+                    updateSpecificationAnswer(index, brainstorm);
+                  }}
+                  clickable
+                  selected={brainstorm === answer}
+                />;
+              })}
+              <TextField
+                className={`${index}-answer`}
+                label="Answer"
+                value={answer}
+                rows={1}
+                onChange={(e) => {
+                  updateSpecificationAnswer(index, e.target.value);
                 }}
-              >
-                {question}
-              </Typography>
-              {/* hi jenny add the input */}
+              ></TextField>
             </Stack>
           );
         })}
         <Button
-          onClick={getQuestions}
+          onClick={updateSpecifications}
           disabled={!needsSpecification}
           sx={{
             width: "100%",
           }}
         >
-          Update Input
+          Update Specifications
         </Button>
       </Stack>
     </Box>

@@ -1,5 +1,4 @@
 import {
-  Paper,
   Stack,
   Table,
   TableBody,
@@ -9,16 +8,15 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import Box from "../../../../components/Box";
-import TextField from "../../../../components/TextField";
-import Button from "../../../../components/Button";
 import InputWithButton from "../../../../components/InputWithButton";
 import { useAppContext } from "../../hooks/app-context";
 import Category from "./category";
+import { CategoryType } from "../../hooks/matrix-context";
 
-const matrixCategories: Record<string, string> = {
+const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
   PersonXIdea:
     "This identifies who the application is for. It defines the target user group or demographic. Are you designing the app for students, professionals, children, elderly people, people with specific needs or conditions, etc.?",
   PersonXGrounding:
@@ -34,13 +32,47 @@ const matrixCategories: Record<string, string> = {
 };
 
 const ProjectSpecification = () => {
-  const [problem, setProblem] = useState("");
-  const [name, setName] = useState("");
   const { updateIsLoading } = useAppContext();
 
-  // hi jenny get matrix implement this in backend
+  const [problem, setProblem] = useState("");
+  const [prototypeName, setPrototypeName] = useState("");
 
-  // hi jenny impelment in backend
+  const getProblem = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_problem",
+    })
+      .then((response) => {
+        console.log("/get_problem request successful:", response.data);
+        setProblem(response.data.problem);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_problem request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const getPrototypeName = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_prototype_name",
+    })
+      .then((response) => {
+        console.log("/get_prototype_name request successful:", response.data);
+        setPrototypeName(response.data.prototype_name);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_prototype_name request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   const saveProblem = () => {
     updateIsLoading(true);
     axios({
@@ -61,42 +93,20 @@ const ProjectSpecification = () => {
       });
   };
 
-  // hi jenny impelment in backend
-  const checkSpecification = () => {
+  const savePrototypeName = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_problem",
+      url: "/save_prototype_name",
       data: {
-        problem: problem,
+        prototype_name: prototypeName,
       },
     })
       .then((response) => {
-        console.log("/save_problem request successful:", response.data);
+        console.log("/save_prototype_name request successful:", response.data);
       })
       .catch((error) => {
-        console.error("Error calling /save_problem request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  // hi jenny impelment in backend
-  const saveName = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_problem",
-      data: {
-        problem: problem,
-      },
-    })
-      .then((response) => {
-        console.log("/save_problem request successful:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error calling /save_problem request:", error);
+        console.error("Error calling /save_prototype_name request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -123,14 +133,6 @@ const ProjectSpecification = () => {
           setInput={setProblem}
           onClick={saveProblem}
         />
-        <Button
-          onClick={checkSpecification}
-          sx={{
-            width: "100%",
-          }}
-        >
-          Check If More Specification Is Needed
-        </Button>
         <TableContainer>
           <Table>
             <TableHead>
@@ -186,23 +188,22 @@ const ProjectSpecification = () => {
                 </TableCell>
                 <TableCell>
                   <Category
-                    title={"PersonXIdea"}
-                    description={matrixCategories["PersonXIdea"]}
-                    needsSpecification={true}
+                    category={"PersonXIdea"}
+                    description={MATRIX_CATEGORY_DESCRIPTIONS["PersonXIdea"]}
                   />
                 </TableCell>
                 <TableCell>
                   <Category
-                    title={"ApproachXIdea"}
-                    description={matrixCategories["ApproachXIdea"]}
-                    needsSpecification={true}
+                    category={"ApproachXIdea"}
+                    description={MATRIX_CATEGORY_DESCRIPTIONS["ApproachXIdea"]}
                   />
                 </TableCell>
                 <TableCell>
                   <Category
-                    title={"InteractionXIdea"}
-                    description={matrixCategories["InteractionXIdea"]}
-                    needsSpecification={true}
+                    category={"InteractionXIdea"}
+                    description={
+                      MATRIX_CATEGORY_DESCRIPTIONS["InteractionXIdea"]
+                    }
                   />
                 </TableCell>
               </TableRow>
@@ -220,23 +221,26 @@ const ProjectSpecification = () => {
                 </TableCell>
                 <TableCell>
                   <Category
-                    title="PersonXGrounding"
-                    description={matrixCategories["PersonXGrounding"]}
-                    needsSpecification={true}
+                    category="PersonXGrounding"
+                    description={
+                      MATRIX_CATEGORY_DESCRIPTIONS["PersonXGrounding"]
+                    }
                   />
                 </TableCell>
                 <TableCell>
                   <Category
-                    title="ApproachXGrounding"
-                    description={matrixCategories["ApproachXGrounding"]}
-                    needsSpecification={true}
+                    category="ApproachXGrounding"
+                    description={
+                      MATRIX_CATEGORY_DESCRIPTIONS["ApproachXGrounding"]
+                    }
                   />
                 </TableCell>
                 <TableCell>
                   <Category
-                    title="InteractionXGrounding"
-                    description={matrixCategories["InteractionXGrounding"]}
-                    needsSpecification={true}
+                    category="InteractionXGrounding"
+                    description={
+                      MATRIX_CATEGORY_DESCRIPTIONS["InteractionXGrounding"]
+                    }
                   />
                 </TableCell>
               </TableRow>
@@ -244,11 +248,11 @@ const ProjectSpecification = () => {
           </Table>
         </TableContainer>
         <InputWithButton
-          className="name"
-          label="Name"
-          input={name}
-          setInput={setName}
-          onClick={saveName}
+          className="prototyp-name"
+          label="Prototype Name"
+          input={prototypeName}
+          setInput={setPrototypeName}
+          onClick={savePrototypeName}
           direction="column"
           buttonName="Save Matrix"
         />
