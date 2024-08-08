@@ -6,7 +6,7 @@ import TextField from "../../../../components/TextField";
 import Button from "../../../../components/Button";
 import InputWithButton from "../../../../components/InputWithButton";
 import { useAppContext } from "../../hooks/app-context";
-import { CategoryType } from "../../hooks/matrix-context";
+import { CategoryType, useMatrixContext } from "../../hooks/matrix-context";
 import Chip from "../../../../components/Chip";
 
 interface CategoryProps {
@@ -31,6 +31,7 @@ const mapQuestionsToSpecifications = (
 
 const Category = ({ description, category }: CategoryProps) => {
   const { updateIsLoading } = useAppContext();
+  const { submittedProblem } = useMatrixContext();
   const [input, setInput] = useState("");
   const [needsSpecification, setNeedsSpecification] = useState(false);
   const [specifications, setSpecifications] = useState([]);
@@ -142,22 +143,22 @@ const Category = ({ description, category }: CategoryProps) => {
       });
   };
 
-  const getBrainstorm = (question: string, index: number) => {
+  const getBrainstorms = (question: string, index: number) => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_questions",
+      url: "/get_brainstorms",
       params: {
         category: category,
         question: question,
       },
     })
       .then((response) => {
-        console.log("/get_questions request successful:", response.data);
-        updateSpecificationBrainstorm(index, response.data.brainstorm);
+        console.log("/get_brainstorms request successful:", response.data);
+        updateSpecificationBrainstorm(index, response.data.brainstorms);
       })
       .catch((error) => {
-        console.error("Error calling /get_questions request:", error);
+        console.error("Error calling /get_brainstorms request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -193,7 +194,7 @@ const Category = ({ description, category }: CategoryProps) => {
   useEffect(() => {
     getInput();
     getNeedsSpecification();
-  }, []);
+  }, [submittedProblem]);
 
   return (
     <Box border={5} sx={{ padding: "10px" }}>
@@ -263,7 +264,7 @@ const Category = ({ description, category }: CategoryProps) => {
                 >
                   {question}
                 </Typography>{" "}
-                <Button onClick={() => getBrainstorm(question, index)}>
+                <Button onClick={() => getBrainstorms(question, index)}>
                   💡
                 </Button>
               </Stack>

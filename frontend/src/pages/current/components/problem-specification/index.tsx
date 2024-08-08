@@ -8,13 +8,13 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Box from "../../../../components/Box";
 import InputWithButton from "../../../../components/InputWithButton";
 import { useAppContext } from "../../hooks/app-context";
 import Category from "./category";
-import { CategoryType } from "../../hooks/matrix-context";
+import { CategoryType, useMatrixContext } from "../../hooks/matrix-context";
 
 const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
   PersonXIdea:
@@ -33,7 +33,7 @@ const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
 
 const ProjectSpecification = () => {
   const { updateIsLoading } = useAppContext();
-
+  const { updateSubmittedProblem } = useMatrixContext();
   const [problem, setProblem] = useState("");
   const [prototypeName, setPrototypeName] = useState("");
 
@@ -45,7 +45,10 @@ const ProjectSpecification = () => {
     })
       .then((response) => {
         console.log("/get_problem request successful:", response.data);
-        setProblem(response.data.problem);
+        if (response.data.problem) {
+          setProblem(response.data.problem);
+          updateSubmittedProblem(true);
+        }
       })
       .catch((error) => {
         console.error("Error calling /get_problem request:", error);
@@ -84,6 +87,7 @@ const ProjectSpecification = () => {
     })
       .then((response) => {
         console.log("/save_problem request successful:", response.data);
+        updateSubmittedProblem(true);
       })
       .catch((error) => {
         console.error("Error calling /save_problem request:", error);
@@ -93,25 +97,30 @@ const ProjectSpecification = () => {
       });
   };
 
-  const savePrototypeName = () => {
+  const explorePrototype = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_prototype_name",
+      url: "/explore_prototype",
       data: {
         prototype_name: prototypeName,
       },
     })
       .then((response) => {
-        console.log("/save_prototype_name request successful:", response.data);
+        console.log("/explore_prototype request successful:", response.data);
       })
       .catch((error) => {
-        console.error("Error calling /save_prototype_name request:", error);
+        console.error("Error calling /explore_prototype request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    getProblem();
+    getPrototypeName();
+  }, []);
 
   return (
     <Box>
@@ -252,9 +261,9 @@ const ProjectSpecification = () => {
           label="Prototype Name"
           input={prototypeName}
           setInput={setPrototypeName}
-          onClick={savePrototypeName}
+          onClick={explorePrototype}
           direction="column"
-          buttonName="Save Matrix"
+          buttonName="Explore Prototype"
         />
       </Stack>
     </Box>

@@ -52,6 +52,15 @@ def file_exists(file_path):
         return False
 
 
+def add_to_file(file_path, content):
+    if file_exists(file_path):
+        with open(file_path, "a") as file:  # Open file in append mode
+            file.write(content + "\n")  # Write content followed by a new line
+        print(f"Added content to '{file_path}'.")
+    else:
+        print("Cannot add content to the file since it doesn't exist.")
+
+
 def delete_folder(folder_path):
     try:
         if os.path.exists(folder_path):

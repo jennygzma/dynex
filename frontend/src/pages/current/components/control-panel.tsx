@@ -11,39 +11,36 @@ const ControlPanel = () => {
   const {
     iterations,
     updateCurrentIteration,
-    theoriesAndParadigmsToExplore,
-    currentTheoryAndParadigm,
-    updateCurrentTheoryAndParadigm,
     updateIsLoading,
+    prototypes,
+    currentPrototype,
+    updateCurrentPrototype,
   } = useAppContext();
 
-  const setCurrentTheoryAndParadigm = (theoryAndParadigm) => {
+  const setCurrentPrototype = (prototype) => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/set_current_theory_and_paradigm",
+      url: "/set_current_prototype",
       data: {
-        theoryAndParadigm: theoryAndParadigm,
+        prototype: prototype,
       },
     })
       .then((response) => {
         console.log(
-          "/set_current_theory_and_paradigm request successful:",
+          "/set_current_prototype request successful:",
           response.data,
         );
       })
       .catch((error) => {
-        console.error(
-          "Error calling /set_current_theory_and_paradigm request:",
-          error,
-        );
+        console.error("Error calling /set_current_prototype request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
       });
   };
 
-  if (theoriesAndParadigmsToExplore?.length === 0) return <></>;
+  if (prototypes?.length === 0) return <></>;
 
   return (
     <Box sx={{ width: "40%" }}>
@@ -58,33 +55,33 @@ const ControlPanel = () => {
         >
           Control Panel
         </Typography>
-        {theoriesAndParadigmsToExplore && (
+        {prototypes && (
           <Stack direction="row" spacing="10px">
             <Stack sx={{ width: "100%" }}>
-              {theoriesAndParadigmsToExplore.map((theory) => {
+              {prototypes.map((prototype) => {
                 return (
                   <Stack spacing="10px">
                     <Card
-                      key={theory}
+                      key={prototype}
                       sx={{
                         fontSize: "20px",
                         lineHeight: "30px",
                         backgroundColor:
-                          currentTheoryAndParadigm === theory
+                          currentPrototype === prototype
                             ? "lightblue"
                             : "transparent",
                       }}
                     >
                       <CardActionArea
                         onClick={() => {
-                          updateCurrentTheoryAndParadigm(theory);
-                          setCurrentTheoryAndParadigm(theory);
+                          updateCurrentPrototype(prototype);
+                          setCurrentPrototype(prototype);
                         }}
                         sx={{ padding: "15px" }}
                       >
-                        <Typography>{theory}</Typography>
+                        <Typography>{prototype}</Typography>
                       </CardActionArea>
-                      {currentTheoryAndParadigm === theory && (
+                      {currentPrototype === prototype && (
                         <Stack
                           spacing="10px"
                           padding="15px"

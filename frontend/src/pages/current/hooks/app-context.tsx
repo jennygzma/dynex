@@ -28,6 +28,10 @@ export interface AppState {
   updateTheoriesAndParadigmsToExplore: Dispatch<SetStateAction<string[]>>;
   currentTheoryAndParadigm: string;
   updateCurrentTheoryAndParadigm: Dispatch<SetStateAction<string>>;
+  prototypes: string[];
+  updatePrototypes: Dispatch<SetStateAction<string[]>>;
+  currentPrototype: string;
+  updateCurrentPrototype: Dispatch<SetStateAction<string>>;
 }
 
 export const AppContext = createContext<AppState | undefined>(undefined);
@@ -45,7 +49,8 @@ export const PlanProvider = ({ children }) => {
     useState(undefined);
   const [currentTheoryAndParadigm, updateCurrentTheoryAndParadigm] =
     useState(undefined);
-
+  const [prototypes, updatePrototypes] = useState(undefined);
+  const [currentPrototype, updateCurrentPrototype] = useState(undefined);
   return (
     <AppContext.Provider
       value={{
@@ -65,6 +70,10 @@ export const PlanProvider = ({ children }) => {
         updateTheoriesAndParadigmsToExplore,
         currentTheoryAndParadigm,
         updateCurrentTheoryAndParadigm,
+        prototypes,
+        updatePrototypes,
+        currentPrototype,
+        updateCurrentPrototype,
       }}
     >
       {children}
