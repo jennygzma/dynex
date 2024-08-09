@@ -160,9 +160,9 @@ def cleanup_brainstorms_with_descriptions(brainstorms):
 def get_plan(design_hypothesis):
     print("calling LLM for get_plan...")
     user_message = f"""I want to create a UI with this design: {design_hypothesis}.
-        Give me a vague implementation plan that is feature-based. Each step should focus on implementing an interaction/feature.
+        Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features.
         The first step should focus on creating the general structure of the app.
-        For example, if creating a facebook news feed UI, the steps could be: 1) Create general structure of app. 2) Users should be able to post statuses and have it be added to the timeline. 3) Users should be able to like and comment on posts. 4) Users should be able to edit posts and delete posts.
+        For example, if creating a facebook news feed UI, the steps could be: 1) Create general structure of app where users should be able to post statuses and have it be added to the timeline. 2) Users should be able to like and comment on posts.
 		Assume all the code will exist in one react App.js file, and that the UI will render in one page with no backend.
 		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
         All the code will be in React and MUI.
@@ -173,7 +173,7 @@ def get_plan(design_hypothesis):
         using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
-		Please limit the plan to 3-5 steps.
+		Please limit the plan to 3 steps.
 		"""
     system_message = "You are a helpful software engineer to answer questions related to implementing this UI."
     res = call_llm(system_message, user_message)

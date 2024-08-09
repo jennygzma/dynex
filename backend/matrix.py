@@ -7,7 +7,7 @@ PPAI_DESCRIPTION = """When we create a UI based on a particular problem, we defi
 First, we problem further into 3 categories: Person, Approach, and Interaction Paradigm.
 Within each category, there are 2 more sub-categories: idea and grounding."""
 
-CATEGORY_DESCRIPTIONS = {
+MATRIX_DESCRIPTIONS = {
     "PersonXIdea": "Within the person section, the idea subsection identifies who the application is for. It defines the target user group or demographic. Are you designing the app for students, professionals, children, elderly people, people with specific needs or conditions, etc.?",
     "PersonXGrounding": "Within the person section and the grounding subsection, we dig deeper into understanding the user's goals and context. Specifically: What does the user aim to achieve with this app? What specific problem does the user have? Why is this problem difficult to solve? Why are existing solutions inadequate? What gaps or shortcomings do they have that your application will address?",
     "ApproachXIdea": "Within the approach section and the idea subsection we think about how we conceptualize the method or strategy to tackle the identified problem. What kind of approach will you use to solve the user's problem? Are you using an algorithm, an existing theory, workflow, or innovative process?",
@@ -44,17 +44,54 @@ InteractionXIdea: Feed view with 5 matches to read
 InteractionXGrounding: : Each "post" in the feed should feature a user’s photo as the focal point, followed by their name and age. The post should also include a concise bio that highlights their personality, interests, and what they’re looking for in a relationship. Additionally, it could show a few shared interests or mutual connections, along with a brief summary of why the match was selected. The layout should encourage thoughtful consideration, presenting just enough information to pique interest without overwhelming the user.
 """
 
-APPROACH_EXAMPLES = """Approaches focus more on what ideas should be implemented as the core logic (backend) of the application based on person context on what the problem is.
+PERSONXIDEA_EXAMPLES = """Person ideas focus on who the target user of the application is.
+For example, if the idea is "learn chinese", some examples of users are "30 year old english-speaking student" or or "busy professional who only has 30 minutes a day to learn chinese"
+If the idea is "journaling app", some examples of users are "someone struggling with depression" or "someone going through a breakup".
+If the idea is "finding a nail salon", some examples are "celebrity assistant" or "female teenager".
+"""
+
+PERSONXGROUNDING_EXAMPLES = """Person Grounding focuses on the goal of the application and what problem it's trying to solve for the person.
+For example, if the idea is to "learn chinese" for "a 30 year old english-speaking student", some example goals of the application could be "gain vocabulary to travel to China for a week and learn Chinese in 3 weeks", versus "learn grammar".
+If the idea is "finding a nail salon" for "a female teenager", the goal of the application could be to "explore a all the nail salons in NYC to formulate where to go when I visit", or "go to a nail salon ASAP for prom"
+"""
+
+APPROACHXIDEA_EXAMPLES = """Approach ideas focus more on what ideas should be implemented as the core logic (backend) of the application based on person context on what the problem is.
 It could be a theory within a domain the app will be built in like spaced repetition for learning apps, subjective expected utility for recommendation or search apps, CBT or ACT for mental health apps, gamification, or CLT for decisionmaking.
 It could be an app solution, such as a rules-based system, Uber for X (airBnb is uber for homes), marketplace system, workflow system, database (logging or reading), social network
+Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code.
 """
 
-INTERACTION_EXAMPLES = """The Interaction focuses on the UI Paradigm in the front end, such as the layout and interactoin paradigms.
+INTERACTIONXIDEA_EXAMPLES = """The Interaction ideas focuses on the UI Paradigm in the front end, such as the layout and interactoin paradigms.
 Examples include chatbot (messaging), cardswipe (tinder), feed (facebook, tiktok, twitter, news), faceted browsing, carousel, table (gmail).
 Approaches generally have a simple basic for UI which people gravitate towards (a searchable database can easily have a table-like UI, but pairing approaches with non-obvious UIs is interesting)
+Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos, so do not return solutions that are out of scope.
 """
 
-MATRIX_DESCRIPTION = f"{PPAI_DESCRIPTION} + {" ".join(CATEGORY_DESCRIPTIONS.values())}"
+APPROACHXGROUDING_EXAMPLES = """Approach Grounding should focus on how exactly the approach idea should be implemented, while factoring in other context such as the Person and problem context.
+Ensure that you understand what the approach idea is exactly before thinking about how you would ground it.
+DO NOT TAKE A RANDOM IDEA AND GROUND IT. IF THE APPROACHXIDEA IS GENERATION AND ELABORATION, FIGURE OUT HOW TO GROUND IT. DO NOT SUDDENLY COME UP WITH SPACED REPETITION.
+For example, for OkCupid, where the ApproachXIdea is "Searchable Database", the ApproachXGrounding should figure out what people should search for to find the right matches (ethnicity, race, age)?
+For Tinder, where the ApproachXIdea is "lower coginitive load to make lots of judgements easier", the ApproachXGrounding should figure out what select bits of information should be shown, since the ProblemXGrounding is that searching for matches is hard
+For Coffee Meets Bagel, where the ApproachXIdea is "lower the cognitive load to think more intentially about matches by having fewer matches", the ApproachXGrounding should focus on what information to show and how the few matches should be selected for the user, since the ProblemXGrounding is that it's hard to make intentional matches when you have a million options.
+Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code."""
+
+INTERACTIONXGROUDNING_EXAMPLES = """Interaction Grounding should focus on how exactly the interaction idea of the UI Paradigm should be implemented, while factoring in other context.
+For example, for OkCupid, where the InteractionXIdea is "Faceted Browsing", the InteractionXGrounding should figure out what facets are needed in the UI for a good searchable experience to find partners.
+For Tinder, where the InteractionXIdea is "card swipe", the InteractionXGrounding should figure out what is shown on each card and how information is laid out.
+For Coffee Meets Bagel, where the InteractionXIdea is "Feed with 5 options for potential partners", the ApproachXGrounding should focus on what information to show for each partner and how it is laid out.
+Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos, so do not return solutions that are out of scope.
+"""
+
+MATRIX_EXAMPLES = {
+    "PersonXIdea": PERSONXIDEA_EXAMPLES,
+    "PersonXGrounding": PERSONXGROUNDING_EXAMPLES,
+    "ApproachXIdea": APPROACHXIDEA_EXAMPLES,
+    "ApproachXGrounding": APPROACHXGROUDING_EXAMPLES,
+    "InteractionXIdea": INTERACTIONXIDEA_EXAMPLES,
+    "InteractionXGrounding": INTERACTIONXGROUDNING_EXAMPLES,
+}
+
+MATRIX_DESCRIPTION = f"{PPAI_DESCRIPTION} + {" ".join(MATRIX_DESCRIPTIONS.values())}"
 
 def get_context_from_other_inputs(problem, category, matrix):
     print(matrix)
@@ -118,6 +155,7 @@ def get_needs_specification(category, input):
     print("calling LLM for get_needs_specification...")
     system_message = f"""You are a system that helps determine if a section needs specification in order to help a user convert it to a UI applciation.
     The problem can have varying levels of specificity. {MATRIX_DESCRIPTION}
+    {PPAI_EXAMPLES}
     For the given category, determine whether or not the user needs to add more specification based on the current level of specification for the category.
     If the current input is empty, then the given category definitely needs more specification.
     Ensure that for the category, there is a clearly defined answer that does not go in multiple directions. The system should detect if the answer is too broad.
@@ -136,13 +174,17 @@ def get_needs_specification(category, input):
 def brainstorm_inputs(category, context):
     print("calling LLM for brainstorm_inputs...")
     user_message = f"This is the category you are brainstorming for: {category}."
-    system_message = f"""You are a helpful assistant that helps brainstorm specification answers for a category to narrow down inputs. {MATRIX_DESCRIPTION} {APPROACH_EXAMPLES} {INTERACTION_EXAMPLES}
+    system_message = f"""
+    You are a helpful assistant that helps brainstorm specification answers for a category to narrow down inputs.
+    {MATRIX_DESCRIPTION}
     {PPAI_EXAMPLES}
     Here is the context for this problem: {context}
+    {MATRIX_EXAMPLES[category]}
     For the Idea categories (PersonXIdea, ApproachXIdea, InteractionXIdea), the answers SHOULD BE LESS THAN 15 WORDS.
     For the Grounding Categories (PersonXGrounding, ApproachXGrounding, InteractionXGrounding), the answers SHOULD BE LESS THAN 50 WORDS
+    The answers should be as specific as possible.
     Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
-    Only return 3 brainstorms.
+    Only return AT MOST 3 brainstorms. If you cannot come up with 3 brainstorms, only come up with 1 or 2.
     """
     res = "here are the users: " + call_llm(system_message, user_message)
     brainstorms = cleanup_array(res)

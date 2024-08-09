@@ -1,4 +1,4 @@
-import { Badge, Stack, Typography } from "@mui/material";
+import { Badge, Stack, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Box from "../../../../components/Box";
@@ -34,7 +34,7 @@ const Category = ({ description, category }: CategoryProps) => {
   const { submittedProblem } = useMatrixContext();
   const [input, setInput] = useState("");
   const [needsSpecification, setNeedsSpecification] = useState(false);
-  const [brianstorms, setBrainstorms] = useState([]);
+  const [brainstorms, setBrainstorms] = useState([]);
   // const [specifications, setSpecifications] = useState([]);
 
   //   const updateSpecificationBrainstorm = (
@@ -137,7 +137,7 @@ const Category = ({ description, category }: CategoryProps) => {
     })
       .then((response) => {
         console.log("/brainstorm_inputs request successful:", response.data);
-        setBrainstorms([...brianstorms, ...response.data.brainstorms]);
+        setBrainstorms(response.data.brainstorms);
       })
       .catch((error) => {
         console.error("Error calling /brainstorm_inputs request:", error);
@@ -228,7 +228,7 @@ const Category = ({ description, category }: CategoryProps) => {
   }, [currentPrototype]);
 
   return (
-    <Box border={5} sx={{ padding: "10px" }}>
+    <Box border={5} sx={{ padding: "10px", maxWidth: "600px" }}>
       <Stack spacing="10px">
         {needsSpecification && (
           <Badge
@@ -268,24 +268,28 @@ const Category = ({ description, category }: CategoryProps) => {
         </Typography>
         <Button
           onClick={brainstormInputs}
-          disabled={!needsSpecification}
           sx={{
             width: "100%",
           }}
         >
           Brainstorm
         </Button>
-        {brianstorms?.map((brainstorm) => {
+        {brainstorms?.map((brainstorm) => {
           return (
-            <Chip
-              key={brainstorm}
-              label={brainstorm}
-              onClick={() => {
-                setInput(brainstorm);
-              }}
-              clickable
-              selected={brainstorm === input}
-            />
+            <Tooltip title={brainstorm}>
+              <Chip
+                key={brainstorm}
+                label={brainstorm}
+                onClick={() => {
+                  setInput(brainstorm);
+                }}
+                clickable
+                selected={brainstorm === input}
+                sx={{
+                  alignSelf: "center",
+                }}
+              />
+            </Tooltip>
           );
         })}
         <InputWithButton

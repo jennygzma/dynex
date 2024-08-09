@@ -20,15 +20,15 @@ const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
   PersonXIdea:
     "This identifies who the application is for. It defines the target user group or demographic.",
   PersonXGrounding:
-    "Here, we dig deeper into understanding the he underlying challenges, realities, or constraints that the individual faces in trying to achieve their goal. This represents the contextual factors or pain points that shape their experience.",
+    "Here, we dig deeper into understanding the underlying challenges, realities, or constraints that the individual faces in trying to achieve their goal. This represents the contextual factors or pain points that shape their experience.",
   ApproachXIdea:
     "Here, we think about how the conceptual strategy, theory, or logical framework that guides the solution or system design. This reflects the abstract approach or methodology used to address the user’s goal.",
   ApproachXGrounding:
-    "Here, we focus on the he specific, practical considerations or decisions that translate the abstract strategy into actionable features or processes, taking into account the user's needs and the context.",
+    "Here, we focus on the specific, practical considerations or decisions that translate the abstract strategy into actionable features or processes, taking into account the user's needs and the context.",
   InteractionXIdea:
-    "This contemplates he design or pattern of interaction that defines how users engage with the system. This focuses on the conceptual model of the user interface or user experience.",
+    "This contemplates the design or pattern of interaction that defines how users engage with the system. This focuses on the conceptual model of the user interface or user experience.",
   InteractionXGrounding:
-    "Here, we delve into the he specific elements, content, or interaction mechanisms that make the abstract UI paradigm meaningful and effective in the given context.",
+    "Here, we delve into the specific elements, content, or interaction mechanisms that make the abstract UI paradigm meaningful and effective in the given context.",
 };
 
 const ProjectSpecification = () => {
