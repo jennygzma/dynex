@@ -612,7 +612,10 @@ def delete_code_per_step_per_iteration():
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
-    task_map[task_id][globals.DEBUG_ITERATION_MAP].pop(iteration, None)
+    print(
+        f"deleting {iteration} {task_map[task_id][globals.DEBUG_ITERATION_MAP][str(iteration)]}"
+    )
+    task_map[task_id][globals.DEBUG_ITERATION_MAP].pop(str(iteration), None)
     print(
         f"after, task id {task_id} iteration {iteration}, {task_map[task_id][globals.DEBUG_ITERATION_MAP]}"
     )

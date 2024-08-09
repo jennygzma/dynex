@@ -30,7 +30,7 @@ const mapQuestionsToSpecifications = (
   }));
 
 const Category = ({ description, category }: CategoryProps) => {
-  const { updateIsLoading } = useAppContext();
+  const { updateIsLoading, currentPrototype } = useAppContext();
   const { submittedProblem } = useMatrixContext();
   const [input, setInput] = useState("");
   const [needsSpecification, setNeedsSpecification] = useState(false);
@@ -136,11 +136,11 @@ const Category = ({ description, category }: CategoryProps) => {
       },
     })
       .then((response) => {
-        console.log("/get_questions request successful:", response.data);
+        console.log("/brainstorm_inputs request successful:", response.data);
         setBrainstorms([...brianstorms, ...response.data.brainstorms]);
       })
       .catch((error) => {
-        console.error("Error calling /get_questions request:", error);
+        console.error("Error calling /brainstorm_inputs request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -222,6 +222,10 @@ const Category = ({ description, category }: CategoryProps) => {
     getInput();
     getNeedsSpecification();
   }, [submittedProblem]);
+
+  useEffect(() => {
+    setBrainstorms([]);
+  }, [currentPrototype]);
 
   return (
     <Box border={5} sx={{ padding: "10px" }}>

@@ -182,7 +182,7 @@ const Iterations = () => {
     axios({
       method: "POST",
       url: "/delete_code_per_step_per_iteration",
-      params: {
+      data: {
         task_id: currentTask.taskId,
         iteration: iteration,
       },

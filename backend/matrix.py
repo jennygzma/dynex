@@ -57,6 +57,7 @@ Approaches generally have a simple basic for UI which people gravitate towards (
 MATRIX_DESCRIPTION = f"{PPAI_DESCRIPTION} + {" ".join(CATEGORY_DESCRIPTIONS.values())}"
 
 def get_context_from_other_inputs(problem, category, matrix):
+    print(matrix)
     compiled_text = problem
     for key, value in matrix.items():
         if key == category:

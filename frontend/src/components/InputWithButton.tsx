@@ -29,6 +29,7 @@ const InputWithButton = ({
   direction = "row",
 }: InputWithSubmissionProps) => {
   const [submittedInput, setSubmittedInput] = useState(false);
+  useEffect(() => setSubmittedInput(false), [input]);
 
   return (
     <Stack direction={direction} spacing="10px" sx={{ width: { width } }}>

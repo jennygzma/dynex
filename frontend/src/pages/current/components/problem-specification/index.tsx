@@ -140,6 +140,7 @@ const ProjectSpecification = () => {
   useEffect(() => {
     getProblem();
     getPrototypes();
+    if (currentPrototype) getPrototypeName();
   }, []);
 
   useEffect(() => {
