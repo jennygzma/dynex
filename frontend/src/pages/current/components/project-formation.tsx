@@ -11,7 +11,7 @@ const ProjectFormation = () => {
     updateIsLoading,
     designHypothesis,
     updateDesignHypothesis,
-    currentTheoryAndParadigm,
+    currentPrototype,
   } = useAppContext();
 
   const [dataInput, setDataInput] = useState("");
@@ -22,11 +22,11 @@ const ProjectFormation = () => {
 
   useEffect(() => {}, [designHypothesis, dataInput, UIPrompt]);
   useEffect(() => {
-    if (!currentTheoryAndParadigm) return;
+    if (!currentPrototype) return;
     getFakedData();
     getDesignHypothesis();
     getPrompt();
-  }, [currentTheoryAndParadigm]);
+  }, [currentPrototype]);
 
   const getPrompt = () => {
     updateIsLoading(true);
@@ -195,7 +195,7 @@ const ProjectFormation = () => {
         updateIsLoading(false);
       });
   };
-  if (!currentTheoryAndParadigm) return <></>;
+  if (!currentPrototype) return <></>;
   return (
     <Box sx={{ width: "90%" }}>
       <Stack spacing="20px">

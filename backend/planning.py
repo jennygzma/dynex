@@ -1,7 +1,7 @@
 # This file handles brainstorming the design hypothesis and creating the task list.
 import json
 
-from globals import DESCRIPTION, TASK_MAP_FILE_NAME, THEORY, call_llm
+from globals import TASK_MAP_FILE_NAME, call_llm
 from utils import read_file
 
 
@@ -17,13 +17,6 @@ def get_plan_from_task_map(folder_path):
         for task_id, task_info in sorted(task_map.items())
     ]
     return json.dumps(task_list)
-
-
-def get_theories_array(theories_and_paradigms):
-    return [
-        {THEORY: theory, DESCRIPTION: details[DESCRIPTION]}
-        for theory, details in theories_and_paradigms.items()
-    ]
 
 
 def get_design_hypothesis(ui_prompt, faked_data):

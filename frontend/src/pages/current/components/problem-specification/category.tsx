@@ -43,6 +43,10 @@ const Category = ({ description, category }: CategoryProps) => {
     const updatedSpecifications = specifications.map((spec, i) =>
       i === index ? { ...spec, brainstorm: brainstorm } : spec,
     );
+    console.log("hi jneny updatedSpecifications", {
+      brainstorm,
+      updatedSpecifications,
+    });
     setSpecifications(updatedSpecifications);
   };
 
@@ -58,7 +62,7 @@ const Category = ({ description, category }: CategoryProps) => {
     axios({
       method: "GET",
       url: "/get_needs_specification",
-      data: {
+      params: {
         category: category,
       },
     })
@@ -111,6 +115,7 @@ const Category = ({ description, category }: CategoryProps) => {
       .then((response) => {
         console.log("/update_input request successful:", response.data);
         getInput();
+        getNeedsSpecification();
       })
       .catch((error) => {
         console.error("Error calling /update_input request:", error);
@@ -196,6 +201,8 @@ const Category = ({ description, category }: CategoryProps) => {
     getNeedsSpecification();
   }, [submittedProblem]);
 
+  console.log("hi jenny specifications", specifications);
+
   return (
     <Box border={5} sx={{ padding: "10px" }}>
       <Stack spacing="10px">
@@ -241,6 +248,7 @@ const Category = ({ description, category }: CategoryProps) => {
           setInput={setInput}
           onClick={updateInput}
           direction="column"
+          rows={3}
         />
         <Button
           onClick={getQuestions}
@@ -251,7 +259,7 @@ const Category = ({ description, category }: CategoryProps) => {
         >
           Specify
         </Button>
-        {specifications.map(({ question, brainstorms, answer }, index) => {
+        {specifications?.map(({ question, brainstorm, answer }, index) => {
           return (
             <Stack key={index} spacing="5px">
               <Stack direction="row" spacing="5px">
@@ -268,15 +276,15 @@ const Category = ({ description, category }: CategoryProps) => {
                   💡
                 </Button>
               </Stack>
-              {brainstorms.map((brainstorm) => {
+              {brainstorm?.map((b) => {
                 <Chip
-                  key={brainstorm}
-                  label={brainstorm}
+                  key={b}
+                  label={b}
                   onClick={() => {
-                    updateSpecificationAnswer(index, brainstorm);
+                    updateSpecificationAnswer(index, b);
                   }}
                   clickable
-                  selected={brainstorm === answer}
+                  selected={b === answer}
                 />;
               })}
               <TextField

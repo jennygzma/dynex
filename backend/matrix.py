@@ -63,7 +63,7 @@ def clean_categorization(response):
         "InteractionXIdea": "",
         "InteractionXGrounding": "",
     }"
-            Only the string form of the jsonobject should be returned. NOTHING OUTSIDE OF THE JSON OBJECT SHOULD BE RETURNED.
+            Only the jsonobject should be returned. NOTHING OUTSIDE OF THE JSON OBJECT SHOULD BE RETURNED.
             """
     res = call_llm(system_message, user_message)
     print("sucessfully called LLM for clean_categorization", res)
@@ -85,11 +85,12 @@ def get_needs_specification(category, input):
     If the problem specified has too many dimensions, then the categories would need to narrow down the specification.
     For example, if the problem says "learn japanese with flashcards and stories to learn more anime", then the “Approach Idea” category should try to narrow down the approach to either "flashcards" or "stories".
     If the prompt was "learn japanese to read and write to watch anime", then the "Person Grounding" category should narrow down the true problem goal, whether it is to "read japanese" or "write japanese" to watch anime.
-    PLEASE RETURN EITHER "True" or "False". Return True if the input has enough specificity to meet its category description, and False if it does not have enough specificity.
+    If the problem needs specification, please return "needs specification". If not, return "no specification needed". DO NOT RETURN ANYTHING ELSE.
+    ENSURE THAT THE RETURNED RESPONSE IS EITHER "needs specification" or "no specification needed".
     """
     user_message = f"This is the input: {input} for category: {category}"
     res = call_llm(system_message, user_message)
-    needs_specification = False if res=="False" else True
+    needs_specification = True if res=="needs specification" else False
     print("sucessfully called LLM for get_needs_specification", res)
     return needs_specification
 
@@ -156,7 +157,8 @@ def summarize_input_from_context(category, input, context):
         f"This is for the category {category}. This is the current input {input}. This is the current context {context}"
     )
     system_message = f"""You are a helpful assistant that helps summarize the problem specification of a given category. {MATRIX_DESCRIPTION}
-    You are provided context in question and answer form, and the current input. Based on this, for the appropriate category, the specification for that category. 
+    You are provided context in question and answer form, and the current input. Based on this, for the appropriate category, the specification for that category.
+    THE SUMMARY SHOULD BE NO MORE THAN 50 WORDS. NO NEED TO WRITE "BASED ON THE CONTEXT FROM CATEOGRY..."
     """
     res =  call_llm(system_message, user_message)
     print("sucessfully called LLM for summarize_input_from_context", res)

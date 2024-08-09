@@ -23,7 +23,7 @@ const ControlPanel = () => {
       method: "POST",
       url: "/set_current_prototype",
       data: {
-        prototype: prototype,
+        current_prototype: prototype,
       },
     })
       .then((response) => {

@@ -55,7 +55,7 @@ def get_problem():
 
 
 @app.route("/save_problem", methods=["POST"])
-def save_idea():
+def save_problem():
     print("calling save_problem...")
     globals.problem = request.json["problem"]
     date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -64,11 +64,16 @@ def save_idea():
             f"{globals.GENERATED_FOLDER_PATH}/generations_{date_time}_{uuid.uuid4()}"
         )
         create_folder(globals.folder_path)
+        create_folder(f"{globals.folder_path}/{globals.MATRIX_FOLDER_NAME}")
     create_and_write_file(
-        f"{globals.folder_path}/{globals.MATRIX_FOLDER_NAME}/{globals.PROBLEM_FILE_NAME}",
+        f"{globals.folder_path}/{globals.PROBLEM_FILE_NAME}",
         globals.problem,
     )
     globals.matrix = categorize_problem(globals.problem)
+    create_and_write_file(
+        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        json.dumps(globals.matrix),
+    )
     return jsonify({"message": "Saved problem"}), 200
 
 
@@ -94,7 +99,7 @@ def get_input():
     category = request.args.get("category")
     print(globals.matrix[category])
     return (
-        jsonify({"message": "getting input", "user": globals.matrix[category]}),
+        jsonify({"message": "getting input", "input": globals.matrix[category]}),
         200,
     )
 
@@ -104,8 +109,8 @@ def update_input():
     print("calling update_input...")
     globals.matrix[request.json["category"]] = request.json["input"]
     create_and_write_file(
-        f"{globals.folder_path}/{globals.MATRIX_FOLDER_NAME}/{globals.CATEGORY_INPUT_FILE_NAME}",
-        globals.matrix,
+        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        json.dumps(globals.matrix),
     )
     return jsonify({"message": "Updated input"}), 200
 
@@ -128,9 +133,9 @@ def get_brainstorms():
     category = request.args.get("category")
     question = request.args.get("question")
     context = get_context_from_other_inputs(globals.problem, None, globals.matrix)
-    answers = brainstorm_answers(category, question, context)
+    brainstorms = brainstorm_answers(category, question, context)
     return (
-        jsonify({"message": "Generated get_brainstorms", "answers": answers}),
+        jsonify({"message": "Generated get_brainstorms", "brainstorms": brainstorms}),
         200,
     )
 
@@ -138,23 +143,27 @@ def get_brainstorms():
 @app.route("/update_specifications", methods=["POST"])
 def update_specifications():
     print("calling update_specifications...")
-    category = request.args.get("category")
-    specifications = json.loads(request.args.get("specifications"))
+    category = request.json["category"]
+    print(request.json["specifications"])
+    specifications = request.json["specifications"]
     text = ""
     for spec in specifications:
         question = spec.get("question", "")
         answer = spec.get("answer", "")
         if answer.strip():
             text += f"{question}{answer}\n"
-
-    create_and_write_file(
-        f"{globals.folder_path}/{globals.MATRIX_FOLDER_NAME}/{globals.CATEGORY_FILE_NAME[category]}",
-        text,
-    )
     category_input = summarize_input_from_context(
         category, globals.matrix[category], text
     )
     globals.matrix[category] = category_input
+    create_and_write_file(
+        f"{globals.folder_path}/{globals.MATRIX_FOLDER_NAME}/{globals.CATEGORY_FILE_NAME[category]}",
+        text,
+    )
+    create_and_write_file(
+        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        json.dumps(globals.matrix),
+    )
     return jsonify({"message": "Saved goal"}), 200
 
 
@@ -172,7 +181,9 @@ def explore_prototype():
     context = get_context_from_other_inputs(globals.problem, None, globals.matrix)
     prompt = f"Create a web UI based on this: {context}. "
     create_and_write_file(f"{folder_path}/{globals.PROMPT_FILE_NAME}", prompt)
-    create_and_write_file(f"{folder_path}/{globals.MATRIX_FILE_NAME}", globals.matrix)
+    create_and_write_file(
+        f"{folder_path}/{globals.MATRIX_FILE_NAME}", json.dumps(globals.matrix)
+    )
     return jsonify({"message": "Saved prototype"}), 200
 
 

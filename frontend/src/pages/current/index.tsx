@@ -34,7 +34,7 @@ const Home = () => {
         >
           <img
             src={require("../../assets/franky-icon.ico")}
-            alt="chopper"
+            alt="franky"
             width="150x"
           />
           <Typography

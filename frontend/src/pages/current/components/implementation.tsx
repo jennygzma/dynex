@@ -14,7 +14,7 @@ const Implementation = () => {
     currentTask,
     currentIteration,
     updateCurrentIteration,
-    currentTheoryAndParadigm,
+    currentPrototype,
   } = useAppContext();
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
@@ -151,20 +151,14 @@ const Implementation = () => {
   };
 
   useEffect(() => {
-    if (currentTask === undefined || !currentTheoryAndParadigm) return;
+    if (currentTask === undefined || !currentPrototype) return;
     getCode();
     getCodeForIteration(currentIteration);
     setProblemDescription("");
     setClickedRender(false);
-  }, [
-    plan,
-    designHypothesis,
-    currentTask,
-    currentIteration,
-    currentTheoryAndParadigm,
-  ]);
+  }, [plan, designHypothesis, currentTask, currentIteration, currentPrototype]);
 
-  if (!currentTheoryAndParadigm) return <></>;
+  if (!currentPrototype) return <></>;
   return (
     <Box sx={{ width: "60%" }}>
       <Stack spacing="10px">

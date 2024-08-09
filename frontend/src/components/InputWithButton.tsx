@@ -28,7 +28,7 @@ const InputWithButton = ({
   disabled = false,
   direction = "row",
 }: InputWithSubmissionProps) => {
-  const [submittedInput, setSubmittedInput] = useState(true);
+  const [submittedInput, setSubmittedInput] = useState(false);
 
   return (
     <Stack direction={direction} spacing="10px" sx={{ width: { width } }}>
@@ -47,7 +47,7 @@ const InputWithButton = ({
           onClick();
           setSubmittedInput(true);
         }}
-        disabled={disabled || !submittedInput}
+        disabled={disabled || submittedInput}
         sx={{
           width: direction === "row" ? "10%" : "100%",
         }}

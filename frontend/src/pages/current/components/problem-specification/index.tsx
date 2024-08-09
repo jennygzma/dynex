@@ -32,8 +32,8 @@ const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
 };
 
 const ProjectSpecification = () => {
-  const { updateIsLoading } = useAppContext();
-  const { updateSubmittedProblem } = useMatrixContext();
+  const { updateIsLoading, updatePrototypes } = useAppContext();
+  const { submittedProblem, updateSubmittedProblem } = useMatrixContext();
   const [problem, setProblem] = useState("");
   const [prototypeName, setPrototypeName] = useState("");
 
@@ -103,11 +103,12 @@ const ProjectSpecification = () => {
       method: "POST",
       url: "/explore_prototype",
       data: {
-        prototype_name: prototypeName,
+        prototype: prototypeName,
       },
     })
       .then((response) => {
         console.log("/explore_prototype request successful:", response.data);
+        getPrototypes();
       })
       .catch((error) => {
         console.error("Error calling /explore_prototype request:", error);
@@ -117,9 +118,28 @@ const ProjectSpecification = () => {
       });
   };
 
+  const getPrototypes = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_prototypes",
+    })
+      .then((response) => {
+        console.log("/get_prototypes request successful:", response.data);
+        updatePrototypes(response.data.prototypes);
+      })
+      .catch((error) => {
+        console.error("Error calling /get_prototypes request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   useEffect(() => {
     getProblem();
     getPrototypeName();
+    getPrototypes();
   }, []);
 
   return (
@@ -142,129 +162,137 @@ const ProjectSpecification = () => {
           setInput={setProblem}
           onClick={saveProblem}
         />
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: "7%" }}></TableCell>
-                <TableCell align="center" sx={{ width: "31%" }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: "bold",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    Person
-                  </Typography>
-                </TableCell>
-                <TableCell align="center" sx={{ width: "31%" }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: "bold",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    Approach
-                  </Typography>
-                </TableCell>
-                <TableCell align="center" sx={{ width: "31%" }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: "bold",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    Interaction
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell align="right">
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: "bold",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    Idea
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Category
-                    category={"PersonXIdea"}
-                    description={MATRIX_CATEGORY_DESCRIPTIONS["PersonXIdea"]}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Category
-                    category={"ApproachXIdea"}
-                    description={MATRIX_CATEGORY_DESCRIPTIONS["ApproachXIdea"]}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Category
-                    category={"InteractionXIdea"}
-                    description={
-                      MATRIX_CATEGORY_DESCRIPTIONS["InteractionXIdea"]
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell align="right">
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: "bold",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    Grounding
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Category
-                    category="PersonXGrounding"
-                    description={
-                      MATRIX_CATEGORY_DESCRIPTIONS["PersonXGrounding"]
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Category
-                    category="ApproachXGrounding"
-                    description={
-                      MATRIX_CATEGORY_DESCRIPTIONS["ApproachXGrounding"]
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Category
-                    category="InteractionXGrounding"
-                    description={
-                      MATRIX_CATEGORY_DESCRIPTIONS["InteractionXGrounding"]
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <InputWithButton
-          className="prototyp-name"
-          label="Prototype Name"
-          input={prototypeName}
-          setInput={setPrototypeName}
-          onClick={explorePrototype}
-          direction="column"
-          buttonName="Explore Prototype"
-        />
+        {submittedProblem && (
+          <>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ width: "7%" }}></TableCell>
+                    <TableCell align="center" sx={{ width: "31%" }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        Person
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center" sx={{ width: "31%" }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        Approach
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center" sx={{ width: "31%" }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        Interaction
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell align="right">
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        Idea
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Category
+                        category={"PersonXIdea"}
+                        description={
+                          MATRIX_CATEGORY_DESCRIPTIONS["PersonXIdea"]
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Category
+                        category={"ApproachXIdea"}
+                        description={
+                          MATRIX_CATEGORY_DESCRIPTIONS["ApproachXIdea"]
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Category
+                        category={"InteractionXIdea"}
+                        description={
+                          MATRIX_CATEGORY_DESCRIPTIONS["InteractionXIdea"]
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell align="right">
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        Grounding
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Category
+                        category="PersonXGrounding"
+                        description={
+                          MATRIX_CATEGORY_DESCRIPTIONS["PersonXGrounding"]
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Category
+                        category="ApproachXGrounding"
+                        description={
+                          MATRIX_CATEGORY_DESCRIPTIONS["ApproachXGrounding"]
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Category
+                        category="InteractionXGrounding"
+                        description={
+                          MATRIX_CATEGORY_DESCRIPTIONS["InteractionXGrounding"]
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <InputWithButton
+              className="prototyp-name"
+              label="Prototype Name"
+              input={prototypeName}
+              setInput={setPrototypeName}
+              onClick={explorePrototype}
+              direction="column"
+              buttonName="Explore Prototype"
+            />
+          </>
+        )}
       </Stack>
     </Box>
   );
