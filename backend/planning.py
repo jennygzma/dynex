@@ -27,9 +27,10 @@ def get_design_hypothesis(ui_prompt, faked_data):
     """
     system_message = """
                 You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
-				Each design should detail the user interactions and design layout. IT SHOULD BE LESS THAN 150 WORDS.
+				Each design should detail the user interactions and design layout. IT SHOULD BE LESS THAN 100 WORDS.
                 Make sure that the design does not incorporate routes. Everything should exist within one page.
                 Make sure the design is consistent with the json data object provided by the user. All data shown must exist as a field on the JSON object.
+                KEEP THE APPLICATION AS SIMPLE AS POSSIBLE TO DESIGN A UI BASED ON THE PROMPT. DO NOT ADD UNNECESSARY COMPONENTS.
 				Keep in mind that we do not have the capacity to build a super fancy application. Keep the application in scope. For example, if this is the prompt:
                 "Create a web UI based on this idea: learn chinese, for users: Retired person seeking a mentally stimulating hobby and a way to connect with their cultural heritage, where the application goal is: To gain conversational fluency to communicate with family members and explore ancestral roots. Use the theory of Spaced Repetition (Reviewing information at optimal intervals reinforces memory and aids long-term retention of the language.), which with interaction pattern Interactive storytelling (A narrative-driven approach with dialogues and scenarios, reinforcing vocabulary and phrases through an engaging story with spaced repetition of key elements.) to guide the design."
                 Focus on implementing the spaced repetition part - unnecessary features like a social community feature, or working with multiple different stories is overly complex, as is is multiple decks, a setting bar, a profile page.

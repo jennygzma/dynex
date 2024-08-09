@@ -34,28 +34,29 @@ const Category = ({ description, category }: CategoryProps) => {
   const { submittedProblem } = useMatrixContext();
   const [input, setInput] = useState("");
   const [needsSpecification, setNeedsSpecification] = useState(false);
-  const [specifications, setSpecifications] = useState([]);
+  const [brianstorms, setBrainstorms] = useState([]);
+  // const [specifications, setSpecifications] = useState([]);
 
-  const updateSpecificationBrainstorm = (
-    index: number,
-    brainstorm: string[],
-  ) => {
-    const updatedSpecifications = specifications.map((spec, i) =>
-      i === index ? { ...spec, brainstorm: brainstorm } : spec,
-    );
-    console.log("hi jneny updatedSpecifications", {
-      brainstorm,
-      updatedSpecifications,
-    });
-    setSpecifications(updatedSpecifications);
-  };
+  //   const updateSpecificationBrainstorm = (
+  //     index: number,
+  //     brainstorm: string[],
+  //   ) => {
+  //     const updatedSpecifications = specifications.map((spec, i) =>
+  //       i === index ? { ...spec, brainstorm: brainstorm } : spec,
+  //     );
+  //     console.log("hi jneny updatedSpecifications", {
+  //       brainstorm,
+  //       updatedSpecifications,
+  //     });
+  //     setSpecifications(updatedSpecifications);
+  //   };
 
-  const updateSpecificationAnswer = (index: number, answer: string) => {
-    const updatedSpecifications = specifications.map((spec, i) =>
-      i === index ? { ...spec, answer: answer } : spec,
-    );
-    setSpecifications(updatedSpecifications);
-  };
+  //   const updateSpecificationAnswer = (index: number, answer: string) => {
+  //     const updatedSpecifications = specifications.map((spec, i) =>
+  //       i === index ? { ...spec, answer: answer } : spec,
+  //     );
+  //     setSpecifications(updatedSpecifications);
+  //   };
 
   const getNeedsSpecification = () => {
     updateIsLoading(true);
@@ -125,20 +126,18 @@ const Category = ({ description, category }: CategoryProps) => {
       });
   };
 
-  const getQuestions = () => {
+  const brainstormInputs = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_questions",
+      url: "/brainstorm_inputs",
       params: {
         category: category,
       },
     })
       .then((response) => {
         console.log("/get_questions request successful:", response.data);
-        setSpecifications(
-          mapQuestionsToSpecifications(response.data.questions),
-        );
+        setBrainstorms([...brianstorms, ...response.data.brainstorms]);
       })
       .catch((error) => {
         console.error("Error calling /get_questions request:", error);
@@ -148,60 +147,81 @@ const Category = ({ description, category }: CategoryProps) => {
       });
   };
 
-  const getBrainstorms = (question: string, index: number) => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_brainstorms",
-      params: {
-        category: category,
-        question: question,
-      },
-    })
-      .then((response) => {
-        console.log("/get_brainstorms request successful:", response.data);
-        updateSpecificationBrainstorm(index, response.data.brainstorms);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_brainstorms request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
+  //   const getQuestions = () => {
+  //     updateIsLoading(true);
+  //     axios({
+  //       method: "GET",
+  //       url: "/get_questions",
+  //       params: {
+  //         category: category,
+  //       },
+  //     })
+  //       .then((response) => {
+  //         console.log("/get_questions request successful:", response.data);
+  //         setSpecifications(
+  //           mapQuestionsToSpecifications(response.data.questions),
+  //         );
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error calling /get_questions request:", error);
+  //       })
+  //       .finally(() => {
+  //         updateIsLoading(false);
+  //       });
+  //   };
 
-  const updateSpecifications = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/update_specifications",
-      data: {
-        category: category,
-        specifications: specifications,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/update_specifications request successful:",
-          response.data,
-        );
-        getInput();
-        getNeedsSpecification();
-      })
-      .catch((error) => {
-        console.error("Error calling /update_specifications request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
+  //   const getBrainstorms = (question: string, index: number) => {
+  //     updateIsLoading(true);
+  //     axios({
+  //       method: "GET",
+  //       url: "/get_brainstorms",
+  //       params: {
+  //         category: category,
+  //         question: question,
+  //       },
+  //     })
+  //       .then((response) => {
+  //         console.log("/get_brainstorms request successful:", response.data);
+  //         updateSpecificationBrainstorm(index, response.data.brainstorms);
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error calling /get_brainstorms request:", error);
+  //       })
+  //       .finally(() => {
+  //         updateIsLoading(false);
+  //       });
+  //   };
+
+  //   const updateSpecifications = () => {
+  //     updateIsLoading(true);
+  //     axios({
+  //       method: "POST",
+  //       url: "/update_specifications",
+  //       data: {
+  //         category: category,
+  //         specifications: specifications,
+  //       },
+  //     })
+  //       .then((response) => {
+  //         console.log(
+  //           "/update_specifications request successful:",
+  //           response.data,
+  //         );
+  //         getInput();
+  //         getNeedsSpecification();
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error calling /update_specifications request:", error);
+  //       })
+  //       .finally(() => {
+  //         updateIsLoading(false);
+  //       });
+  //   };
 
   useEffect(() => {
     getInput();
     getNeedsSpecification();
   }, [submittedProblem]);
-
-  console.log("hi jenny specifications", specifications);
 
   return (
     <Box border={5} sx={{ padding: "10px" }}>
@@ -242,15 +262,37 @@ const Category = ({ description, category }: CategoryProps) => {
         >
           {description}
         </Typography>
+        <Button
+          onClick={brainstormInputs}
+          disabled={!needsSpecification}
+          sx={{
+            width: "100%",
+          }}
+        >
+          Brainstorm
+        </Button>
+        {brianstorms?.map((brainstorm) => {
+          return (
+            <Chip
+              key={brainstorm}
+              label={brainstorm}
+              onClick={() => {
+                setInput(brainstorm);
+              }}
+              clickable
+              selected={brainstorm === input}
+            />
+          );
+        })}
         <InputWithButton
           label="Input"
           input={input}
           setInput={setInput}
           onClick={updateInput}
           direction="column"
-          rows={3}
+          rows={category.includes("Idea") ? 1 : 5}
         />
-        <Button
+        {/* <Button
           onClick={getQuestions}
           disabled={!needsSpecification}
           sx={{
@@ -307,7 +349,7 @@ const Category = ({ description, category }: CategoryProps) => {
           }}
         >
           Update Specifications
-        </Button>
+        </Button> */}
       </Stack>
     </Box>
   );

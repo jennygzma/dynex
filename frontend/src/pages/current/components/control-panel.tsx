@@ -13,6 +13,7 @@ const ControlPanel = () => {
     updateCurrentIteration,
     updateIsLoading,
     prototypes,
+    updatePrototypes,
     currentPrototype,
     updateCurrentPrototype,
   } = useAppContext();
@@ -40,7 +41,9 @@ const ControlPanel = () => {
       });
   };
 
-  if (prototypes?.length === 0) return <></>;
+  useEffect(() => {}, [prototypes]);
+
+  if (prototypes?.length === 0 || !prototypes) return <></>;
 
   return (
     <Box sx={{ width: "40%" }}>
@@ -58,7 +61,7 @@ const ControlPanel = () => {
         {prototypes && (
           <Stack direction="row" spacing="10px">
             <Stack sx={{ width: "100%" }}>
-              {prototypes.map((prototype) => {
+              {prototypes?.map((prototype) => {
                 return (
                   <Stack spacing="10px">
                     <Card
@@ -79,7 +82,21 @@ const ControlPanel = () => {
                         }}
                         sx={{ padding: "15px" }}
                       >
-                        <Typography>{prototype}</Typography>
+                        <Stack
+                          direction="row"
+                          sx={{ justifyContent: "space-between" }}
+                        >
+                          <Typography>{prototype}</Typography>
+                          <Button
+                            onClick={() =>
+                              updatePrototypes(
+                                prototypes.filter((p) => p !== prototype),
+                              )
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </Stack>
                       </CardActionArea>
                       {currentPrototype === prototype && (
                         <Stack

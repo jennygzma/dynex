@@ -13,8 +13,9 @@ from code_generation import (
     wipeout_code,
 )
 from flask import Flask, jsonify, request
+from matrix import brainstorm_answers
+from matrix import brainstorm_inputs as brainstorm_generated_inputs
 from matrix import (
-    brainstorm_answers,
     brainstorm_questions,
     categorize_problem,
     get_context_from_other_inputs,
@@ -89,6 +90,18 @@ def get_needs_specification():
                 "needs_specification": needs_specification,
             }
         ),
+        200,
+    )
+
+
+@app.route("/brainstorm_inputs", methods=["GET"])
+def brainstorm_inputs():
+    print("calling brainstorm_inputs...")
+    category = request.args.get("category")
+    context = get_context_from_other_inputs(globals.problem, None, globals.matrix)
+    brainstorms = brainstorm_generated_inputs(category, context)
+    return (
+        jsonify({"message": "Generated brainstorm_inputs", "brainstorms": brainstorms}),
         200,
     )
 
@@ -203,6 +216,15 @@ def set_current_prototype():
     print("calling set_current_prototype...")
     data = request.json
     globals.current_prototype = data["current_prototype"]
+    globals.matrix = json.loads(
+        read_file(
+            f"{globals.folder_path}/{globals.current_prototype}/{globals.MATRIX_FILE_NAME}"
+        )
+    )
+    create_and_write_file(
+        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        json.dumps(globals.matrix),
+    )
     return (
         jsonify(
             {
@@ -694,20 +716,13 @@ def get_test_cases_per_lock_step():
 def set_globals_for_uuid(generated_uuid):
     print("calling set_globals_for_uuid")
     globals.folder_path = f"{globals.GENERATED_FOLDER_PATH}/{generated_uuid}"
-    globals.idea = read_file(f"{globals.folder_path}/{globals.IDEA_FILE_NAME}")
-    globals.user = read_file(f"{globals.folder_path}/{globals.USER_FILE_NAME}")
-    globals.goal = read_file(f"{globals.folder_path}/{globals.GOAL_FILE_NAME}")
-    globals.theories_and_paradigms = (
-        json.loads(
-            read_file(
-                f"{globals.folder_path}/{globals.THEORIES_AND_PARADIGMS_FILE_NAME}"
-            )
-        )
-        if file_exists(
-            f"{globals.folder_path}/{globals.THEORIES_AND_PARADIGMS_FILE_NAME}"
-        )
-        else {}
+    globals.prototypes = json.loads(
+        read_file(f"{globals.folder_path}/{globals.PROTOTYPES}")
     )
+    globals.matrix = json.loads(
+        read_file(f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}")
+    )
+    globals.problem = read_file(f"{globals.folder_path}/{globals.PROBLEM_FILE_NAME}")
     return jsonify({"message": "Successfully set global fields"}), 200
 
 

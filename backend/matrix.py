@@ -5,8 +5,8 @@ from globals import call_llm
 
 PPAI_DESCRIPTION = """When we create a UI based on a particular problem, we define it with a 3x2 problem matrix.
 First, we problem further into 3 categories: Person, Approach, and Interaction Paradigm.
-Within each category, there are 2 more sub-categories: idea and grounding.
-"""
+Within each category, there are 2 more sub-categories: idea and grounding."""
+
 CATEGORY_DESCRIPTIONS = {
     "PersonXIdea": "Within the person section, the idea subsection identifies who the application is for. It defines the target user group or demographic. Are you designing the app for students, professionals, children, elderly people, people with specific needs or conditions, etc.?",
     "PersonXGrounding": "Within the person section and the grounding subsection, we dig deeper into understanding the user's goals and context. Specifically: What does the user aim to achieve with this app? What specific problem does the user have? Why is this problem difficult to solve? Why are existing solutions inadequate? What gaps or shortcomings do they have that your application will address?",
@@ -15,6 +15,44 @@ CATEGORY_DESCRIPTIONS = {
     "InteractionXIdea": "Within the interaction section and the idea subsection we contemplate the general design of the user interface. How should the UI look and what interactions should the user have with it? Consider how the design aligns with the users' needs and expectations.",
     "InteractionXGrounding": "Within the interaction section and the grounding subsection, we delve into the specifics of the UI components and user interactions: What general information will be shown in each UI component? What kinds of interactions will the user have with the UI? For example, will there be buttons to click, swipes, drag-and-drop features, form fields?",
 }
+
+PPAI_EXAMPLES = """
+Here are some examples:
+
+OKCupid -
+PersonXIdea: Someone looking to date.
+PersonXGrounding: It is hard to search for people to date that are compatible and match what you want.
+ApproachXIdea: Searchable Database - allow people to search for what they want.
+ApproachXGrounding: The attributes that users should be able to search for include Age, Ethnicity, Religion, Preferences (e.g., interests, lifestyle choices, relationship goals). These criteria help users narrow down potential matches to those who align with their personal values, beliefs, and desires.
+InteractionXIdea: Faceted Browsing
+InteractionXGrounding: The facets that should be available include Age, Ethnicity, Religion, Interests, Relationship Goals, Location, and possibly more detailed preferences like education level, political views, or hobbies. These facets allow users to customize their search results by applying multiple filters, making the browsing experience more relevant and efficient.
+
+Tinder:
+PersonXIdea: Someone looking to hookup or date.
+PersonXGrounding: It is hard to search for people to date because it's hard to know what to search. Also, you don't know what they look like.
+ApproachXIdea: Lower the cognitive load - have less information to allow people to make lots of easy judgements
+ApproachXGrounding: The select bits of information that should be shown include the user's photo (primary focus), first name, age, and a brief bio or tagline. Optional details like distance or mutual interests can also be included, but the goal is to keep the information minimal to facilitate fast decision-making.
+InteractionXIdea: Card Swipe
+InteractionXGrounding: Each card should prominently feature the user's photo, taking up most of the card space. Below or alongside the photo, the card should display the user's first name, age, and a brief bio or tagline. Additional icons or indicators for mutual interests, distance, or other relevant details can be shown in a subtle manner. The layout should be clean and focused, ensuring that users can make quick judgments based primarily on the visual appeal and a few key details.
+
+Coffee Meets Bagel:
+PersonXIdea: Someone looking for a more serious relationship.
+PersonXGrounding: Searching or swiping through a lot of matches is difficult and not intentional.
+ApproachXIdea: Lower the cognitive load by having less matches to make more intentional judgements
+ApproachXGrounding: Matches should be selected based on compatibility factors such as shared values, relationship goals, and lifestyle preferences. The algorithm should prioritize quality over quantity, focusing on users with a higher likelihood of a meaningful connection. The information shown should include the user’s photo, name, age, a well-thought-out bio, key interests or hobbies, and a brief summary of relationship preferences or goals. This curated approach ensures that each match is more likely to be relevant and meaningful.
+InteractionXIdea: Feed view with 5 matches to read
+InteractionXGrounding: : Each "post" in the feed should feature a user’s photo as the focal point, followed by their name and age. The post should also include a concise bio that highlights their personality, interests, and what they’re looking for in a relationship. Additionally, it could show a few shared interests or mutual connections, along with a brief summary of why the match was selected. The layout should encourage thoughtful consideration, presenting just enough information to pique interest without overwhelming the user.
+"""
+
+APPROACH_EXAMPLES = """Approaches focus more on what ideas should be implemented as the core logic (backend) of the application based on person context on what the problem is.
+It could be a theory within a domain the app will be built in like spaced repetition for learning apps, subjective expected utility for recommendation or search apps, CBT or ACT for mental health apps, gamification, or CLT for decisionmaking.
+It could be an app solution, such as a rules-based system, Uber for X (airBnb is uber for homes), marketplace system, workflow system, database (logging or reading), social network
+"""
+
+INTERACTION_EXAMPLES = """The Interaction focuses on the UI Paradigm in the front end, such as the layout and interactoin paradigms.
+Examples include chatbot (messaging), cardswipe (tinder), feed (facebook, tiktok, twitter, news), faceted browsing, carousel, table (gmail).
+Approaches generally have a simple basic for UI which people gravitate towards (a searchable database can easily have a table-like UI, but pairing approaches with non-obvious UIs is interesting)
+"""
 
 MATRIX_DESCRIPTION = f"{PPAI_DESCRIPTION} + {" ".join(CATEGORY_DESCRIPTIONS.values())}"
 
@@ -93,6 +131,22 @@ def get_needs_specification(category, input):
     needs_specification = True if res=="needs specification" else False
     print("sucessfully called LLM for get_needs_specification", res)
     return needs_specification
+
+def brainstorm_inputs(category, context):
+    print("calling LLM for brainstorm_inputs...")
+    user_message = f"This is the category you are brainstorming for: {category}."
+    system_message = f"""You are a helpful assistant that helps brainstorm specification answers for a category to narrow down inputs. {MATRIX_DESCRIPTION} {APPROACH_EXAMPLES} {INTERACTION_EXAMPLES}
+    {PPAI_EXAMPLES}
+    Here is the context for this problem: {context}
+    For the Idea categories (PersonXIdea, ApproachXIdea, InteractionXIdea), the answers SHOULD BE LESS THAN 15 WORDS.
+    For the Grounding Categories (PersonXGrounding, ApproachXGrounding, InteractionXGrounding), the answers SHOULD BE LESS THAN 50 WORDS
+    Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
+    Only return 3 brainstorms.
+    """
+    res = "here are the users: " + call_llm(system_message, user_message)
+    brainstorms = cleanup_array(res)
+    print("sucessfully called LLM for brainstorm_inputs", res)
+    return brainstorms
 
 def brainstorm_questions(category, input, context):
     print("calling LLM for brainstorm_questions...")

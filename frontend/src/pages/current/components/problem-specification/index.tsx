@@ -18,21 +18,22 @@ import { CategoryType, useMatrixContext } from "../../hooks/matrix-context";
 
 const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
   PersonXIdea:
-    "This identifies who the application is for. It defines the target user group or demographic. Are you designing the app for students, professionals, children, elderly people, people with specific needs or conditions, etc.?",
+    "This identifies who the application is for. It defines the target user group or demographic.",
   PersonXGrounding:
-    "Here, we dig deeper into understanding the user's goals and context. Specifically: What does the user aim to achieve with this app? What specific problem does the user have? Why is this problem difficult to solve? Why are existing solutions inadequate? What gaps or shortcomings do they have that your application will address?",
+    "Here, we dig deeper into understanding the he underlying challenges, realities, or constraints that the individual faces in trying to achieve their goal. This represents the contextual factors or pain points that shape their experience.",
   ApproachXIdea:
-    "Here, we think about how we conceptualize the method or strategy to tackle the identified problem. What kind of approach will you use to solve the user's problem? Are you using an algorithm, an existing theory, workflow, or innovative process?",
+    "Here, we think about how the conceptual strategy, theory, or logical framework that guides the solution or system design. This reflects the abstract approach or methodology used to address the user’s goal.",
   ApproachXGrounding:
-    "Here, we focus on the tangible details of making the approach feasible and effective for the target users. What are the essential components and features required to implement the approach effectively? How will you bring this approach to life?",
+    "Here, we focus on the he specific, practical considerations or decisions that translate the abstract strategy into actionable features or processes, taking into account the user's needs and the context.",
   InteractionXIdea:
-    "This contemplates the general design of the user interface. How should the UI look and what interactions should the user have with it? Consider how the design aligns with the users' needs and expectations.",
+    "This contemplates he design or pattern of interaction that defines how users engage with the system. This focuses on the conceptual model of the user interface or user experience.",
   InteractionXGrounding:
-    "Here, we delve into the specifics of the UI components and user interactions: What general information will be shown in each UI component? What kinds of interactions will the user have with the UI? For example, will there be buttons to click, swipes, drag-and-drop features, form fields?",
+    "Here, we delve into the he specific elements, content, or interaction mechanisms that make the abstract UI paradigm meaningful and effective in the given context.",
 };
 
 const ProjectSpecification = () => {
-  const { updateIsLoading, updatePrototypes } = useAppContext();
+  const { currentPrototype, updateIsLoading, updatePrototypes } =
+    useAppContext();
   const { submittedProblem, updateSubmittedProblem } = useMatrixContext();
   const [problem, setProblem] = useState("");
   const [prototypeName, setPrototypeName] = useState("");
@@ -138,9 +139,12 @@ const ProjectSpecification = () => {
 
   useEffect(() => {
     getProblem();
-    getPrototypeName();
     getPrototypes();
   }, []);
+
+  useEffect(() => {
+    getPrototypeName();
+  }, [currentPrototype]);
 
   return (
     <Box>
