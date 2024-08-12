@@ -1,10 +1,11 @@
 import { Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
-import UserSpecification from "./components/user-specification";
 import CodeGeneration from "./components/implementation";
 import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
 import ControlPanel from "./components/control-panel";
+import ProblemSpecification from "./components/problem-specification";
+import { MatrixProvider } from "./hooks/matrix-context";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
@@ -33,7 +34,7 @@ const Home = () => {
         >
           <img
             src={require("../../assets/franky-icon.ico")}
-            alt="chopper"
+            alt="franky"
             width="150x"
           />
           <Typography
@@ -45,10 +46,12 @@ const Home = () => {
               fontFamily: "monospace",
             }}
           >
-            THEORY2CODE
+            DYNAEXPRO
           </Typography>
         </Stack>
-        <UserSpecification />
+        <MatrixProvider>
+          <ProblemSpecification />
+        </MatrixProvider>
         <Stack direction="row">
           <ControlPanel />
           <CodeGeneration />

@@ -27,6 +27,7 @@ const Iterations = () => {
     updateCurrentIteration,
     updateCurrentTask,
     designHypothesis,
+    currentPrototype,
   } = useAppContext();
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
   const [updatedNewTaskDescription, setUpdatedNewTaskDescription] =
@@ -68,6 +69,7 @@ const Iterations = () => {
       })
       .catch((error) => {
         console.error("Error calling /get_plan request:", error);
+        updatePlan([]);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -180,7 +182,7 @@ const Iterations = () => {
     axios({
       method: "POST",
       url: "/delete_code_per_step_per_iteration",
-      params: {
+      data: {
         task_id: currentTask.taskId,
         iteration: iteration,
       },
@@ -233,8 +235,8 @@ const Iterations = () => {
 
   useEffect(() => {
     getPlan();
-  }, []);
-  useEffect(() => {}, [plan, designHypothesis]);
+  }, [currentPrototype]);
+  useEffect(() => {}, [plan, designHypothesis, currentPrototype]);
   useEffect(() => {
     if (currentTask === undefined) return;
     setUpdatedNewTaskDescription(false);
@@ -268,7 +270,7 @@ const Iterations = () => {
             width: "100%",
           }}
         >
-          {plan ? "Regenerate Plan" : "Create Plan"}
+          {plan?.length !== 0 ? "Regenerate Plan" : "Create Plan"}
         </Button>
         {plan && (
           <Stack direction="row" spacing="10px">
@@ -347,7 +349,7 @@ const Iterations = () => {
             </Stack>
           </Stack>
         )}
-        <Box
+        {/* <Box
           border={5}
           sx={{
             justifyContent: "center",
@@ -377,7 +379,7 @@ const Iterations = () => {
                 ))}
             </Stack>
           </Stack>
-        </Box>
+        </Box> */}
         <Box
           border={5}
           sx={{
