@@ -15,6 +15,7 @@ const ProjectFormation = () => {
   } = useAppContext();
 
   const [dataInput, setDataInput] = useState("");
+  const [dataIteration, setDataIteration] = useState("");
   const [UIPrompt, setUIPrompt] = useState("");
   const [updatedPrompt, setUpdatedPrompt] = useState(false);
   const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
@@ -73,6 +74,9 @@ const ProjectFormation = () => {
     axios({
       method: "POST",
       url: "/generate_fake_data",
+      data: {
+        user_iteration: dataIteration,
+      },
     })
       .then((response) => {
         console.log("/generate_fake_data request successful:", response.data);
@@ -285,6 +289,17 @@ const ProjectFormation = () => {
             >
               Fake Data
             </Typography>
+            <TextField
+              className={"generated-data"}
+              label="Data Input Suggestions"
+              variant="outlined"
+              multiline
+              rows={2}
+              value={dataIteration}
+              onChange={(e) => {
+                setDataIteration(e.target.value);
+              }}
+            />
             <Button
               onClick={generateFakeData}
               disabled={!UIPrompt || !designHypothesis}

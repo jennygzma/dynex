@@ -235,6 +235,7 @@ const Iterations = () => {
 
   useEffect(() => {
     getPlan();
+    updateCurrentIteration(0);
   }, [currentPrototype]);
   useEffect(() => {}, [plan, designHypothesis, currentPrototype]);
   useEffect(() => {

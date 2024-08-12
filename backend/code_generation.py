@@ -108,7 +108,7 @@ sample_code = """
 </html>
 """
 
-def get_fake_data(design_hypothesis):
+def get_fake_data(design_hypothesis, user_input):
 	print("calling LLM for get_fake_data...")
 	system_message = """
         You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. THE USER INPUT WILL INCLUDE THE DATA FIELDS. PLEASE INCLUDE ALL FIELDS THE USER INPUT SUGGEST. Here is an example:
@@ -145,7 +145,7 @@ def get_fake_data(design_hypothesis):
         2. Array length should be length 20.
         3. Please ensure that the generated data makes sense.
     """
-	user_message = "please generate data given this UI: " + design_hypothesis
+	user_message = f"please generate data given this UI: {design_hypothesis}. Factor in this user suggestion into generating the data: {user_input}"
 	res = call_llm(system_message, user_message)
 	print("sucessfully called LLM for get_fake_data", res)
 	return res

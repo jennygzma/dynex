@@ -75,11 +75,12 @@ For Tinder, where the ApproachXIdea is "lower coginitive load to make lots of ju
 For Coffee Meets Bagel, where the ApproachXIdea is "lower the cognitive load to think more intentially about matches by having fewer matches", the ApproachXGrounding should focus on what information to show and how the few matches should be selected for the user, since the ProblemXGrounding is that it's hard to make intentional matches when you have a million options.
 Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code."""
 
-INTERACTIONXGROUDNING_EXAMPLES = """Interaction Grounding should focus on how exactly the interaction idea of the UI Paradigm should be implemented, while factoring in other context.
+INTERACTIONXGROUNDING_EXAMPLES = """Interaction Grounding should focus on how exactly the interaction idea of the UI Paradigm should be implemented, while factoring in other context.
 For example, for OkCupid, where the InteractionXIdea is "Faceted Browsing", the InteractionXGrounding should figure out what facets are needed in the UI for a good searchable experience to find partners.
 For Tinder, where the InteractionXIdea is "card swipe", the InteractionXGrounding should figure out what is shown on each card and how information is laid out.
 For Coffee Meets Bagel, where the InteractionXIdea is "Feed with 5 options for potential partners", the ApproachXGrounding should focus on what information to show for each partner and how it is laid out.
 Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos, so do not return solutions that are out of scope.
+Additionally, the UI created will be on the web, not a mobile app, so only come up with interaction groundings rooted in webapps.
 """
 
 MATRIX_EXAMPLES = {
@@ -88,7 +89,7 @@ MATRIX_EXAMPLES = {
     "ApproachXIdea": APPROACHXIDEA_EXAMPLES,
     "ApproachXGrounding": APPROACHXGROUDING_EXAMPLES,
     "InteractionXIdea": INTERACTIONXIDEA_EXAMPLES,
-    "InteractionXGrounding": INTERACTIONXGROUDNING_EXAMPLES,
+    "InteractionXGrounding": INTERACTIONXGROUNDING_EXAMPLES,
 }
 
 MATRIX_DESCRIPTION = f"{PPAI_DESCRIPTION} + {" ".join(MATRIX_DESCRIPTIONS.values())}"
@@ -180,11 +181,11 @@ def brainstorm_inputs(category, context):
     {PPAI_EXAMPLES}
     Here is the context for this problem: {context}
     {MATRIX_EXAMPLES[category]}
-    For the Idea categories (PersonXIdea, ApproachXIdea, InteractionXIdea), the answers SHOULD BE LESS THAN 15 WORDS.
+    For the Idea categories (PersonXIdea, ApproachXIdea, InteractionXIdea), the answers SHOULD BE LESS THAN 15 WORDS. ALL THE ANSWERS MUST BE DIFFERENT FROM ONE ANOTHER.
     For the Grounding Categories (PersonXGrounding, ApproachXGrounding, InteractionXGrounding), the answers SHOULD BE LESS THAN 50 WORDS
     The answers should be as specific as possible.
     Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
-    Only return AT MOST 3 brainstorms. If you cannot come up with 3 brainstorms, only come up with 1 or 2.
+    Only return AT MOST 3 brainstorms. If you cannot come up with 3 SIGNIFICANTLY DIFFERENT brainstorms, ONLY RETURN 1 BRAINSTORM.
     """
     res = "here are the users: " + call_llm(system_message, user_message, llm="openai")
     brainstorms = cleanup_array(res)
