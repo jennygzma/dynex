@@ -173,7 +173,7 @@ def get_plan(design_hypothesis):
         using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
-		Please limit the plan to 3 steps.
+		Please limit the plan to 2 or 3 steps at maximum.
 		"""
     system_message = "You are a helpful software engineer to answer questions related to implementing this UI."
     res = call_llm(system_message, user_message)

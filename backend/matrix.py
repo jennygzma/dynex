@@ -121,7 +121,7 @@ def categorize_problem(problem):
     }}
     """
     user_message = f"This is the user problem: {problem}"
-    res = call_llm(system_message, user_message)
+    res = call_llm(system_message, user_message, llm="openai")
     matrix = clean_categorization(f"response: {res}")
     print("sucessfully called LLM for categorize_problem", res)
     return matrix
@@ -141,7 +141,7 @@ def clean_categorization(response):
     }"
             Only the jsonobject should be returned. NOTHING OUTSIDE OF THE JSON OBJECT SHOULD BE RETURNED.
             """
-    res = call_llm(system_message, user_message)
+    res = call_llm(system_message, user_message, llm="openai")
     print("sucessfully called LLM for clean_categorization", res)
     cleaned = res
     try:
@@ -166,7 +166,7 @@ def get_needs_specification(category, input):
     ENSURE THAT THE RETURNED RESPONSE IS EITHER "needs specification" or "no specification needed".
     """
     user_message = f"This is the input: {input} for category: {category}"
-    res = call_llm(system_message, user_message)
+    res = call_llm(system_message, user_message, llm="openai")
     needs_specification = True if res=="needs specification" else False
     print("sucessfully called LLM for get_needs_specification", res)
     return needs_specification
@@ -186,7 +186,7 @@ def brainstorm_inputs(category, context):
     Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
     Only return AT MOST 3 brainstorms. If you cannot come up with 3 brainstorms, only come up with 1 or 2.
     """
-    res = "here are the users: " + call_llm(system_message, user_message)
+    res = "here are the users: " + call_llm(system_message, user_message, llm="openai")
     brainstorms = cleanup_array(res)
     print("sucessfully called LLM for brainstorm_inputs", res)
     return brainstorms
@@ -203,7 +203,7 @@ def brainstorm_questions(category, input, context):
         Format the the responses in an array like so: ["Should the approach be flashcard, or quiz format?", "Are there theories to support learning Japanese"]
     Only return 3 brainstormed questions for this category.
     """
-    res = "here are the questions: " + call_llm(system_message, user_message)
+    res = "here are the questions: " + call_llm(system_message, user_message, llm="openai")
     theories = cleanup_array(res)
     print("sucessfully called LLM for brainstorm_questions", res)
     return theories
@@ -223,7 +223,7 @@ def brainstorm_answers(category, question, context):
     Format the brainstormed goals in an array like so: ["get nails for prom as soon as possible", "explore nail salons in NYC"]
     Only return 3 brainstormed answers.
     """
-    res = "here are the brainstoremd answers: " + call_llm(system_message, user_message)
+    res = "here are the brainstoremd answers: " + call_llm(system_message, user_message, llm="openai")
     theories = cleanup_array(res)
     print("sucessfully called LLM for brainstorm_answers", res)
     return theories
@@ -233,12 +233,12 @@ def cleanup_array(brainstorms):
     print("calling LLM for cleanup_array...")
     user_message = f"Please clean up the response so it only returns the array. This is the response: {brainstorms}"
     system_message = """You are an assistant to clean up GPT responses into an array.
-			The response should be as formatted: "[
+			The response should be as formatted: [
                 "a", "b", "c"
-            ]"
-            Only the string form of the array should be returned. NOTHING OUTSIDE OF THE ARRAY SHOULD BE RETURNED.
+            ]
+            Only the array should be returned. NOTHING OUTSIDE OF THE ARRAY SHOULD BE RETURNED.
             """
-    res = call_llm(system_message, user_message)
+    res = call_llm(system_message, user_message, llm="openai")
     print("sucessfully called LLM for cleanup_brainstorms", res)
     cleaned = res
     try:
@@ -257,6 +257,6 @@ def summarize_input_from_context(category, input, context):
     You are provided context in question and answer form, and the current input. Based on this, for the appropriate category, the specification for that category.
     THE SUMMARY SHOULD BE NO MORE THAN 50 WORDS. NO NEED TO WRITE "BASED ON THE CONTEXT FROM CATEOGRY..."
     """
-    res =  call_llm(system_message, user_message)
+    res =  call_llm(system_message, user_message, llm="openai")
     print("sucessfully called LLM for summarize_input_from_context", res)
     return res

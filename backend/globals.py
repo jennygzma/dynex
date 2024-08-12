@@ -12,19 +12,17 @@ LLM = "anthropic"
 # Load variables from .env file
 load_dotenv()
 
-api_key_name = "ANTHROPIC_API_KEY" if globals.LLM == "anthropic" else "OPENAI_API_KEY"
-api_key = os.getenv(api_key_name)
+anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
-if globals.LLM == "anthropic":
-    client = Anthropic(api_key=api_key)
-else:
-    client = OpenAI(api_key=api_key)
+anthropic_client = Anthropic(api_key=anthropic_api_key)
+openai_client = OpenAI(api_key=openai_api_key)
 
 
-def call_llm(system_message, user_message):
-    if globals.LLM == "anthropic":
+def call_llm(system_message, user_message, llm=globals.LLM):
+    if llm == "anthropic":
         temperature = secrets.randbelow(10**6) / 10**6
-        message = client.messages.create(
+        message = anthropic_client.messages.create(
             model="claude-3-sonnet-20240229",
             max_tokens=4096,
             temperature=temperature,
@@ -42,7 +40,7 @@ def call_llm(system_message, user_message):
             "content": user_message,
         },
     ]
-    message = client.chat.completions.create(model="gpt-4", messages=messages)
+    message = openai_client.chat.completions.create(model="gpt-4", messages=messages)
     return message.choices[0].message.content
 
 
