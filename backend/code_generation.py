@@ -1,5 +1,6 @@
 # This file handles saving mocked data, generating, and cleaning up the code based on the task list
 import json
+import os
 
 import globals
 from globals import call_llm
@@ -29,6 +30,8 @@ from utils import (
 # checked.html - checked code
 # cleaned.html - cleaned code
 
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
 get_faked_data_code = """
 useEffect(() => {
         fetch('http://127.0.0.1:5000/get_faked_data')
@@ -37,6 +40,578 @@ useEffect(() => {
           .catch(error => console.error('Error fetching data:', error));
       }, []);
 """
+
+sample_gojs_code = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal Tracking Mind Map</title>
+  <!-- Load React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel for JSX transformation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Load MUI from CDN -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
+  <!-- Load GoJS for mind map visualization -->
+  <script src="https://unpkg.com/gojs/release/go.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const {
+      Box,
+      Container,
+      Typography,
+      Drawer,
+      Button,
+      TextField,
+      IconButton,
+      Divider,
+      List,
+      ListItem,
+      ListItemText,
+      ListItemSecondaryAction,
+      Dialog,
+      DialogTitle,
+      DialogContent,
+      DialogActions,
+    } = MaterialUI;
+
+    const { useState, useEffect, useRef } = React;
+
+    function App() {
+      const [goals, setGoals] = useState([]);
+      const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+      const [newGoal, setNewGoal] = useState({ title: '', description: '' });
+      const [editingGoal, setEditingGoal] = useState(null);
+      const [isDialogOpen, setIsDialogOpen] = useState(false);
+      const diagramRef = useRef(null);
+
+      useEffect(() => {
+        initMindMap([]);
+      }, []);
+
+      const toggleDrawer = () => {
+        setIsDrawerOpen(!isDrawerOpen);
+      };
+
+      const handleInputChange = (event) => {
+        setNewGoal({ ...newGoal, [event.target.name]: event.target.value });
+      };
+
+      const handleAddGoal = () => {
+        if (newGoal.title.trim()) {
+          const newGoalData = { ...newGoal, id: Date.now().toString(), status: 'Not Started', subgoals: [] };
+          const updatedGoals = [...goals, newGoalData];
+          setGoals(updatedGoals);
+          updateMindMap(updatedGoals);
+          setNewGoal({ title: '', description: '' });
+          toggleDrawer();
+        }
+      };
+
+      const handleEditGoal = (goal) => {
+        setEditingGoal(goal);
+        setIsDialogOpen(true);
+      };
+
+      const handleUpdateGoal = () => {
+        const updatedGoals = goals.map(g => (g.id === editingGoal.id ? editingGoal : g));
+        setGoals(updatedGoals);
+        updateMindMap(updatedGoals);
+        setEditingGoal(null);
+        setIsDialogOpen(false);
+      };
+
+      const handleDeleteGoal = (goalToDelete) => {
+        const updatedGoals = goals.filter(g => g.id !== goalToDelete.id);
+        setGoals(updatedGoals);
+        updateMindMap(updatedGoals);
+      };
+
+      const initMindMap = (data) => {
+        const $ = go.GraphObject.make;
+        const diagram = $(go.Diagram, "mindMapDiv", {
+          "undoManager.isEnabled": true,
+          layout: $(go.TreeLayout, {
+            angle: 90,
+            layerSpacing: 35,
+          }),
+          initialContentAlignment: go.Spot.Center,
+        });
+
+        diagram.nodeTemplate =
+          $(go.Node, 'Auto',
+            new go.Binding('text', 'title'),
+            $(go.Shape, 'RoundedRectangle', {
+              fill: 'lightblue',
+              stroke: null,
+            }),
+            $(go.TextBlock, {
+              margin: 8,
+              maxSize: new go.Size(160, NaN),
+              wrap: go.TextBlock.WrapFit,
+              editable: true,
+            }, new go.Binding('text', 'title'))
+          );
+
+        diagram.linkTemplate =
+          $(go.Link,
+            $(go.Shape, { strokeWidth: 2 }),
+            $(go.Shape, { toArrow: 'Standard' })
+          );
+
+        diagram.model = new go.TreeModel(data);
+        diagramRef.current = diagram;
+      };
+
+      const updateMindMap = (data) => {
+        const diagram = diagramRef.current;
+        diagram.model = new go.TreeModel(data);
+      };
+
+      return (
+        <Container maxWidth="xl">
+          <Box display="flex" height="100vh">
+            <Box flex={3} position="relative">
+              <Typography variant="h4" gutterBottom>
+                Goal Tracking Mind Map
+              </Typography>
+              <Box
+                sx={{
+                  border: '1px solid #ccc',
+                  height: '80vh',
+                }}
+                id="mindMapDiv"
+              >
+              </Box>
+            </Box>
+            <Box flex={1}>
+              <Typography variant="h5" gutterBottom>
+                Goal Management
+              </Typography>
+              <Button variant="contained" onClick={toggleDrawer}>
+                Add Goal
+              </Button>
+              <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer}>
+                <Box p={2} width={300}>
+                  <Typography variant="h6" gutterBottom>
+                    Add New Goal
+                  </Typography>
+                  <TextField
+                    label="Title"
+                    name="title"
+                    value={newGoal.title}
+                    onChange={handleInputChange}
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    label="Description"
+                    name="description"
+                    value={newGoal.description}
+                    onChange={handleInputChange}
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                  />
+                  <Button variant="contained" onClick={handleAddGoal}>
+                    Add Goal
+                  </Button>
+                </Box>
+              </Drawer>
+              <Divider />
+              <List>
+                {goals.map((goal) => (
+                  <ListItem key={goal.id}>
+                    <ListItemText primary={goal.title} secondary={goal.description} />
+                    <ListItemSecondaryAction>
+                      <IconButton edge="end" onClick={() => handleEditGoal(goal)}>
+                        <i className="material-icons">edit</i>
+                      </IconButton>
+                      <IconButton edge="end" onClick={() => handleDeleteGoal(goal)}>
+                        <i className="material-icons">delete</i>
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          </Box>
+          <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+            <DialogTitle>Edit Goal</DialogTitle>
+            <DialogContent>
+              <TextField
+                label="Title"
+                value={editingGoal?.title || ''}
+                onChange={(e) => setEditingGoal({ ...editingGoal, title: e.target.value })}
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                label="Description"
+                value={editingGoal?.description || ''}
+                onChange={(e) => setEditingGoal({ ...editingGoal, description: e.target.value })}
+                fullWidth
+                multiline
+                rows={4}
+                margin="normal"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleUpdateGoal}>Save</Button>
+            </DialogActions>
+          </Dialog>
+        </Container>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
+"""
+sample_gpt_hook = f"""
+try {{
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {{
+    method: 'POST',
+    headers: {{
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer {openai_api_key}`
+    }},
+    body: JSON.stringify({{
+      model: 'gpt-4',
+      messages: [
+        {{
+          role: 'system',
+          content: 'You are a helpful assistant providing clothing recommendations based on user preferences.'
+        }},
+        {{
+          role: 'user',
+          content: `
+          Based on the following preferences, provide a list of recommended clothing items in the following JSON format:
+          [
+            {{
+              "id": 6,
+              "itemName": "Striped T-Shirt",
+              "description": "A classic striped t-shirt made of 100% cotton.",
+              "imageUrl": "https://example.com/striped-tshirt.jpg",
+              "size": "M",
+              "brand": "H&M",
+              "price": 19.99
+            }},
+            ...
+          ]
+
+          Preferences: XYX
+
+          Ensure the JSON is valid and adheres strictly to this format. Do not type any additional text, only provide the JSON.
+          `
+        }}
+      ]
+    }})
+  }});
+
+  const result = await response.json();
+  const parsedData = JSON.parse(result.choices[0].message.content);
+  setRecommendations(parsedData);
+}} catch (err) {{
+  setError(err.message);
+}} finally {{
+  setLoading(false);
+}}
+"""
+
+sample_gpt_image_code = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clothing Recommender App</title>
+  <!-- Load React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel for JSX transformation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Load MUI from CDN -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const {{
+      Container,
+      Typography,
+      Grid,
+      Card,
+      CardContent,
+      CardMedia,
+      IconButton,
+      Box,
+      List,
+      ListItem,
+      ListItemText,
+      FormControl,
+      FormLabel,
+      FormGroup,
+      FormControlLabel,
+      Checkbox,
+      Button,
+    }} = MaterialUI;
+
+    const {{ useState, useEffect }} = React;
+
+    function App() {{
+      const [surveyData, setSurveyData] = useState([]);
+      const [recommendations, setRecommendations] = useState([]);
+      const [savedItems, setSavedItems] = useState([]);
+      const [selectedOptions, setSelectedOptions] = useState({{}});
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState(null);
+
+      useEffect(() => {{
+        fetch('http://127.0.0.1:5000/get_faked_data')
+          .then(response => response.json())
+          .then(data => {{
+            const parsedData = JSON.parse(data.faked_data);
+            setSurveyData(parsedData.filter(item => item.surveyQuestion));
+            setRecommendations(parsedData.filter(item => !item.surveyQuestion));
+          }})
+          .catch(error => console.error('Error fetching data:', error));
+      }}, []);
+
+      const handleSaveItem = (item) => {{
+        setSavedItems([...savedItems, item]);
+      }};
+
+      const handleRemoveItem = (item) => {{
+        setSavedItems(savedItems.filter(savedItem => savedItem.id !== item.id));
+      }};
+
+      const handleOptionChange = (event, surveyId) => {{
+        setSelectedOptions({{
+          ...selectedOptions,
+          [surveyId]: event.target.checked
+            ? [...(selectedOptions[surveyId] || []), event.target.value]
+            : selectedOptions[surveyId].filter(option => option !== event.target.value),
+        }});
+      }};
+
+      const handleSearch = async () => {{
+        setLoading(true);
+        setError(null);
+
+        const selectedOptionsArray = Object.entries(selectedOptions).flatMap(([surveyId, options]) =>
+          options.map(option => `${{surveyData.find(survey => survey.id === parseInt(surveyId)).surveyQuestion}}: ${{option}}`)
+        );
+
+        const searchPrompt = selectedOptionsArray.join('\\n');
+
+        try {{
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {{
+            method: 'POST',
+            headers: {{
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer {openai_api_key}`
+            }},
+            body: JSON.stringify({{
+              model: 'gpt-4',
+              messages: [
+                {{
+                  role: 'system',
+                  content: 'You are a helpful assistant providing clothing recommendations based on user preferences.'
+                }},
+                {{
+                  role: 'user',
+                  content: `
+                  Based on the following preferences, provide a list of recommended clothing items in the following JSON format:
+                  [
+                    {{
+                      "id": 6,
+                      "itemName": "Striped T-Shirt",
+                      "description": "A classic striped t-shirt made of 100% cotton.",
+                      "size": "M",
+                      "brand": "H&M",
+                      "price": 19.99
+                    }},
+                    ...
+                  ]
+
+                  Preferences:
+                  ${{searchPrompt}}
+
+                  Ensure the JSON is valid and adheres strictly to this format. Do not type any additional text, only provide the JSON.
+                  `
+                }}
+              ]
+            }})
+          }});
+
+          const result = await response.json();
+          const parsedData = JSON.parse(result.choices[0].message.content);
+
+          // Fetch images for each recommendation
+          for (let i = 0; i < parsedData.length; i++) {{
+            const item = parsedData[i];
+            const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {{
+              method: 'POST',
+              headers: {{
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer {openai_api_key}`
+              }},
+              body: JSON.stringify({{
+                prompt: `An image of a ${{item.description}}, brand ${{item.brand}}, size ${{item.size}}.`,
+                n: 1,
+                size: "128x128"
+              }})
+            }});
+
+            const imageResult = await imageResponse.json();
+            item.imageUrl = imageResult.data[0].url;  // Assuming the image URL is returned here
+            console.log(item.imageUrl);
+          }}
+
+          setRecommendations(parsedData);
+        }} catch (err) {{
+          setError(err.message);
+        }} finally {{
+          setLoading(false);
+        }}
+      }};
+
+      return (
+        <Container maxWidth="lg">
+          <Typography variant="h4" component="h1" gutterBottom>
+            Clothing Recommender App
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h5" component="h2">
+                    Survey
+                  </Typography>
+                  {{surveyData.map(survey => (
+                    <FormControl component="fieldset" key={{survey.id}}>
+                      <FormLabel component="legend">{{survey.surveyQuestion}}</FormLabel>
+                      <FormGroup>
+                        {{survey.options.map(option => (
+                          <FormControlLabel
+                            key={{option}}
+                            control={{
+                              <Checkbox
+                                checked={{selectedOptions[survey.id]?.includes(option) || false}}
+                                onChange={{(event) => handleOptionChange(event, survey.id)}}
+                                value={{option}}
+                              />
+                            }}
+                            label={{option}}
+                          />
+                        ))}}
+                      </FormGroup>
+                    </FormControl>
+                  ))}}
+                  <Button variant="contained" color="primary" onClick={{handleSearch}}disabled={{loading}}>
+                    {{loading ? 'Loading...' : 'Search'}}
+                  </Button>
+                  {{error && <Typography color="error">{{error}}</Typography>}}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12} md={8}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h5" component="h2">
+                    Recommendations
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {{recommendations.map(item => (
+                      <Grid item xs={12} sm={6} md={4} key={{item.id}}>
+                        <Card>
+                          <CardMedia
+                            component="img"
+                            height="140"
+                            image={{item.imageUrl}}
+                            alt={{item.itemName}}
+                          />
+                          <CardContent>
+                            <Typography gutterBottom variant="h6" component="h3">
+                              {{item.itemName}}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" component="p">
+                              {{item.description}}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" component="p">
+                              Size: {{item.size}}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" component="p">
+                              Brand: {{item.brand}}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" component="p">
+                              Price: ${{item.price}}
+                            </Typography>
+                            <Box mt={2}>
+                              <IconButton
+                                aria-label="Save Item"
+                                onClick={{() => handleSaveItem(item)}}
+                              >
+                                <i className="material-icons">favorite_border</i>
+                              </IconButton>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}}
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Card>
+            <CardContent>
+              <Typography variant="h5" component="h2">
+                Saved Items
+              </Typography>
+              <List>
+                {{savedItems.map(item => (
+                  <ListItem key={{item.id}}>
+                    <ListItemText
+                      primary={{item.itemName}}
+                      secondary={{`${{item.brand}} - $${{item.price}}`}}
+                    />
+                    <IconButton
+                      aria-label="Remove Item"
+                      onClick={{() => handleRemoveItem(item)}}
+                    >
+                      <i className="material-icons">remove_circle_outline</i>
+                    </IconButton>
+                  </ListItem>
+                ))}}
+            </CardContent>
+          </Card>
+        </Container>
+      );
+    }}
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
+"""
+
 sample_code = """
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +626,6 @@ sample_code = """
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <!-- Load MUI from CDN -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
 </head>
 <body>
@@ -108,6 +682,21 @@ sample_code = """
 </html>
 """
 
+code_rules= f"""
+Make sure to implement all that is specified in the task and do not leave anything else. Follow these rules when writing code:
+1. The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS. The design should not incorporate routes. Everything should exist within one page. No need for design mockups, wireframes, or external dependencies.
+2. The entire app will be written using React and MUI. Load MUI from the CDN. Here is an example: {sample_code}
+3. DO NOT DELETE PREVIOUS CODE. DO NOT RETURN A CODE SNIPPET. RETURN THE ENTIRE CODE. Only ADD to existing code to implement the task properly. DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /*...rest of the code */ or something similar.
+4. Grab existing data to help build the application through an endpoint like so: {get_faked_data_code}. USE THIS ENDPOINT TO GRAB THE DATA.
+5. If the app requires it, it can call OpenAI for additional data or API calls like so: {sample_gpt_hook}. If the app requires images, it can also call GPT to grab images like in this example: {sample_gpt_image_code}
+6. If the app requires some visualization element like a pie chart or a bar chart, you can load chart.js from the CDN like so: : <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>.
+Ensure that when creating a chart, we do not run into the error where the `useEffect` hook in the `PieChart` or whatever chart component we are creating component is a new instance of the `Chart` object every time the component re-renders, without destroying the previous instance. To fix this, we need to store a reference to the chart instance and destroy it before creating a new one.
+7. If the app requires visualization such as  a flow chart, mind map, or tree, you can use GoJS from the CDN like so:  {sample_gojs_code}
+8. If the app would be better with animation, use three.js from the CDN like so:   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+9. DO NOT LOAD ANYTHING ELSE IN THE CDN UNLESS YOU ARE CONFIDENT THAT IT WOULD WORK. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
+10. Do not return separate code files. All the components should be in one code file and returned.
+11. Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
+"""
 def get_fake_data(design_hypothesis, user_input):
 	print("calling LLM for get_fake_data...")
 	system_message = """
@@ -172,19 +761,13 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 				Currently, you are working on this task: {task}.
 				For context, this is the faked_data: {faked_data}
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
-				DO NOT USE MUI ICON.
-				Please add to the existing code and implement this task. Write React and MUI code, and html, javascript, and css.
-				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.
-				DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /* ... (rest of the code) */.
-				RETURN THE ENTIRE RELEVANT CODE TO HAVE THE APP WORK.
-				MAKE SURE ALL THE HOOK TO GRAB THE FAKED_DATA IS INSIDE THE CODE.
-                Return the FULL CODE NEEDED TO HAVE THE APP WORK, INSIDE THE INDEX.HTML file.
+				{code_rules}
 """
 	code = call_llm(system_message, user_message)
 	create_and_write_file(task_merged_code_file_path, code)
 	merged_code_lines = len(code.splitlines())
 	previous_code_lines=len(previous_code.splitlines())
-	if previous_code_lines-10 > merged_code_lines:
+	if previous_code_lines-50 > merged_code_lines:
 		print("trying again... writing code failed...")
 		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data)
 	print("sucessfully called LLM for get_ui_code", code)
@@ -220,18 +803,8 @@ def implement_first_task(design_hypothesis, task, task_merged_code_file_path, fa
 	print("calling LLM for implement_first_task...")
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
-                You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
-				You are creating the initial index.html file for the code to create the basic HTML structure of the code as specified by the task. Only implement what is stated in the task.
-				MAKE SURE TO IMPLEMENT ALL FEATURES STATED IN THE TASK. DO NOT LEAVE ANYTHING OUT.
-				DO NOT USE MUI ICON.
-                The index.html file will load React and MUI libraries from a CDN. Here is an example of the html file that will be generated: {sample_code}
-				For context, this is the faked_data: {faked_data}
-                Make sure to grab the faked_data data by using a hook with code similar to this: {get_faked_data_code}. PLEASE USE THIS ENDPOIINT TO GRAB DATA.
-
-                Follow these rules while writing the code.
-				1. Only HTML, Javascript, and CSS code. Particularly, write the script part using React and MUI libraries.
-				2. Do not return separate files code. Compile it all together in one file in one component and only send me the code.
-				3. Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
+                You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}. Here is the faked data for context: {faked_data}.
+				{code_rules}
             """
 	code = call_llm(system_message, user_message)
 	print("called LLM for initial html file code", code)
@@ -251,7 +824,6 @@ def implement_first_task(design_hypothesis, task, task_merged_code_file_path, fa
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <!-- Load MUI from CDN -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
 </head>
 <body>
@@ -333,9 +905,9 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
                 A coding task has been implemented for a project we are working on.
 				For context, this is the project description: {design_hypothesis}. The task was this: {task}. This is the faked_data: {faked_data}
 				However, the task was not implemented fully correctly. The user explains what is wrong in the problem {problem}.
-				There is already existing code in the index.html file. Using the existing code {task_code}.
-				Please add to the existing code and fix the problem. Write React and MUI code, and html, javascript, and css.
-				PLEASE DO NOT DELETE EXISTING CODE. DO NOT DELETE EXISTING DATA.
+				There is already existing code in the index.html file. Using the existing code {task_code}. Please fix the problem.
+				{code_rules}
+				PLEASE DO NOT DELETE EXISTING CODE.
                 Return the FULL CODE NEEDED TO HAVE THE APP WORK, INSIDE THE INDEX.HTML file.
             """
     iterated_code = call_llm(system_message, user_message)
@@ -387,7 +959,6 @@ def cleanup_code(cleaned_code_file_path, code_file_path, task_main_code_file_pat
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <!-- Load MUI from CDN -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <script src="https://unpkg.com/@mui/material@5.0.0-rc.1/umd/material-ui.development.js" crossorigin></script>
 </head>
 <body>

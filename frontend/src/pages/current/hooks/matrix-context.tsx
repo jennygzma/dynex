@@ -28,6 +28,8 @@ export interface MatrixState {
   ) => void;
   submittedProblem: boolean;
   updateSubmittedProblem: Dispatch<SetStateAction<boolean>>;
+  updatedMatrix: boolean;
+  updateUpdatedMatrix: Dispatch<SetStateAction<boolean>>;
 }
 
 export const MatrixContext = createContext<MatrixState | undefined>(undefined);
@@ -36,6 +38,8 @@ export const useMatrixContext = () => useContext(MatrixContext);
 
 export const MatrixProvider = ({ children }) => {
   const [submittedProblem, updateSubmittedProblem] = useState(false);
+  const [updatedMatrix, updateUpdatedMatrix] = useState(false);
+
   const [matrixCategoryInfo, setUpdateMatrixCategoryInfo] = useState<
     Record<CategoryType, MatrixCategory>
   >({
@@ -89,6 +93,8 @@ export const MatrixProvider = ({ children }) => {
         updateMatrixCategoryInfo,
         submittedProblem,
         updateSubmittedProblem,
+        updatedMatrix,
+        updateUpdatedMatrix,
       }}
     >
       {children}

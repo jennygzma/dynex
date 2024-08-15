@@ -31,7 +31,7 @@ const mapQuestionsToSpecifications = (
 
 const Category = ({ description, category }: CategoryProps) => {
   const { updateIsLoading, currentPrototype } = useAppContext();
-  const { submittedProblem } = useMatrixContext();
+  const { submittedProblem, updateUpdatedMatrix } = useMatrixContext();
   const [input, setInput] = useState("");
   const [needsSpecification, setNeedsSpecification] = useState(false);
   const [brainstorms, setBrainstorms] = useState([]);
@@ -137,7 +137,11 @@ const Category = ({ description, category }: CategoryProps) => {
     })
       .then((response) => {
         console.log("/brainstorm_inputs request successful:", response.data);
-        setBrainstorms(response.data.brainstorms);
+        if (category.includes("Grounding") && !category.includes("Person")) {
+          setBrainstorms(response.data.brainstorms);
+        } else {
+          setBrainstorms(response.data.brainstorms);
+        }
       })
       .catch((error) => {
         console.error("Error calling /brainstorm_inputs request:", error);
@@ -225,6 +229,7 @@ const Category = ({ description, category }: CategoryProps) => {
 
   useEffect(() => {
     setBrainstorms([]);
+    getInput();
   }, [currentPrototype]);
 
   return (
@@ -296,7 +301,10 @@ const Category = ({ description, category }: CategoryProps) => {
           label="Input"
           input={input}
           setInput={setInput}
-          onClick={updateInput}
+          onClick={() => {
+            updateInput();
+            updateUpdatedMatrix(true);
+          }}
           direction="column"
           rows={category.includes("Idea") ? 1 : 5}
         />

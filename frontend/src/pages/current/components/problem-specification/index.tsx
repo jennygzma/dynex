@@ -34,7 +34,12 @@ const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
 const ProjectSpecification = () => {
   const { currentPrototype, updateIsLoading, updatePrototypes } =
     useAppContext();
-  const { submittedProblem, updateSubmittedProblem } = useMatrixContext();
+  const {
+    submittedProblem,
+    updateSubmittedProblem,
+    updatedMatrix,
+    updateUpdatedMatrix,
+  } = useMatrixContext();
   const [problem, setProblem] = useState("");
   const [prototypeName, setPrototypeName] = useState("");
 
@@ -140,7 +145,6 @@ const ProjectSpecification = () => {
   useEffect(() => {
     getProblem();
     getPrototypes();
-    if (currentPrototype) getPrototypeName();
   }, []);
 
   useEffect(() => {
@@ -292,9 +296,13 @@ const ProjectSpecification = () => {
               label="Prototype Name"
               input={prototypeName}
               setInput={setPrototypeName}
-              onClick={explorePrototype}
+              onClick={() => {
+                explorePrototype();
+                updateUpdatedMatrix(false);
+              }}
               direction="column"
               buttonName="Explore Prototype"
+              disabled={!updatedMatrix}
             />
           </>
         )}

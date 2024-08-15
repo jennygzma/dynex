@@ -114,7 +114,7 @@ const Iterations = () => {
         getPlan();
         setClickedAddStep(false);
         setAddStepNewTaskDescription(undefined);
-        updateCurrentTask(plan[plan.length - 1]);
+        updateCurrentTask(plan[plan.length]);
       })
       .catch((error) => {
         console.error("Error calling /add_step_in_plan request:", error);
@@ -171,6 +171,7 @@ const Iterations = () => {
           "Error calling /get_iteration_map_per_step request:",
           error,
         );
+        updateIterations(undefined);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -250,7 +251,9 @@ const Iterations = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     getIterations();
-  }, [currentIteration, currentTask]);
+  }, [plan, currentIteration, currentTask, currentPrototype]);
+
+  if (!designHypothesis) return <></>;
 
   return (
     <Box sx={{ width: "90%" }}>

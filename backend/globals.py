@@ -60,7 +60,6 @@ CATEGORY_FILE_NAME = {
     "InteractionXGrounding": "InteractionXGrounding.txt",
 }
 PROMPT_FILE_NAME = "prompt.txt"
-CATEGORY_INPUT_FILE_NAME = "inputs.txt"
 TASK_MAP_FILE_NAME = "task_map.json"
 
 GENERATED_FOLDER_PATH = "generated"

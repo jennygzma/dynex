@@ -62,7 +62,7 @@ Keep in mind that we cannot support AI features (such as AI-convesational chat-b
 """
 
 INTERACTIONXIDEA_EXAMPLES = """The Interaction ideas focuses on the UI Paradigm in the front end, such as the layout and interactoin paradigms.
-Examples include chatbot (messaging), cardswipe (tinder), feed (facebook, tiktok, twitter, news), faceted browsing, carousel, table (gmail).
+Examples include chatbot (messaging), cardswipe (tinder), feed (facebook, tiktok, twitter, news), faceted browsing, table (gmail).
 Approaches generally have a simple basic for UI which people gravitate towards (a searchable database can easily have a table-like UI, but pairing approaches with non-obvious UIs is interesting)
 Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos, so do not return solutions that are out of scope.
 """
@@ -97,11 +97,18 @@ MATRIX_DESCRIPTION = f"{PPAI_DESCRIPTION} + {" ".join(MATRIX_DESCRIPTIONS.values
 def get_context_from_other_inputs(problem, category, matrix):
     print(matrix)
     compiled_text = problem
+    if category is not None and "Idea" in category:
+        skipped = category.replace("Idea", "Grounding")
+    else:
+        skipped = ""
+
     for key, value in matrix.items():
         if key == category:
             continue
         if not value:
-            compiled_text += f"There is no input for the {key} section.\n"
+            continue
+        if category is not None and "Idea" in category and key == skipped:
+            continue
         else:
             compiled_text += f"For the {key} section, the input is: {value}\n"
     return compiled_text
@@ -182,10 +189,26 @@ def brainstorm_inputs(category, context):
     Here is the context for this problem: {context}
     {MATRIX_EXAMPLES[category]}
     For the Idea categories (PersonXIdea, ApproachXIdea, InteractionXIdea), the answers SHOULD BE LESS THAN 15 WORDS. ALL THE ANSWERS MUST BE DIFFERENT FROM ONE ANOTHER.
-    For the Grounding Categories (PersonXGrounding, ApproachXGrounding, InteractionXGrounding), the answers SHOULD BE LESS THAN 50 WORDS
+    For the Grounding Categories (PersonXGrounding, ApproachXGrounding, InteractionXGrounding), the answers SHOULD BE 50 to 100 WORDS
     The answers should be as specific as possible.
     Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
-    Only return AT MOST 3 brainstorms. If you cannot come up with 3 SIGNIFICANTLY DIFFERENT brainstorms, ONLY RETURN 1 BRAINSTORM.
+    Only return AT MOST 3 brainstorms. They must all be SIGNIFICANTLY DIFFERENT than one another. If they are not significantly different, ONLY RETURN 1 BRAINSTORM.
+
+    For example, these 3 brainstorms are SIMILAR, so only one should be returned:
+    1. The essential features for the simple logging system would be a user-friendly interface for manual entry of food items along with a comprehensive, searchable database of common foods and their nutritional information. To tackle the problem of homemade meals and foods without a barcode, the system should enable users to save and quickly relog personal meal recipes with their nutrition facts.
+    2. A comprehensive database of food items along with their nutritional information could be included for generic foods. The logging system should be able to provide a fast way of searching through the database. For user convenience, frequently logged foods and meals should be suggested first. As well, an option for users to manually input nutrition facts for homemade meals or foods without a barcode should be considered.
+    3. The logging system could include a feature to easily find and enter food items from a wide range of brands, restaurants, or common homemade meals, which would automatically provide the nutritional information. To make it easier to input homemade dishes, the system s
+
+    Here is another example of 3 SAME brainstorms, so only one should be returned:
+    1. Each food entry cell should include the item’s name, quantity, calorie content, and buttons for editing, duplicating, or deleting the entry. The top of the page should feature an interactive pie chart displaying the user's current protein, carbs, and fat intake in comparison with their daily targets, along with a progress bar showing the percentage of their daily calorie limit consumed.
+    2. Every food entry row should present food name, quantity consumed, and its calorie count. Users can use action buttons to edit or delete an entry. A dynamic pie chart, updated with every entry, should sit on the header of the page showing the distribution of proteins, carbs, and fats consumed. Besides that, a progress bar indicating the percentage of the total calorie intake can provide quick glance.
+    3. The diary layout should list the name, quantity, and calorie content of each food item. Reusable controls for modification and deletion of entries should be available. The main UI should feature an interactive pie chart for macronutrient distribution, and a running progress bar below it to demonstrate the consumed calories against the daily calorie goal.
+
+
+    Another example, for these 3 brainstorms, the first one is different than the second and third, so only the first 2 brainstorms should be returned:
+    1. Each food entry in the diary layout should display the item’s name, calorie content, macronutrient breakdown, and meal time. Additionally, a visual indication of the user's daily calorie limit and current consumption will assist in quick contrast and decision making.
+    2. Each entry in the food diary layout displays the food name, brand (if applicable), serving quantity, total calories, and macronutrients. Interactive components like checkbox for marking an item as eaten, a 'favorite' star to save often consumed food and a delete icon for efficient diary management.
+    3. User interface should show each logged food item with their respective calorie and macronutrient count. There should be an option to modify or delete each entry. An ongoing tally of consumed versus targeted calories can be presented on the top of the screen for better visibility.
     """
     res = "here are the users: " + call_llm(system_message, user_message, llm="openai")
     brainstorms = cleanup_array(res)

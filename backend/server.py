@@ -15,11 +15,7 @@ from code_generation import (
 from flask import Flask, jsonify, request
 from matrix import brainstorm_answers
 from matrix import brainstorm_inputs as brainstorm_generated_inputs
-from matrix import (
-    brainstorm_questions,
-    categorize_problem,
-    get_context_from_other_inputs,
-)
+from matrix import brainstorm_questions, get_context_from_other_inputs
 from matrix import get_needs_specification as check_needs_specification
 from matrix import summarize_input_from_context
 from planning import get_design_hypothesis as get_generated_design_hypothesis
@@ -70,9 +66,9 @@ def save_problem():
         f"{globals.folder_path}/{globals.PROBLEM_FILE_NAME}",
         globals.problem,
     )
-    globals.matrix = categorize_problem(globals.problem)
+    # globals.matrix = categorize_problem(globals.problem)
     create_and_write_file(
-        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        f"{globals.folder_path}/{globals.MATRIX_FILE_NAME}",
         json.dumps(globals.matrix),
     )
     return jsonify({"message": "Saved problem"}), 200
@@ -122,7 +118,7 @@ def update_input():
     print("calling update_input...")
     globals.matrix[request.json["category"]] = request.json["input"]
     create_and_write_file(
-        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        f"{globals.folder_path}/{globals.MATRIX_FILE_NAME}",
         json.dumps(globals.matrix),
     )
     return jsonify({"message": "Updated input"}), 200
@@ -174,7 +170,7 @@ def update_specifications():
         text,
     )
     create_and_write_file(
-        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        f"{globals.folder_path}/{globals.MATRIX_FILE_NAME}",
         json.dumps(globals.matrix),
     )
     return jsonify({"message": "Saved goal"}), 200
@@ -222,7 +218,7 @@ def set_current_prototype():
         )
     )
     create_and_write_file(
-        f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}",
+        f"{globals.folder_path}/{globals.MATRIX_FILE_NAME}",
         json.dumps(globals.matrix),
     )
     return (
@@ -724,7 +720,7 @@ def set_globals_for_uuid(generated_uuid):
         read_file(f"{globals.folder_path}/{globals.PROTOTYPES}")
     )
     globals.matrix = json.loads(
-        read_file(f"{globals.folder_path}/{globals.CATEGORY_INPUT_FILE_NAME}")
+        read_file(f"{globals.folder_path}/{globals.MATRIX_FILE_NAME}")
     )
     globals.problem = read_file(f"{globals.folder_path}/{globals.PROBLEM_FILE_NAME}")
     return jsonify({"message": "Successfully set global fields"}), 200
