@@ -15,7 +15,7 @@ from code_generation import (
 from flask import Flask, jsonify, request
 from matrix import brainstorm_answers
 from matrix import brainstorm_inputs as brainstorm_generated_inputs
-from matrix import brainstorm_questions, get_context_from_other_inputs
+from matrix import brainstorm_question, get_context_from_other_inputs
 from matrix import get_needs_specification as check_needs_specification
 from matrix import summarize_input_from_context
 from planning import get_design_hypothesis as get_generated_design_hypothesis
@@ -94,8 +94,9 @@ def get_needs_specification():
 def brainstorm_inputs():
     print("calling brainstorm_inputs...")
     category = request.args.get("category")
+    iteration = request.args.get("iteration")
     context = get_context_from_other_inputs(globals.problem, None, globals.matrix)
-    brainstorms = brainstorm_generated_inputs(category, context)
+    brainstorms = brainstorm_generated_inputs(category, context, iteration)
     return (
         jsonify({"message": "Generated brainstorm_inputs", "brainstorms": brainstorms}),
         200,
@@ -124,14 +125,14 @@ def update_input():
     return jsonify({"message": "Updated input"}), 200
 
 
-@app.route("/get_questions", methods=["GET"])
-def get_questions():
-    print("calling get_questions...")
+@app.route("/get_question", methods=["GET"])
+def get_question():
+    print("calling get_question...")
     category = request.args.get("category")
     context = get_context_from_other_inputs(globals.problem, category, globals.matrix)
-    questions = brainstorm_questions(category, globals.matrix[category], context)
+    question = brainstorm_question(category, context)
     return (
-        jsonify({"message": "Generated get_questions", "questions": questions}),
+        jsonify({"message": "Generated get_question", "question": question}),
         200,
     )
 

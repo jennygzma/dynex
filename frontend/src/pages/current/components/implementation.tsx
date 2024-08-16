@@ -234,7 +234,7 @@ const Implementation = () => {
                       fontFamily: "monospace",
                     }}
                   >
-                    Iterate, Debug, or Repair
+                    Iterate
                   </Typography>
                   <TextField
                     className={"problem"}
