@@ -28,6 +28,7 @@ def get_design_hypothesis(ui_prompt, faked_data):
     system_message = """
                 You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
 				Each design should detail the user interactions and design layout. IT SHOULD BE LESS THAN 100 WORDS.
+                If needed, we can call GPT, so if the design requires dynamic data or personalization, it should be written in the design to call GPT.
                 Make sure that the design does not incorporate routes. Everything should exist within one page.
                 Make sure the design is consistent with the json data object provided by the user. All data shown must exist as a field on the JSON object.
                 KEEP THE APPLICATION AS SIMPLE AS POSSIBLE TO DESIGN A UI BASED ON THE PROMPT. DO NOT ADD UNNECESSARY COMPONENTS.
@@ -162,18 +163,21 @@ def get_plan(design_hypothesis):
     user_message = f"""I want to create a UI with this design: {design_hypothesis}.
         Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features.
         The first step should focus on creating the general structure of the app.
-        For example, if creating a facebook news feed UI, the steps could be: 1) Create general structure of app where users should be able to post statuses and have it be added to the timeline. 2) Users should be able to like and comment on posts.
-		Assume all the code will exist in one react App.js file, and that the UI will render in one page with no backend.
 		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
         All the code will be in React and MUI.
         Make sure that the design does not incorporate routes. Everything should exist within one page.
         Placeholder data already exists. There should be NO task for mocking placeholder data, or populating the cards with placeholder data, since that already exists.
+        If the app requires it, it can call OpenAI for additional data or API calls. If the app requires images, it can also call GPT to grab images.
+        If the app requires some visualization element like a pie chart or a bar chart, you can load chart.js from the CDN.
+        If the app requires visualization such as  a flow chart, mind map, or tree, you can use GoJS from the CDN.
+        If the app would be better with animation, use three.js from the CDN.
+        DO NOT LOAD ANYTHING ELSE IN THE CDN UNLESS YOU ARE CONFIDENT THAT IT WOULD WORK. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
         Additionally, keep in mind that we are attempting to test the application created. So, if the application for example implements spaced repetition that has different algorithms each day,
         If necessary, factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in
         using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
-		Please limit the plan to 2 or 3 steps at maximum.
+        Limit the plan to 2-3 steps.
 		"""
     system_message = "You are a helpful software engineer to answer questions related to implementing this UI."
     res = call_llm(system_message, user_message)

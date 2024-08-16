@@ -1,4 +1,4 @@
-import { Badge, Stack, Tooltip, Typography } from "@mui/material";
+import { Badge, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Box from "../../../../components/Box";
@@ -36,27 +36,30 @@ const Category = ({ description, category }: CategoryProps) => {
   const [needsSpecification, setNeedsSpecification] = useState(false);
   const [brainstorms, setBrainstorms] = useState([]);
   // const [specifications, setSpecifications] = useState([]);
+  const [question, setQuestion] = useState("");
+  const [iteration, setIteration] = useState("");
+  const isGrounding = category.includes("Grounding");
 
-  //   const updateSpecificationBrainstorm = (
-  //     index: number,
-  //     brainstorm: string[],
-  //   ) => {
-  //     const updatedSpecifications = specifications.map((spec, i) =>
-  //       i === index ? { ...spec, brainstorm: brainstorm } : spec,
-  //     );
-  //     console.log("hi jneny updatedSpecifications", {
-  //       brainstorm,
-  //       updatedSpecifications,
-  //     });
-  //     setSpecifications(updatedSpecifications);
-  //   };
+  // const updateSpecificationBrainstorm = (
+  //   index: number,
+  //   brainstorm: string[],
+  // ) => {
+  //   const updatedSpecifications = specifications.map((spec, i) =>
+  //     i === index ? { ...spec, brainstorm: brainstorm } : spec,
+  //   );
+  //   console.log("hi jneny updatedSpecifications", {
+  //     brainstorm,
+  //     updatedSpecifications,
+  //   });
+  //   setSpecifications(updatedSpecifications);
+  // };
 
-  //   const updateSpecificationAnswer = (index: number, answer: string) => {
-  //     const updatedSpecifications = specifications.map((spec, i) =>
-  //       i === index ? { ...spec, answer: answer } : spec,
-  //     );
-  //     setSpecifications(updatedSpecifications);
-  //   };
+  // const updateSpecificationAnswer = (index: number, answer: string) => {
+  //   const updatedSpecifications = specifications.map((spec, i) =>
+  //     i === index ? { ...spec, answer: answer } : spec,
+  //   );
+  //   setSpecifications(updatedSpecifications);
+  // };
 
   const getNeedsSpecification = () => {
     updateIsLoading(true);
@@ -133,12 +136,13 @@ const Category = ({ description, category }: CategoryProps) => {
       url: "/brainstorm_inputs",
       params: {
         category: category,
+        iteration: iteration,
       },
     })
       .then((response) => {
         console.log("/brainstorm_inputs request successful:", response.data);
-        if (category.includes("Grounding") && !category.includes("Person")) {
-          setBrainstorms(response.data.brainstorms);
+        if (category.includes("Grounding")) {
+          setBrainstorms([response.data.brainstorms]);
         } else {
           setBrainstorms(response.data.brainstorms);
         }
@@ -151,50 +155,51 @@ const Category = ({ description, category }: CategoryProps) => {
       });
   };
 
-  //   const getQuestions = () => {
-  //     updateIsLoading(true);
-  //     axios({
-  //       method: "GET",
-  //       url: "/get_questions",
-  //       params: {
-  //         category: category,
-  //       },
+  // const getQuestion = () => {
+  //   updateIsLoading(true);
+  //   axios({
+  //     method: "GET",
+  //     url: "/get_question",
+  //     params: {
+  //       category: category,
+  //     },
+  //   })
+  //     .then((response) => {
+  //       console.log("/get_question request successful:", response.data);
+  //       // setSpecifications(
+  //       //   mapQuestionsToSpecifications(response.data.questions),
+  //       // );
+  //       setQuestion(response.data.question);
   //     })
-  //       .then((response) => {
-  //         console.log("/get_questions request successful:", response.data);
-  //         setSpecifications(
-  //           mapQuestionsToSpecifications(response.data.questions),
-  //         );
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error calling /get_questions request:", error);
-  //       })
-  //       .finally(() => {
-  //         updateIsLoading(false);
-  //       });
-  //   };
+  //     .catch((error) => {
+  //       console.error("Error calling /get_questions request:", error);
+  //     })
+  //     .finally(() => {
+  //       updateIsLoading(false);
+  //     });
+  // };
 
-  //   const getBrainstorms = (question: string, index: number) => {
-  //     updateIsLoading(true);
-  //     axios({
-  //       method: "GET",
-  //       url: "/get_brainstorms",
-  //       params: {
-  //         category: category,
-  //         question: question,
-  //       },
+  // const getBrainstorms = (question: string, index: number) => {
+  //   updateIsLoading(true);
+  //   axios({
+  //     method: "GET",
+  //     url: "/get_brainstorms",
+  //     params: {
+  //       category: category,
+  //       question: question,
+  //     },
+  //   })
+  //     .then((response) => {
+  //       console.log("/get_brainstorms request successful:", response.data);
+  //       updateSpecificationBrainstorm(index, response.data.brainstorms);
   //     })
-  //       .then((response) => {
-  //         console.log("/get_brainstorms request successful:", response.data);
-  //         updateSpecificationBrainstorm(index, response.data.brainstorms);
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error calling /get_brainstorms request:", error);
-  //       })
-  //       .finally(() => {
-  //         updateIsLoading(false);
-  //       });
-  //   };
+  //     .catch((error) => {
+  //       console.error("Error calling /get_brainstorms request:", error);
+  //     })
+  //     .finally(() => {
+  //       updateIsLoading(false);
+  //     });
+  // };
 
   //   const updateSpecifications = () => {
   //     updateIsLoading(true);
@@ -271,30 +276,49 @@ const Category = ({ description, category }: CategoryProps) => {
         >
           {description}
         </Typography>
-        <Button
-          onClick={brainstormInputs}
-          sx={{
-            width: "100%",
-          }}
-        >
-          Brainstorm
-        </Button>
+        {brainstorms.length > 0 ? (
+          <Stack direction="row" spacing="5px">
+            <TextField
+              className={"code"}
+              rows={1}
+              value={iteration}
+              onChange={(e) => {
+                setIteration(e.target.value);
+              }}
+            />
+            <Button
+              onClick={brainstormInputs}
+              sx={{
+                width: "20%",
+              }}
+            >
+              💡
+            </Button>
+          </Stack>
+        ) : (
+          <Button
+            onClick={brainstormInputs}
+            sx={{
+              width: "100%",
+            }}
+          >
+            Brainstorm
+          </Button>
+        )}
         {brainstorms?.map((brainstorm) => {
           return (
-            <Tooltip title={brainstorm}>
-              <Chip
-                key={brainstorm}
-                label={brainstorm}
-                onClick={() => {
-                  setInput(brainstorm);
-                }}
-                clickable
-                selected={brainstorm === input}
-                sx={{
-                  alignSelf: "center",
-                }}
-              />
-            </Tooltip>
+            <Chip
+              key={brainstorm}
+              label={brainstorm}
+              onClick={() => {
+                setInput(brainstorm);
+              }}
+              clickable
+              selected={brainstorm === input}
+              sx={{
+                alignSelf: "center",
+              }}
+            />
           );
         })}
         <InputWithButton
@@ -306,7 +330,7 @@ const Category = ({ description, category }: CategoryProps) => {
             updateUpdatedMatrix(true);
           }}
           direction="column"
-          rows={category.includes("Idea") ? 1 : 5}
+          rows={category.includes("Idea") ? 1 : 8}
         />
         {/* <Button
           onClick={getQuestions}

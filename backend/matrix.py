@@ -57,8 +57,9 @@ If the idea is "finding a nail salon" for "a female teenager", the goal of the a
 
 APPROACHXIDEA_EXAMPLES = """Approach ideas focus more on what ideas should be implemented as the core logic (backend) of the application based on person context on what the problem is.
 It could be a theory within a domain the app will be built in like spaced repetition for learning apps, subjective expected utility for recommendation or search apps, CBT or ACT for mental health apps, gamification, or CLT for decisionmaking.
-It could be an app solution, such as a rules-based system, Uber for X (airBnb is uber for homes), marketplace system, workflow system, database (logging or reading), social network
-Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code.
+It could be an app solution, such as a rules-based system to generate outfit recommendations based off rules, Uber for X to match users with homes (airBnb is uber for homes), marketplace system to shop for used cars, workflow system to develop a joke iteratively, database (logging or reading) system to search for grocery stores, social network
+We can support AI features in our application by calling GPT.
+Keep in mind that we cannot support physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code.
 """
 
 INTERACTIONXIDEA_EXAMPLES = """The Interaction ideas focuses on the UI Paradigm in the front end, such as the layout and interactoin paradigms.
@@ -73,13 +74,13 @@ DO NOT TAKE A RANDOM IDEA AND GROUND IT. IF THE APPROACHXIDEA IS GENERATION AND 
 For example, for OkCupid, where the ApproachXIdea is "Searchable Database", the ApproachXGrounding should figure out what people should search for to find the right matches (ethnicity, race, age)?
 For Tinder, where the ApproachXIdea is "lower coginitive load to make lots of judgements easier", the ApproachXGrounding should figure out what select bits of information should be shown, since the ProblemXGrounding is that searching for matches is hard
 For Coffee Meets Bagel, where the ApproachXIdea is "lower the cognitive load to think more intentially about matches by having fewer matches", the ApproachXGrounding should focus on what information to show and how the few matches should be selected for the user, since the ProblemXGrounding is that it's hard to make intentional matches when you have a million options.
-Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code."""
+Keep in mind that we cannot support physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. We do support calling GPT for LLM-based methods. All approaches should be able to be implemented with code."""
 
 INTERACTIONXGROUNDING_EXAMPLES = """Interaction Grounding should focus on how exactly the interaction idea of the UI Paradigm should be implemented, while factoring in other context.
 For example, for OkCupid, where the InteractionXIdea is "Faceted Browsing", the InteractionXGrounding should figure out what facets are needed in the UI for a good searchable experience to find partners.
 For Tinder, where the InteractionXIdea is "card swipe", the InteractionXGrounding should figure out what is shown on each card and how information is laid out.
 For Coffee Meets Bagel, where the InteractionXIdea is "Feed with 5 options for potential partners", the ApproachXGrounding should focus on what information to show for each partner and how it is laid out.
-Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos, so do not return solutions that are out of scope.
+Keep in mind that we cannot support AI features (such as AI-convesational chat-bot), physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos, so do not return solutions that are out of scope. We also cannot play videos or play audio recordings.
 Additionally, the UI created will be on the web, not a mobile app, so only come up with interaction groundings rooted in webapps.
 """
 
@@ -179,58 +180,57 @@ def get_needs_specification(category, input):
     print("sucessfully called LLM for get_needs_specification", res)
     return needs_specification
 
-def brainstorm_inputs(category, context):
+def brainstorm_inputs(category, context, iteration):
     print("calling LLM for brainstorm_inputs...")
-    user_message = f"This is the category you are brainstorming for: {category}."
+    is_grounding = "Grounding" in category
+    print(f"category {category} is_grounding {is_grounding}")
+    iteration_message = f"The user would also like you to factor this into the brainstormed answer: {iteration}" if iteration != "" else ""
+    user_message = f"This is the category you are brainstorming for: {category}. {iteration_message}"
+    grounding_format = """
+        The answers should be as specific as possible, but do not be overly verbose in your response. USE AS LITTLE WORDS AS POSSIBLE. Do not repeat what is said in the corresponding idea section.
+        The answer should be 50-100 words.
+       RETURN THE ANSWER AS A STRING WITH BULLETED LIST:
+       examples:
+        - Each card in the feed should show the album artwork, artist name, song title, genre, and a brief preview start-time of the song.
+        - The cards should be designed with an intuitive layout, making sure the album art is the primary focus, complemented with easily readable text for the song and artist details.",
+        or
+        - In the main feed view, the user can see a visual array of comedic techniques, illustrated with brief descriptions or examples rendered on selectable cards. Each card, when clicked, reveals more details and examples.
+        - Selected techniques would be added to a drafting canvas in the center of the screen where joke structure can be manipulated and rearranged.
+        - A supplemental panel could provide suggestions for unusual metaphors and random elements to include.
+        - A preview pane should be provided to see the flow of the joke.
+        DO NOT RETURN A PARAGRAPH.
+    """ if is_grounding else """
+        The answers SHOULD BE 10-15 words WORDS that specify what exactly the idea is. ALL THE ANSWERS MUST BE DIFFERENT FROM ONE ANOTHER.
+        Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
+        The array should have size 3 maximum.
+    """
     system_message = f"""
     You are a helpful assistant that helps brainstorm specification answers for a category to narrow down inputs.
     {MATRIX_DESCRIPTION}
     {PPAI_EXAMPLES}
     Here is the context for this problem: {context}
     {MATRIX_EXAMPLES[category]}
-    For the Idea categories (PersonXIdea, ApproachXIdea, InteractionXIdea), the answers SHOULD BE LESS THAN 15 WORDS. ALL THE ANSWERS MUST BE DIFFERENT FROM ONE ANOTHER.
-    For the Grounding Categories (PersonXGrounding, ApproachXGrounding, InteractionXGrounding), the answers SHOULD BE 50 to 100 WORDS
-    The answers should be as specific as possible.
-    Format the the responses in an array like so: ["30 year old english speaking student", "5 year old native"]
-    Only return AT MOST 3 brainstorms. They must all be SIGNIFICANTLY DIFFERENT than one another. If they are not significantly different, ONLY RETURN 1 BRAINSTORM.
-
-    For example, these 3 brainstorms are SIMILAR, so only one should be returned:
-    1. The essential features for the simple logging system would be a user-friendly interface for manual entry of food items along with a comprehensive, searchable database of common foods and their nutritional information. To tackle the problem of homemade meals and foods without a barcode, the system should enable users to save and quickly relog personal meal recipes with their nutrition facts.
-    2. A comprehensive database of food items along with their nutritional information could be included for generic foods. The logging system should be able to provide a fast way of searching through the database. For user convenience, frequently logged foods and meals should be suggested first. As well, an option for users to manually input nutrition facts for homemade meals or foods without a barcode should be considered.
-    3. The logging system could include a feature to easily find and enter food items from a wide range of brands, restaurants, or common homemade meals, which would automatically provide the nutritional information. To make it easier to input homemade dishes, the system s
-
-    Here is another example of 3 SAME brainstorms, so only one should be returned:
-    1. Each food entry cell should include the item’s name, quantity, calorie content, and buttons for editing, duplicating, or deleting the entry. The top of the page should feature an interactive pie chart displaying the user's current protein, carbs, and fat intake in comparison with their daily targets, along with a progress bar showing the percentage of their daily calorie limit consumed.
-    2. Every food entry row should present food name, quantity consumed, and its calorie count. Users can use action buttons to edit or delete an entry. A dynamic pie chart, updated with every entry, should sit on the header of the page showing the distribution of proteins, carbs, and fats consumed. Besides that, a progress bar indicating the percentage of the total calorie intake can provide quick glance.
-    3. The diary layout should list the name, quantity, and calorie content of each food item. Reusable controls for modification and deletion of entries should be available. The main UI should feature an interactive pie chart for macronutrient distribution, and a running progress bar below it to demonstrate the consumed calories against the daily calorie goal.
-
-
-    Another example, for these 3 brainstorms, the first one is different than the second and third, so only the first 2 brainstorms should be returned:
-    1. Each food entry in the diary layout should display the item’s name, calorie content, macronutrient breakdown, and meal time. Additionally, a visual indication of the user's daily calorie limit and current consumption will assist in quick contrast and decision making.
-    2. Each entry in the food diary layout displays the food name, brand (if applicable), serving quantity, total calories, and macronutrients. Interactive components like checkbox for marking an item as eaten, a 'favorite' star to save often consumed food and a delete icon for efficient diary management.
-    3. User interface should show each logged food item with their respective calorie and macronutrient count. There should be an option to modify or delete each entry. An ongoing tally of consumed versus targeted calories can be presented on the top of the screen for better visibility.
+    {grounding_format}
     """
-    res = "here are the users: " + call_llm(system_message, user_message, llm="openai")
-    brainstorms = cleanup_array(res)
+    res = call_llm(system_message, user_message, llm="openai")
+    brainstorms = res if is_grounding else cleanup_array("here are the users: " + res)
     print("sucessfully called LLM for brainstorm_inputs", res)
     return brainstorms
 
-def brainstorm_questions(category, input, context):
-    print("calling LLM for brainstorm_questions...")
-    user_message = f"This is the category you are brainstorming for: {category}. This is the current input for the category: {input}"
-    system_message = f"""You are a helpful assistant that helps brainstorms questions for a category. {MATRIX_DESCRIPTION}
-        The goal is to brainstorm questinos tailored for the current category, given the user context provided from the other cateogires and the current input of the category.
+def brainstorm_question(category, context):
+    print("calling LLM for brainstorm_question...")
+    user_message = f"This is the category you are brainstorming for: {category}."
+    system_message = f"""You are a helpful assistant that helps brainstorms a relevant question for a category to elicit context from the user. {MATRIX_DESCRIPTION}
+        The goal is to brainstorm a question tailored for the current category, given the user context provided from the other cateogires and the current input of the category.
         Here is the context: {context}.
-        Generate questions that would best help fill out this category based on the existing context.
-        For example, if the problem is "learn japanese" and the PersonXIdea section's input is "me", the PersonXIdea could have sample questions like "Is this a beginner or advanced Japanese speaker? Is it for a specific age group or demographic?"
-        Or, if the problem is "learn chinese" and in the context, PersonXIdea section's input is "for a retiree who plans on visiting Japan in 3 weeks", the PersonXGrounding section's generated questions could be "What type of Japanese words should be taught? Why do current approaches to learn Japanese in 3 weeks for travelling not work?"
-        Format the the responses in an array like so: ["Should the approach be flashcard, or quiz format?", "Are there theories to support learning Japanese"]
-    Only return 3 brainstormed questions for this category.
+        Generate a question that would best help fill out this category based on the existing context.
+        For example, if the problem is "learn japanese" and the PersonXIdea section's input is "me", the PersonXIdea could have sample question like "Is this a beginner or advanced Japanese speaker? Is it for a specific age group or demographic?"
+        Or, if the problem is "learn chinese" and in the context, PersonXIdea section's input is "for a retiree who plans on visiting Japan in 3 weeks", the PersonXGrounding section's generated question could be "What type of Japanese words should be taught? Why do current approaches to learn Japanese in 3 weeks for travelling not work?"
+        Limit the question to less than 30 words.
     """
-    res = "here are the questions: " + call_llm(system_message, user_message, llm="openai")
-    theories = cleanup_array(res)
+    res = call_llm(system_message, user_message, llm="openai")
     print("sucessfully called LLM for brainstorm_questions", res)
-    return theories
+    return res
 
 
 def brainstorm_answers(category, question, context):
