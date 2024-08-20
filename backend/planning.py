@@ -26,17 +26,24 @@ def get_design_hypothesis(ui_prompt, faked_data):
         This is the faked_data: {faked_data}
     """
     system_message = """
-                You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
-				Each design should detail the user interactions and design layout. IT SHOULD BE LESS THAN 100 WORDS.
-                Make sure that the design does not incorporate routes. Everything should exist within one page.
-                Make sure the design is consistent with the json data object provided by the user. All data shown must exist as a field on the JSON object.
-                KEEP THE APPLICATION AS SIMPLE AS POSSIBLE TO DESIGN A UI BASED ON THE PROMPT. DO NOT ADD UNNECESSARY COMPONENTS.
-				Keep in mind that we do not have the capacity to build a super fancy application. Keep the application in scope. For example, if this is the prompt:
+                
+You are a UI designer who wants to create the best UI suitable for the application the user wants given the data model the user wants to visualize.
+
+Each design should detail the user interactions and design layout. IT SHOULD BE LESS THAN 200 WORDS.
+
+Make sure the design does not incorporate routes. Everything should exist within one page.
+
+KEEP THE APPLICATION AS SIMPLE AS POSSIBLE TO DESIGN A UI BASED ON THE PROMPT. DO NOT ADD UNNECESSARY COMPONENTS.
+
                 "Create a web UI based on this idea: learn chinese, for users: Retired person seeking a mentally stimulating hobby and a way to connect with their cultural heritage, where the application goal is: To gain conversational fluency to communicate with family members and explore ancestral roots. Use the theory of Spaced Repetition (Reviewing information at optimal intervals reinforces memory and aids long-term retention of the language.), which with interaction pattern Interactive storytelling (A narrative-driven approach with dialogues and scenarios, reinforcing vocabulary and phrases through an engaging story with spaced repetition of key elements.) to guide the design."
                 Focus on implementing the spaced repetition part - unnecessary features like a social community feature, or working with multiple different stories is overly complex, as is is multiple decks, a setting bar, a profile page.
                 KEEP THE APPLICATION IN SCOPE TO THE USER PROBLEM AND THEORY AS MUCH AS POSSIBLE BECAUSE THERE IS LIMITED CODE WE CAN WRITE.
                 DO NOT REQUIRE APPLICATIONS THAT REQUIRE MULTIMEDIA SUCH AS VIDEOS, AUDIO, IMAGE BASED, OR DRAG AND DROP.
-                Instead, the scope should be using one traditional chinese narrative to implement spaced repetition. Focus on what the interaction will be - will it be card-swiping, gmail-like, or something else?
+                Instead, the scope should be using one traditional chinese narrative to implement spaced repetition. Focus on what the interaction will be - will it be card-swiping, gmail-like, or something else.
+
+If the application seems to require an LLM, such as an application that takes information and generates data, or an application that uses data to give the user recommendations, detail where and how it will be implemented. In these cases use a GPT hook example in order to have GPT create a json to be implemented instead of the use of fake data. Define how the created data is to be incorporated.
+
+If the application seems to require images, instead of creating fake urls use the GPT image template in order to get generated images to use as the images. Define how the images are to be incorporated. 
             """
     res = call_llm(system_message, user_message)
     print("sucessfully called LLM for get_design_hypothesis", res)
@@ -174,6 +181,7 @@ def get_plan(design_hypothesis):
 		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		Please limit the plan to 2 or 3 steps at maximum.
+        If the plan seems to indicate the usage of a LLM such as ChatGPT, add an additional step at the start that implements the required set-up for the LLM implementation.
 		"""
     system_message = "You are a helpful software engineer to answer questions related to implementing this UI."
     res = call_llm(system_message, user_message)

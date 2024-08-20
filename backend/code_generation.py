@@ -755,7 +755,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
 	system_message = f"""
-                You are working on an app dsecribed here: {design_hypothesis}.
+                You are working on an app described here: {design_hypothesis}.
                 The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}.
@@ -768,6 +768,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	merged_code_lines = len(code.splitlines())
 	previous_code_lines=len(previous_code.splitlines())
 	if previous_code_lines-50 > merged_code_lines:
+		#How does this work. why is get_ui_code called again, what happens to 'code'
 		print("trying again... writing code failed...")
 		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data)
 	print("sucessfully called LLM for get_ui_code", code)
