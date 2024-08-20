@@ -4,6 +4,115 @@ import json
 from globals import TASK_MAP_FILE_NAME, call_llm
 from utils import read_file
 
+app_rules = """
+Here are the rules that the application must follow.
+- The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS.
+- The application is a UI app. Do not recommend a mobile app. For example, if the prompt suggests a swiping interface, in the UI the "swipe" would be done by clicking, since it is not a mobile interface.
+- The entire app will be written using React and MUI.
+- The app can also call GPT, use ChartJS, and GoJS. For example, if the application suggests using an ML algorithm for a personalization or suggestion-type application, the design should recommend using GPT as an LLM to accomplish this.
+- The app cannot use MaterialUI Icon, Material UI Lab, and other packages that are not available via the CDN.
+- However, if not necessary, do not call ChartJS, GoJS, or GPT. Only call these packages if absolutely necessary, as we don't want to overcomplicate the application.
+- Do not design applications that require multimedia such as videos, audio, image-based, or drag and drop.
+- The design should not incorporate routes. Everything should exist within one page. No need for design mockups, wireframes, or external dependencies.
+- Keep in mind that we do not have the capacity to build a super fancy application. KEEP THE APPLICATION IN SCOPE TO THE USER PROBLEM AND THEORY AS MUCH AS POSSIBLE BECAUSE THERE IS LIMITED CODE WE CAN WRITE. For example, if this is the prompt: "Create a web UI based on this idea: learn chinese, for users: Retired person seeking a mentally stimulating hobby and a way to connect with their cultural heritage, where the application goal is: To gain conversational fluency to communicate with family members and explore ancestral roots. Use the theory of Spaced Repetition (Reviewing information at optimal intervals reinforces memory and aids long-term retention of the language.), which with interaction pattern Interactive storytelling (A narrative-driven approach with dialogues and scenarios, reinforcing vocabulary and phrases through an engaging story with spaced repetition of key elements.) to guide the design.", we should focus on implementing the spaced repetition part - unnecessary features like a social community feature, or working with multiple different stories is overly complex, as is is multiple decks, a setting bar, a profile page.
+- Additionally, keep in mind that we are attempting to test the application created. If necessary, factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
+"""
+
+design_hyptothesis_example = """
+Here is an example of the design hypothesis of a music-recommendation app.
+Application Layout:
+- Create a clean, simple interface divided into two main sections: "Discover" and "Favorites."
+- The "Discover" section would have a large area that changes dynamically to display song details with each swipe (song name, artist, album, genre, and description).
+- It would also have 'like', 'dislike' and 'skip' buttons, which will work with simple clicks.
+- The 'Favorites' section would be a list of all liked songs.
+
+User Interactions:
+- The user can click to swipe a song left (dislike), right (like), or down (skip).
+- The user can click on a song to save to favorites once liked.
+- The user can navigate between "Discover" and "Favorites" sections via top navigation tabs.
+
+Inputs and Logic:
+- The app will use the user's interactions (likes, dislikes, skips) as inputs to an ML model (implemented using GPT) to evolve its music recommendations in real-time.
+- On initial use, ask the user for favorite genres, artists, or songs to kickstart the ML algorithm.
+- The user's interaction with each song (whether they like, dislike, or skip it) will further tailor the recommendations.
+- The saved favorite songs will be stored
+- There is no need to create placeholder data for music, as GPT will return the music recommendations.
+
+Here is an example of a design hypothesis of a outfit-generator app.
+Application Layout:
+
+- Create a clean, minimalist interface with a prominent central area for displaying outfit recommendations.
+- Divide the interface into three main sections: "Outfit Recommendations," "Wardrobe," and "Saved Outfits."
+- The "Outfit Recommendations" section should display swipeable cards with visual representations of the recommended outfits, along with relevant tags (season, occasion, style).
+- The "Wardrobe" section should allow users to input their clothing items, categorized by type (tops, bottoms, dresses, etc.).
+- The "Saved Outfits" section should display a grid of liked outfits for future reference.
+
+User Interactions:
+
+- Users can swipe left by clicking no, or right by clicking yes on the outfit recommendation cards to dislike or like the outfit, respectively.
+- Users can click on individual clothing items in the "Wardrobe" section to add or remove them from their virtual wardrobe.
+- Users can click on a liked outfit in the "Saved Outfits" section to view its details or remove it from the saved list.
+
+Inputs and Logic:
+
+- The app will use the user's initial wardrobe inputs and style preferences (gathered through a brief questionnaire) to kickstart the GPT-powered outfit recommendation algorithm.
+- The algorithm will consider factors like season, occasion, and the user's wardrobe items to generate outfit recommendations.
+- The user's interactions (likes, dislikes) with the recommended outfits will be used as feedback to refine and personalize the algorithm's recommendations over time.
+- The liked outfits will be saved in the "Saved Outfits" section for future reference.
+- Create placeholder data for initial wardrobe.
+
+Here is an example of a design hypothesis for a plant watering system:
+Application Layout:
+
+- Create a clean and intuitive interface with a prominent section for the "Watering Calendar."
+- Divide the interface into three main sections: "Watering Calendar," "Plant List," and "Watering Reminders."
+- The "Watering Calendar" section should display a monthly calendar view with visual indicators for scheduled watering days.
+- The "Plant List" section should allow users to add and manage their plant collection, including details like species, pot size, and watering requirements.
+- The "Watering Reminders" section should display upcoming watering tasks and allow users to set notification preferences.
+
+User Interactions:
+
+- Users can click on specific dates in the "Watering Calendar" to schedule or modify watering tasks for individual plants or groups.
+- Users can click on plants in the "Plant List" to view or edit their details, including watering schedules.
+- Users can set notification preferences (email, push notifications, etc.) for upcoming watering tasks in the "Watering Reminders" section.
+
+Inputs and Logic:
+
+- The app will use the user's initial plant inputs (species, pot size, etc.) to determine baseline watering requirements for each plant.
+- An algorithm (implemented using GPT) will analyze factors like plant type, pot size, and environmental conditions (temperature, humidity, etc.) to generate adaptive watering schedules.
+- The algorithm will learn from the user's interactions (manually adjusting watering schedules, plant health feedback) to refine its recommendations over time.
+- The app will send reminders based on the user's scheduled watering tasks and notification preferences.
+- Create placeholder data for user's current plants.
+
+"""
+
+plan_example = """
+For design hypothesis:
+Application Layout:
+- Create a clean, minimalist interface with a prominent central area for displaying outfit recommendations.
+- Divide the interface into three main sections: "Outfit Recommendations," "Wardrobe," and "Saved Outfits."
+- The "Outfit Recommendations" section should display swipeable cards with visual representations of the recommended outfits, along with relevant tags (season, occasion, style).
+- The "Wardrobe" section should allow users to input their clothing items, categorized by type (tops, bottoms, dresses, etc.).
+- The "Saved Outfits" section should display a grid of liked outfits for future reference.
+User Interactions:
+- Users can swipe left by clicking no, or right by clicking yes on the outfit recommendation cards to dislike or like the outfit, respectively.
+- Users can click on individual clothing items in the "Wardrobe" section to add or remove them from their virtual wardrobe.
+- Users can click on a liked outfit in the "Saved Outfits" section to view its details or remove it from the saved list.
+Inputs and Logic:
+- The app will use the user's initial wardrobe inputs and style preferences (gathered through a brief questionnaire) to kickstart the GPT-powered outfit recommendation algorithm.
+- The algorithm will consider factors like season, occasion, and the user's wardrobe items to generate outfit recommendations.
+- The user's interactions (likes, dislikes) with the recommended outfits will be used as feedback to refine and personalize the algorithm's recommendations over time.
+- The liked outfits will be saved in the "Saved Outfits" section for future reference.
+- Create placeholder data for initial wardrobe.
+
+Here is the example plan. It is longer because we are using GPT:
+1. Set up the React application and create the main layout with the three sections: 'Outfit Recommendations', 'Wardrobe', and 'Saved Outfits'. Read in the placeholder data from the endpoint.
+2. Implement the 'Outfit Recommendations' section with swipeable cards using MUI components. Create placeholder data for initial outfit recommendations.
+3. Implement the 'Wardrobe' section with a list of clothing items categorized by type (tops, bottoms, dresses, etc.). Allow users to add or remove items from their virtual wardrobe.
+4. Implement the 'Saved Outfits' section with a grid layout to display liked outfits. Allow users to view outfit details or remove outfits from the saved list.
+5. Integrate GPT to generate outfit recommendations based on the user's wardrobe and style preferences. Implement the logic to handle user interactions (likes, dislikes) and refine the recommendations accordingly.
+"""
+
 
 def get_plan_from_task_map(folder_path):
     task_map_json = json.loads(read_file(f"{folder_path}/{TASK_MAP_FILE_NAME}"))
@@ -25,23 +134,70 @@ def get_design_hypothesis(ui_prompt, faked_data):
         This is the UI prompt: {ui_prompt}
         This is the faked_data: {faked_data}
     """
-    system_message = """
-                You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. 
-				Each design should detail the user interactions and design layout. IT SHOULD BE LESS THAN 100 WORDS.
-                If needed, we can call GPT, so if the design requires dynamic data or personalization, it should be written in the design to call GPT.
-                Make sure that the design does not incorporate routes. Everything should exist within one page.
-                Make sure the design is consistent with the json data object provided by the user. All data shown must exist as a field on the JSON object.
-                KEEP THE APPLICATION AS SIMPLE AS POSSIBLE TO DESIGN A UI BASED ON THE PROMPT. DO NOT ADD UNNECESSARY COMPONENTS.
-				Keep in mind that we do not have the capacity to build a super fancy application. Keep the application in scope. For example, if this is the prompt:
-                "Create a web UI based on this idea: learn chinese, for users: Retired person seeking a mentally stimulating hobby and a way to connect with their cultural heritage, where the application goal is: To gain conversational fluency to communicate with family members and explore ancestral roots. Use the theory of Spaced Repetition (Reviewing information at optimal intervals reinforces memory and aids long-term retention of the language.), which with interaction pattern Interactive storytelling (A narrative-driven approach with dialogues and scenarios, reinforcing vocabulary and phrases through an engaging story with spaced repetition of key elements.) to guide the design."
-                Focus on implementing the spaced repetition part - unnecessary features like a social community feature, or working with multiple different stories is overly complex, as is is multiple decks, a setting bar, a profile page.
-                KEEP THE APPLICATION IN SCOPE TO THE USER PROBLEM AND THEORY AS MUCH AS POSSIBLE BECAUSE THERE IS LIMITED CODE WE CAN WRITE.
-                DO NOT REQUIRE APPLICATIONS THAT REQUIRE MULTIMEDIA SUCH AS VIDEOS, AUDIO, IMAGE BASED, OR DRAG AND DROP.
-                Instead, the scope should be using one traditional chinese narrative to implement spaced repetition. Focus on what the interaction will be - will it be card-swiping, gmail-like, or something else?
+    system_message = f"""
+                You are a UI designer who wants to create the best UI suitable for the application the user wants, given the data model the user wants to visualize. {app_rules}
+				Each design should detail the application layout, user interactions, and consider all inputs and logic that the app will use.
+                In most cases, the application will require using fake, placeholder data to test out the application. In some cases it will not. If the application requires creating fake, placeholder data, then mention it in the design. Add details about what type of placeholder data should be generated.
+                It should be less than 300 words, and each sentence should be a bullet point.
+                {design_hyptothesis_example}
+                The design hypothesis should decide what type of placeholder data to generate (unless the application truly does not require any placeholder data), and should also decide whether or not GPT, chartJS, or goJS is required.
+                If the app would benefit from a visual requirement, you can suggest using GPT to generate images, or use placeholder images.
+                Only recommend GPT if it is a personalization or recommender app, or if generated images would significantly enhance the app. Only recommend chartJS or GoJS if ABSOLUTELY NECESSARY. Do not recommend other packages.
+                Most applications will need placeholder data of some form, even when not obvious. For example:
+                - when creating an outfit personalization app, even though GPT is called for the outfit recommendations, the initial wardrobe can be populated by placeholder data
+                - when creating an music recommendation app, if necessary, the initial music library can be created using placeholder data
+                - when creating a journaling app based on CBT, the CBT exercises can be created using placeholder data.
             """
     res = call_llm(system_message, user_message)
     print("sucessfully called LLM for get_design_hypothesis", res)
     return res
+
+
+def get_plan(design_hypothesis):
+    print("calling LLM for get_plan...")
+    user_message = f"""
+        Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features. {app_rules}
+        The first step should focus on creating the general structure of the app. If placeholder data was generated as specified by the design hypothesis, then add that to the step.
+        No need to have steps to create placeholder data, as that will be created before this.
+        Limit the plan to 1-3 steps. If the application is particularly complex, such as requiring complex GPT calls and logic, then allow two extra steps specifically detailing the logic of calling these external libaries - but only if needed.
+        At most, there will be 5 steps.
+        Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
+		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
+		"""
+    system_message = f"You are a helpful software engineer to answer questions related to implementing this UI based on this design hypothesis: {design_hypothesis}"
+    res = call_llm(system_message, user_message)
+    plan = cleanup_plan(res)
+    print("sucessfully called LLM for get_plan", res)
+    return plan
+
+
+#  To do: make this recursive so that if the plan cannot be parsed into a json file, we recall GPT until its a valid JSON array
+def cleanup_plan(plan):
+    print("calling LLM for cleanup_plan...")
+    user_message = f"Please clean up the plan so it only returns the json array. This is the plan: {plan}"
+    system_message = """You are an assistant to clean up GPT responses into a json array.
+			The response should be as formatted: [
+                {
+                    "task_id": 1,
+                    "task": "Create a static table with sample rows",
+                    "dep": [],
+                },
+                {
+                    "task_id": 2,
+                    "task": "When clicking a row, a modal should open up.",
+                    "dep": [],
+                }
+            ]
+            """
+    res = call_llm(system_message, user_message)
+    print("sucessfully called LLM for cleanup_plan", res)
+    cleaned_plan = res
+    try:
+        cleaned_plan_json = json.loads(cleaned_plan)
+        return cleaned_plan_json
+    except json.JSONDecodeError:
+        print("Error decoding JSON, retrying...")
+        return cleanup_plan(plan)
 
 
 def get_user_examples(idea):
@@ -156,60 +312,3 @@ def cleanup_brainstorms_with_descriptions(brainstorms):
     except json.JSONDecodeError:
         print("Error decoding JSON, retrying...")
         return cleanup_brainstorms_with_descriptions(brainstorms)
-
-
-def get_plan(design_hypothesis):
-    print("calling LLM for get_plan...")
-    user_message = f"""I want to create a UI with this design: {design_hypothesis}.
-        Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features.
-        The first step should focus on creating the general structure of the app.
-		There is no need for design mockups, wireframes, or external libraries. We just want to build a simple usable UI component. 
-        All the code will be in React and MUI.
-        Make sure that the design does not incorporate routes. Everything should exist within one page.
-        Placeholder data already exists. There should be NO task for mocking placeholder data, or populating the cards with placeholder data, since that already exists.
-        If the app requires it, it can call OpenAI for additional data or API calls. If the app requires images, it can also call GPT to grab images.
-        If the app requires some visualization element like a pie chart or a bar chart, you can load chart.js from the CDN.
-        If the app requires visualization such as  a flow chart, mind map, or tree, you can use GoJS from the CDN.
-        If the app would be better with animation, use three.js from the CDN.
-        DO NOT LOAD ANYTHING ELSE IN THE CDN UNLESS YOU ARE CONFIDENT THAT IT WOULD WORK. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
-        Additionally, keep in mind that we are attempting to test the application created. So, if the application for example implements spaced repetition that has different algorithms each day,
-        If necessary, factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in
-        using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
-		Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}]. 
-		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
-        Limit the plan to 2-3 steps.
-		"""
-    system_message = "You are a helpful software engineer to answer questions related to implementing this UI."
-    res = call_llm(system_message, user_message)
-    plan = cleanup_plan(res)
-    print("sucessfully called LLM for get_plan", res)
-    return plan
-
-
-#  To do: make this recursive so that if the plan cannot be parsed into a json file, we recall GPT until its a valid JSON array
-def cleanup_plan(plan):
-    print("calling LLM for cleanup_plan...")
-    user_message = f"Please clean up the plan so it only returns the json array. This is the plan: {plan}"
-    system_message = """You are an assistant to clean up GPT responses into a json array.
-			The response should be as formatted: [
-                {
-                    "task_id": 1,
-                    "task": "Create a static table with sample rows",
-                    "dep": [],
-                },
-                {
-                    "task_id": 2,
-                    "task": "When clicking a row, a modal should open up.",
-                    "dep": [],
-                }
-            ]
-            """
-    res = call_llm(system_message, user_message)
-    print("sucessfully called LLM for cleanup_plan", res)
-    cleaned_plan = res
-    try:
-        cleaned_plan_json = json.loads(cleaned_plan)
-        return cleaned_plan_json
-    except json.JSONDecodeError:
-        print("Error decoding JSON, retrying...")
-        return cleanup_plan(plan)
