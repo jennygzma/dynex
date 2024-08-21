@@ -7,7 +7,7 @@ from utils import read_file
 app_rules = """
 Here are the rules that the application must follow.
 - The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS.
-- The application is a UI app. Do not recommend a mobile app. For example, if the prompt suggests a swiping interface, in the UI the "swipe" would be done by clicking, since it is not a mobile interface.
+- The application is a UI app. Do not recommend a mobile app. The app cannot suggest any carousels, since it is a UI. For example, if the prompt suggests a swiping interface, in the UI the "swipe" would be done by clicking, since it is not a mobile interface.
 - The entire app will be written using React and MUI.
 - The app can also call GPT, use ChartJS, and GoJS. For example, if the application suggests using an ML algorithm for a personalization or suggestion-type application, the design should recommend using GPT as an LLM to accomplish this.
 - The app cannot use MaterialUI Icon, Material UI Lab, and other packages that are not available via the CDN.
@@ -18,7 +18,7 @@ Here are the rules that the application must follow.
 - Additionally, keep in mind that we are attempting to test the application created. If necessary, factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
 """
 
-design_hyptothesis_example = """
+design_hypothesis_example = """
 Here is an example of the design hypothesis of a music-recommendation app.
 Application Layout:
 - Create a clean, simple interface divided into two main sections: "Discover" and "Favorites."
@@ -139,10 +139,18 @@ def get_design_hypothesis(ui_prompt, faked_data):
 				Each design should detail the application layout, user interactions, and consider all inputs and logic that the app will use.
                 In most cases, the application will require using fake, placeholder data to test out the application. In some cases it will not. If the application requires creating fake, placeholder data, then mention it in the design. Add details about what type of placeholder data should be generated.
                 It should be less than 300 words, and each sentence should be a bullet point.
-                {design_hyptothesis_example}
-                The design hypothesis should decide what type of placeholder data to generate (unless the application truly does not require any placeholder data), and should also decide whether or not GPT, chartJS, or goJS is required.
-                If the app would benefit from a visual requirement, you can suggest using GPT to generate images, or use placeholder images.
-                Only recommend GPT if it is a personalization or recommender app, or if generated images would significantly enhance the app. Only recommend chartJS or GoJS if ABSOLUTELY NECESSARY. Do not recommend other packages.
+                {design_hypothesis_example}
+
+                The design hypothesis should:
+                1) decide what type of placeholder data to generate (unless the application truly does not require any placeholder data)
+                2) should also decide whether or not GPT, chartJS, or goJS is required.
+
+                If the app would benefit from a visual requirement, you can suggest using GPT to generate images.
+                Only recommend GPT if:
+                - it is a personalization or recommender app. Faceted browsing of a database does not require GPT.
+                - if generated images would significantly enhance the app. (For example: a card swipe UI for outfits would benefit with images, a music player would benefit from an image)
+                Only recommend chartJS or GoJS if ABSOLUTELY NECESSARY.
+                Do not recommend other packages.
                 Most applications will need placeholder data of some form, even when not obvious. For example:
                 - when creating an outfit personalization app, even though GPT is called for the outfit recommendations, the initial wardrobe can be populated by placeholder data
                 - when creating an music recommendation app, if necessary, the initial music library can be created using placeholder data

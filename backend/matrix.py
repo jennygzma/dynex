@@ -20,7 +20,7 @@ PPAI_EXAMPLES = """
 Here are some examples:
 
 OKCupid -
-PersonXIdea: Single person looking for a partner
+PersonXIdea: Single person
 PersonXGrounding: - Difficulty in finding potential partners who meet specific criteria like race, religion, age, or occupation. \n - Challenges in efficiently filtering through dating apps to locate compatible matches. \n - Need for an application that streamlines the process by allowing users to set precise criteria and receive curated suggestions.
 ApproachXIdea: Searchable Database to allow people to search for people based on specified criteria
 ApproachXGrounding: - Ensure the database includes comprehensive filters such as age, gender, sex, religion, and occupation to meet users' specific search criteria. \n - Develop a robust and scalable search algorithm that efficiently handles large datasets and returns accurate results based on the selected filters. \n - Implement user-friendly search and filtering interfaces that make it easy for users to apply multiple criteria and refine their search results.
@@ -28,7 +28,7 @@ InteractionXIdea: Faceted Browsing
 InteractionXGrounding: - Provide users with multiple facet filters, including age, gender, religion, occupation, and location, to refine their search effectively. \n - Ensure the UI dynamically updates search results in real-time as users adjust their facet filters, offering immediate feedback. \n - Design intuitive navigation with clear options to reset filters, switch criteria, and save searches, using checkboxes, sliders, and dropdowns for ease of use.
 
 Tinder:
-PersonXIdea: Single person looking for hookups or dates
+PersonXIdea: Single person
 PersonXGrounding: - Users often struggle to find matches that meet their physical preferences quickly and efficiently. \n - The abundance of profiles makes it challenging to identify those that align with specific looks or appearances. \n - A streamlined approach to swiping and filtering by appearance would help users connect with potential matches faster, focusing on visual attraction.
 ApproachXIdea: Lower the cognitive load by providing less information, making it easier to judge potential matches quickly
 ApproachXGrounding: - Limit the displayed information to essential details, such as a single profile photo and a brief tagline, to encourage snap judgments. \n - Focus on visual appeal as the primary matching criterion, reducing the need for users to sift through extensive profiles. \n - Use an algorithm to prioritize matches based on visual preferences and minimal data inputs, streamlining the matching process.
@@ -36,7 +36,7 @@ InteractionXIdea: Card Swipe
 InteractionXGrounding: - Each card should prominently feature a large profile photo, as visual appeal is the primary factor in this interaction. \n - Include minimal text, such as the person’s name, age, and a short tagline or fun fact, to provide just enough context without overwhelming the user. \n - Add simple icons or buttons for actions like "Like" or "Pass," ensuring that users can quickly swipe or tap to make their choice.
 
 Coffee Meets Bagel:
-PersonXIdea: Single person looking for a serious life partner
+PersonXIdea: Single person
 PersonXGrounding: - Users who are looking for serious relationships prefer fewer, high-quality matches over endless swiping. \n - The overwhelming number of potential matches on other apps can make it difficult to focus on finding a meaningful connection.\n - An app designed for serious dating should streamline the process by offering a curated selection of potential partners, reducing time spent on the app.
 ApproachXIdea: Lower the cognitive load by having less matches to make more intentional judgements
 ApproachXGrounding: - Present a select number of potential matches each day to prevent decision fatigue and promote thoughtful consideration.\n - Display key information like shared interests, compatibility indicators, and mutual friends to aid decision-making without overwhelming the user. \n - Prioritize quality over quantity, ensuring that each match is relevant to the user’s preferences and relationship goals.
@@ -44,20 +44,15 @@ InteractionXIdea: Feed with 5 options to date
 InteractionXGrounding: - The daily message should include a concise profile summary for each of the five matches, highlighting essential details such as name, age, occupation, and a short personal note or shared interest. \n - Include compatibility scores or commonalities (e.g., mutual friends, hobbies) to help users quickly assess each match’s potential. \n - Provide clear action buttons within the message to either like, pass, or start a conversation, making it easy for users to engage with their daily options.
 """
 
-PERSONXIDEA_EXAMPLES = """Person ideas focus on who the target user of the application is.
-For example, if the idea is "learn chinese", some examples of users are "30 year old english-speaking student" or or "busy professional who only has 30 minutes a day to learn chinese"
-If the idea is "journaling app", some examples of users are "someone struggling with depression" or "someone going through a breakup".
-If the idea is "finding a nail salon", some examples are "celebrity assistant looking for personalized nail salon" or "female teenager looking for affordable nail salons".
-For OkCupid, the PersonXIdea is "Single person looking for a partner."
-For Tinder, the PersonXIdea is "Single person looking for hookups."
-For CoffeeMeetsBagel, the PersonXIdea is "Single person looking for a serious life partner".
+PERSONXIDEA_EXAMPLES = """Person ideas focus on who the target user of the application is. This could be the demographic, such as age, gender class, job, or societal role (busy professional, working mom, teenager).
+For example, if the idea is "learn chinese", some examples of users are "30 year-old english-speaker" or or "busy professional". If the idea is "journaling app", some examples of users are "student" or "mother". If the idea is "finding a nail salon", some examples are "celebrity assistant" or "female teen".
+For OkCupid, Tinder, and CoffeeMeetsBagel, the PersonXIdea is "Single person". KEEP THE ANSWER SIMPLE - MAXIMUM OF 3 WORDS.
 """
-
 PERSONXGROUNDING_EXAMPLES = """Person Grounding focuses on the goal of the application and what problem it's trying to solve for the person.
-For example, if the idea is to "learn chinese" for "a 30 year old english-speaking student", some example goals of the application could be "gain vocabulary to travel to China for a week and learn Chinese in 3 weeks", versus "learn grammar".
-If the idea is "finding a nail salon" for "a female teenager", the goal of the application could be to "explore a all the nail salons in NYC to formulate where to go when I visit", or "go to a nail salon ASAP for prom".
-For OkCupid, where the PersonXIdea is "Single person looking for a partner.":  - Difficulty in finding potential partners who meet specific criteria like race, religion, age, or occupation. \n - Challenges in efficiently filtering through dating apps to locate compatible matches. \n - Need for an application that streamlines the process by allowing users to set precise criteria and receive curated suggestions.
-For Tinder, where the PersonXIdea is "Single person looking for hookups.": - Users often struggle to find matches that meet their physical preferences quickly and efficiently. \n - The abundance of profiles makes it challenging to identify those that align with specific looks or appearances. \n - A streamlined approach to swiping and filtering by appearance would help users connect with potential matches faster, focusing on visual attraction.
+For example, if the idea is to "learn chinese" for "a 30 year old english speaker", some example goals of the application could be "gain vocabulary to travel to China for a week and learn Chinese in 3 weeks", versus "learn grammar".
+If the idea is "finding a nail salon" for "a female teenager", the goal of the application could be to "explore all the nail salons in NYC to formulate where to go when I visit", or "go to a nail salon ASAP for prom".
+For OkCupid, where the PersonXIdea is "Single person":  - Difficulty in finding potential partners who meet specific criteria like race, religion, age, or occupation. \n - Challenges in efficiently filtering through dating apps to locate compatible matches. \n - Need for an application that streamlines the process by allowing users to set precise criteria and receive curated suggestions.
+For Tinder, where the PersonXIdea is "Single person": - Users often struggle to find matches that meet their physical preferences quickly and efficiently. \n - The abundance of profiles makes it challenging to identify those that align with specific looks or appearances. \n - A streamlined approach to swiping and filtering by appearance would help users connect with potential matches faster, focusing on visual attraction.
 For CoffeeMeetsBagel, where the PersonXIdea is "Single person looking for a serious life partner": - Users who are looking for serious relationships prefer fewer, high-quality matches over endless swiping. \n - The overwhelming number of potential matches on other apps can make it difficult to focus on finding a meaningful connection.\n - An app designed for serious dating should streamline the process by offering a curated selection of potential partners, reducing time spent on the app.
 """
 
@@ -74,6 +69,7 @@ INTERACTIONXIDEA_EXAMPLES = """The Interaction ideas focuses on the UI Paradigm 
 Examples include chatbot (messaging), cardswipe (tinder), feed (facebook, tiktok, twitter, news), faceted browsing, table (gmail).
 Approaches generally have a simple basic for UI which people gravitate towards. For example, a searchable database can easily have a table-like UI, but pairing approaches with non-obvious UIs is interesting, such as Card-Swipe UI.
 The InteractionXIdea should also brainstorm some nonobvious InteractionXIdeas.
+The application is a UI app. Do not recommend a mobile app. The app cannot suggest any carousels, since it is a UI. For example, if the prompt suggests a swiping interface, in the UI the "swipe" would be done by clicking, since it is not a mobile interface.
 For OkCupid: Faceted Browsing
 For Tinder: Card Swipe
 For CoffeeMeetsBagel: Feed with 5 options to date

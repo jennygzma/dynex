@@ -767,6 +767,7 @@ def get_fake_data(design_hypothesis, user_input):
 	return res
 
 # this code generated is one shot
+# NOT NECESSARY
 def implement_plan(prompt, plan, design_hypothesis, code_folder_path, faked_data):
 	print("calling LLM for implement_plan...")
 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
@@ -782,7 +783,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
 	system_message = f"""
-                You are working on an app dsecribed here: {design_hypothesis}.
+                You are working on an app described here: {design_hypothesis}.
                 The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}.
@@ -873,27 +874,7 @@ def implement_first_task(design_hypothesis, task, task_merged_code_file_path, fa
 	create_and_write_file(task_merged_code_file_path, code_with_data)
 	print("sucessfully called LLM for implement_first_task", code_with_data)
 
-def identify_code_changes(plan, task, task_code_file_path, previous_task_main_code_file_path, design_hypothesis):
-	print("calling LLM for identify_code_changes...")
-	user_message = f"Please return the array of code-snippets and the line number where you would inject the code as an array for this task: {task}."
-	print("previous_task_main_code_file_path ", previous_task_main_code_file_path)
-	previous_code = read_file(previous_task_main_code_file_path)
-	system_message = f"""
-                You are working on an app dsecribed here: {design_hypothesis}.
-                The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
-				We've broken down the development of it into these tasks: {plan}.
-				Currently, you are working on this task: {task}.
-				There is already existing code in the index.html file. Using the existing code {previous_code}, identify where you would add code to implement ONLY this task and have it fully working.
-
-				Return the response in an array with this format: [{{"line number": line_number, "action": action, "code": code}}],
-				where the line number is where you would inject the code given the previous code,
-				action is whether or not you are replacing existing code or adding new code (Example: if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. REPLACE the current search bar with the new search bar. Example: Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.),
-				code is the actual code you would inject. Only write in React and MUI code.
-            """
-	injections = call_llm(system_message, user_message)
-	create_and_write_file(task_code_file_path, injections)
-	print("sucessfully called LLM for identify_code_changes", injections)
-
+# not used
 def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path):
     print("calling LLM for inject_code...")
     task_code = read_file(task_code_file_path)
