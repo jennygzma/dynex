@@ -47,6 +47,7 @@ def call_llm(system_message, user_message, llm=globals.LLM):
 MATRIX_FILE_NAME = "matrix.txt"
 FAKED_DATA_FILE_NAME = "faked_data.json"
 DESIGN_HYPOTHESIS_FILE_NAME = "design_hypothesis.txt"
+TOOL_REQUIREMENTS_FILE_NAME = "tool_requirements.txt"   
 
 PROBLEM_FILE_NAME = "problem.txt"
 PROTOTYPES = "prototypes.txt"
