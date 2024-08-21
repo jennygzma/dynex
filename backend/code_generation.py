@@ -697,10 +697,37 @@ Ensure that when creating a chart, we do not run into the error where the `useEf
 10. Do not return separate code files. All the components should be in one code file and returned.
 11. Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
 """
+
 def get_fake_data(design_hypothesis, user_input):
 	print("calling LLM for get_fake_data...")
 	system_message = """
-        You are generating fake JSON data for a UI that a user wants to create. Given the context, please generate a JSON array of fake data with appropriate fields. THE USER INPUT WILL INCLUDE THE DATA FIELDS. PLEASE INCLUDE ALL FIELDS THE USER INPUT SUGGEST. Here is an example:
+        You are generating fake JSON data for a UI that a user wants to create. The design hypothesis should give instructures as to what data needs to be generated.
+
+        For example, for this design hypothesis:
+        "Application Layout:
+
+        - Create a clean, minimalist interface with a prominent central area for displaying outfit recommendations.
+        - Divide the interface into three main sections: "Outfit Recommendations," "Wardrobe," and "Saved Outfits."
+        - The "Outfit Recommendations" section should display swipeable cards with visual representations of the recommended outfits, along with relevant tags (season, occasion, style).
+        - The "Wardrobe" section should allow users to input their clothing items, categorized by type (tops, bottoms, dresses, etc.).
+        - The "Saved Outfits" section should display a grid of liked outfits for future reference.
+
+        User Interactions:
+
+        - Users can swipe left by clicking no, or right by clicking yes on the outfit recommendation cards to dislike or like the outfit, respectively.
+        - Users can click on individual clothing items in the "Wardrobe" section to add or remove them from their virtual wardrobe.
+        - Users can click on a liked outfit in the "Saved Outfits" section to view its details or remove it from the saved list.
+
+        Inputs and Logic:
+
+        - The app will use the user's initial wardrobe inputs and style preferences (gathered through a brief questionnaire) to kickstart the GPT-powered outfit recommendation algorithm.
+        - The algorithm will consider factors like season, occasion, and the user's wardrobe items to generate outfit recommendations.
+        - The user's interactions (likes, dislikes) with the recommended outfits will be used as feedback to refine and personalize the algorithm's recommendations over time.
+        - The liked outfits will be saved in the "Saved Outfits" section for future reference.
+        - Create placeholder data for initial wardrobe."
+  we only want to generate fake data for the INITIAL wardrobe, not the outfit recommendations.
+
+	Please generate a JSON array of fake data with appropriate fields. THE USER INPUT WILL INCLUDE THE DATA FIELDS. PLEASE INCLUDE ALL FIELDS THE USER INPUT SUGGEST. Here is an example:
 
         Input: I want to create a UI that visualizes a beauty store's inventory... It should have the fields `title`, `description`, `price`, `discountPercentage`, `rating`, `stock`, `brand`, `category`
 
@@ -731,7 +758,7 @@ def get_fake_data(design_hypothesis, user_input):
         ]
         Please follow these rules while creating the JSON array
         1. Please only return the JSON array and nothing else.
-        2. Array length should be length 20.
+        2. Array length should be length 10-20.
         3. Please ensure that the generated data makes sense.
     """
 	user_message = f"please generate data given this UI: {design_hypothesis}. Factor in this user suggestion into generating the data: {user_input}"
@@ -740,6 +767,7 @@ def get_fake_data(design_hypothesis, user_input):
 	return res
 
 # this code generated is one shot
+# NOT NECESSARY
 def implement_plan(prompt, plan, design_hypothesis, code_folder_path, faked_data):
 	print("calling LLM for implement_plan...")
 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
@@ -755,7 +783,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
 	system_message = f"""
-                You are working on an app dsecribed here: {design_hypothesis}.
+                You are working on an app described here: {design_hypothesis}.
                 The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}.
@@ -804,6 +832,7 @@ def implement_first_task(design_hypothesis, task, task_merged_code_file_path, fa
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
                 You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}. Here is the faked data for context: {faked_data}.
+				We will grab the faked_data from the endpoint, if it exists. Grab it like so: {get_faked_data_code}.
 				{code_rules}
             """
 	code = call_llm(system_message, user_message)
@@ -845,27 +874,7 @@ def implement_first_task(design_hypothesis, task, task_merged_code_file_path, fa
 	create_and_write_file(task_merged_code_file_path, code_with_data)
 	print("sucessfully called LLM for implement_first_task", code_with_data)
 
-def identify_code_changes(plan, task, task_code_file_path, previous_task_main_code_file_path, design_hypothesis):
-	print("calling LLM for identify_code_changes...")
-	user_message = f"Please return the array of code-snippets and the line number where you would inject the code as an array for this task: {task}."
-	print("previous_task_main_code_file_path ", previous_task_main_code_file_path)
-	previous_code = read_file(previous_task_main_code_file_path)
-	system_message = f"""
-                You are working on an app dsecribed here: {design_hypothesis}.
-                The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
-				We've broken down the development of it into these tasks: {plan}.
-				Currently, you are working on this task: {task}.
-				There is already existing code in the index.html file. Using the existing code {previous_code}, identify where you would add code to implement ONLY this task and have it fully working.
-
-				Return the response in an array with this format: [{{"line number": line_number, "action": action, "code": code}}],
-				where the line number is where you would inject the code given the previous code,
-				action is whether or not you are replacing existing code or adding new code (Example: if there is already a search bar and the task asks to implement search functionality, do not create a new search bar. REPLACE the current search bar with the new search bar. Example: Or, if you are to add a column to a table, you should REPLACE the existing table - do not create a new table.),
-				code is the actual code you would inject. Only write in React and MUI code.
-            """
-	injections = call_llm(system_message, user_message)
-	create_and_write_file(task_code_file_path, injections)
-	print("sucessfully called LLM for identify_code_changes", injections)
-
+# not used
 def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path):
     print("calling LLM for inject_code...")
     task_code = read_file(task_code_file_path)

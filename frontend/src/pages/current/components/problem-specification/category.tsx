@@ -142,7 +142,7 @@ const Category = ({ description, category }: CategoryProps) => {
       .then((response) => {
         console.log("/brainstorm_inputs request successful:", response.data);
         if (category.includes("Grounding")) {
-          setBrainstorms([response.data.brainstorms]);
+          setInput(response.data.brainstorms);
         } else {
           setBrainstorms(response.data.brainstorms);
         }

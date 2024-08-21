@@ -717,8 +717,10 @@ def get_test_cases_per_lock_step():
 def set_globals_for_uuid(generated_uuid):
     print("calling set_globals_for_uuid")
     globals.folder_path = f"{globals.GENERATED_FOLDER_PATH}/{generated_uuid}"
-    globals.prototypes = json.loads(
-        read_file(f"{globals.folder_path}/{globals.PROTOTYPES}")
+    globals.prototypes = (
+        json.loads(read_file(f"{globals.folder_path}/{globals.PROTOTYPES}"))
+        if file_exists(f"{globals.folder_path}/{globals.PROTOTYPES}")
+        else []
     )
     globals.matrix = json.loads(
         read_file(f"{globals.folder_path}/{globals.MATRIX_FILE_NAME}")
