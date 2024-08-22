@@ -1,4 +1,10 @@
-import { Stack, Typography } from "@mui/material";
+import {
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Stack,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAppContext } from "../hooks/app-context";
@@ -20,12 +26,29 @@ const ProjectFormation = () => {
   const [updatedPrompt, setUpdatedPrompt] = useState(false);
   const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
   const [updatedDataInput, setUpdatedDataInput] = useState(false);
+  const [checkedState, setCheckedState] = useState({
+    checkedGPT: false,
+    checkedImages: false,
+    checkedFakedData: false,
+    checkedChartJs: false,
+    checkedGoJs: false,
+  });
+  const [updatedCheckBoxes, setUpdatedCheckBoxes] = useState(false);
+
+  const handleChange = (event) => {
+    setCheckedState({
+      ...checkedState,
+      [event.target.name]: event.target.checked,
+    });
+    setUpdatedCheckBoxes(true);
+  };
 
   useEffect(() => {}, [designHypothesis, dataInput, UIPrompt]);
   useEffect(() => {
     if (!currentPrototype) return;
     getFakedData();
     getDesignHypothesis();
+    getToolsRequirement();
     getPrompt();
   }, [currentPrototype]);
 
@@ -142,6 +165,7 @@ const ProjectFormation = () => {
           response.data,
         );
         getDesignHypothesis();
+        getToolsRequirement();
       })
       .catch((error) => {
         console.error(
@@ -199,6 +223,91 @@ const ProjectFormation = () => {
         updateIsLoading(false);
       });
   };
+
+  const getToolsRequirement = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_tools_requirements",
+    })
+      .then((response) => {
+        console.log(
+          "/get_tools_requirements request successful:",
+          response.data,
+        );
+        const gpt = response.data.gpt;
+        const images = response.data.images;
+        const fakedData = response.data.faked_data;
+        const chartJs = response.data.chart_js;
+        const goJs = response.data.go_js;
+        setCheckedState({
+          checkedGPT: gpt,
+          checkedImages: images,
+          checkedFakedData: fakedData,
+          checkedChartJs: chartJs,
+          checkedGoJs: goJs,
+        });
+      })
+      .catch((error) => {
+        console.error("Error calling /get_tools_requirements request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const setToolsRequirement = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/set_tools_requirements",
+      data: {
+        gpt: checkedState.checkedGPT,
+        images: checkedState.checkedImages,
+        faked_data: checkedState.checkedFakedData,
+        chart_js: checkedState.checkedChartJs,
+        go_js: checkedState.checkedGoJs,
+      },
+    })
+      .then((response) => {
+        console.log(
+          "/set_tools_requirements request successful:",
+          response.data,
+        );
+        getToolsRequirement();
+      })
+      .catch((error) => {
+        console.error("Error calling /set_tools_requirements request:", error);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const recommendToolsRequirement = () => {
+    updateIsLoading(true);
+    axios({
+      method: "POST",
+      url: "/recommend_tools_requirements",
+    })
+      .then((response) => {
+        console.log(
+          "/recommend_tools_requirements request successful:",
+          response.data,
+        );
+        getToolsRequirement();
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /recommend_tools_requirements request:",
+          error,
+        );
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
   if (!currentPrototype) return <></>;
   return (
     <Box sx={{ width: "90%" }}>
@@ -234,51 +343,138 @@ const ProjectFormation = () => {
             Update Prompt
           </Button>
         </Stack>
-        <Stack spacing="10px">
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: "bold",
-              alignSelf: "center",
-              fontFamily: "monospace",
-            }}
-          >
-            Design Hypothesis
-          </Typography>
-          <Button
-            onClick={generateDesignHypothesis}
-            disabled={!UIPrompt}
-            sx={{
-              width: "100%",
-            }}
-          >
-            {designHypothesis
-              ? "Generate new design hypothesis"
-              : "Generate design hypothesis"}
-          </Button>
-          {designHypothesis && (
-            <>
-              <TextField
-                className={"design-hypothesis"}
-                label="Design Hypothesis"
-                rows={13}
-                value={designHypothesis}
-                onChange={(e) => {
-                  updateDesignHypothesis(e.target.value);
-                  setUpdatedDesignHypothesis(true);
+        <Stack spacing="10px" direction="row">
+          <Stack sx={{ width: "50%" }}>
+            <Stack direction="row" spacing="5px" sx={{ alignSelf: "center" }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  alignSelf: "center",
+                  fontFamily: "monospace",
                 }}
-              />
-              <Button
-                onClick={saveDesignHypothesis}
-                disabled={!updatedDesignHypothesis}
               >
-                Update design hypothesis
-              </Button>
-            </>
-          )}
-        </Stack>
-        <Stack spacing="10px" width="100%">
-          <Stack spacing="10px">
+                Choose your options:
+              </Typography>
+              <Button onClick={recommendToolsRequirement}>🧠</Button>
+            </Stack>
+            <FormGroup
+              sx={{
+                alignSelf: "center",
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkedState.checkedGPT}
+                    onChange={handleChange}
+                    name="checkedGPT"
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      alignSelf: "center",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    GPT
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkedState.checkedImages}
+                    onChange={handleChange}
+                    name="checkedImages"
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      alignSelf: "center",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    Images
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkedState.checkedFakedData}
+                    onChange={handleChange}
+                    name="checkedFakedData"
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      alignSelf: "center",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    Faked Data
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkedState.checkedChartJs}
+                    onChange={handleChange}
+                    name="checkedChartJs"
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      alignSelf: "center",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    ChartJS
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkedState.checkedGoJs}
+                    onChange={handleChange}
+                    name="checkedGoJs"
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      alignSelf: "center",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    GoJS
+                  </Typography>
+                }
+              />
+            </FormGroup>
+            <Button
+              onClick={() => {
+                setToolsRequirement();
+                setUpdatedCheckBoxes(false);
+              }}
+              disabled={!updatedCheckBoxes}
+            >
+              Update Tools Requirement
+            </Button>
+          </Stack>
+          <Stack spacing="10px" sx={{ width: "50%" }}>
             <Typography
               variant="body2"
               sx={{
@@ -287,49 +483,97 @@ const ProjectFormation = () => {
                 fontFamily: "monospace",
               }}
             >
-              Fake Data
+              Design Hypothesis
             </Typography>
-            <TextField
-              className={"generated-data"}
-              label="Data Input Suggestions"
-              variant="outlined"
-              multiline
-              rows={2}
-              value={dataIteration}
-              onChange={(e) => {
-                setDataIteration(e.target.value);
-              }}
-            />
             <Button
-              onClick={generateFakeData}
-              disabled={!UIPrompt || !designHypothesis}
+              onClick={generateDesignHypothesis}
+              disabled={!UIPrompt}
               sx={{
                 width: "100%",
               }}
             >
-              {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
+              {designHypothesis
+                ? "Generate new design hypothesis"
+                : "Generate design hypothesis"}
             </Button>
-            {dataInput !== "null" && dataInput && (
+            {designHypothesis && (
               <>
                 <TextField
-                  code={true}
-                  className={"generated-data"}
-                  label="Data Input"
-                  variant="outlined"
-                  multiline
+                  className={"design-hypothesis"}
+                  label="Design Hypothesis"
                   rows={13}
-                  value={dataInput}
+                  value={designHypothesis}
                   onChange={(e) => {
-                    setDataInput(e.target.value);
-                    setUpdatedDataInput(true);
+                    updateDesignHypothesis(e.target.value);
+                    setUpdatedDesignHypothesis(true);
                   }}
                 />
-                <Button onClick={saveFakedData} disabled={!updatedDataInput}>
-                  Update faked data
+                <Button
+                  onClick={saveDesignHypothesis}
+                  disabled={!updatedDesignHypothesis}
+                >
+                  Update design hypothesis
                 </Button>
               </>
             )}
           </Stack>
+        </Stack>
+
+        <Stack spacing="10px" width="100%">
+          {checkedState.checkedFakedData && (
+            <Stack spacing="10px">
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: "bold",
+                  alignSelf: "center",
+                  fontFamily: "monospace",
+                }}
+              >
+                Fake Data
+              </Typography>
+              <TextField
+                className={"generated-data"}
+                label="Data Input Suggestions"
+                variant="outlined"
+                multiline
+                rows={2}
+                value={dataIteration}
+                onChange={(e) => {
+                  setDataIteration(e.target.value);
+                }}
+              />
+              <Button
+                onClick={generateFakeData}
+                disabled={!UIPrompt || !designHypothesis}
+                sx={{
+                  width: "100%",
+                }}
+              >
+                {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
+              </Button>
+              {dataInput !== "null" && dataInput && (
+                <>
+                  <TextField
+                    code={true}
+                    className={"generated-data"}
+                    label="Data Input"
+                    variant="outlined"
+                    multiline
+                    rows={13}
+                    value={dataInput}
+                    onChange={(e) => {
+                      setDataInput(e.target.value);
+                      setUpdatedDataInput(true);
+                    }}
+                  />
+                  <Button onClick={saveFakedData} disabled={!updatedDataInput}>
+                    Update faked data
+                  </Button>
+                </>
+              )}
+            </Stack>
+          )}
         </Stack>
       </Stack>
     </Box>
