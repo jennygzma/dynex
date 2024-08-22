@@ -276,7 +276,7 @@ const Category = ({ description, category }: CategoryProps) => {
         >
           {description}
         </Typography>
-        {brainstorms.length > 0 ? (
+        {brainstorms.length > 0 || input ? (
           <Stack direction="row" spacing="5px">
             <TextField
               className={"code"}

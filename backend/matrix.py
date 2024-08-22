@@ -103,7 +103,7 @@ MATRIX_DESCRIPTION = f"{PPAI_DESCRIPTION} + {" ".join(MATRIX_DESCRIPTIONS.values
 
 def get_context_from_other_inputs(problem, category, matrix):
     print(matrix)
-    compiled_text = problem
+    compiled_text = f"{problem}\n"
     if category is not None and "Idea" in category:
         skipped = category.replace("Idea", "Grounding")
     else:
@@ -211,7 +211,7 @@ def brainstorm_inputs(category, context, iteration):
     system_message = f"""
     You are a helpful assistant that helps brainstorm specification answers for a category to narrow down inputs.
     {MATRIX_DESCRIPTION}
-    We can support AI/ML features in our application by calling GPT. However, we can only call GPT, so do not suggest "ML Algorithm" or "AI-powered" - it must be "GPT-powered".
+    ONLY IF NECESSARY WILL WE SUPPORT AI/ML features in our application by calling GPT. However, we can only call GPT, so do not suggest "ML Algorithm" or "AI-powered" - it must be "GPT-powered".
     Keep in mind that we cannot support physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code.
     {PPAI_EXAMPLES}
     Here is the context for this problem: {context}

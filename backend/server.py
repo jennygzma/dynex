@@ -20,7 +20,11 @@ from matrix import get_needs_specification as check_needs_specification
 from matrix import summarize_input_from_context
 from planning import get_design_hypothesis as get_generated_design_hypothesis
 from planning import get_plan as get_generated_plan
-from planning import get_plan_from_task_map
+from planning import (
+    get_plan_from_task_map,
+    get_tool_requirements,
+    get_tools_requirement_context,
+)
 from utils import (
     create_and_write_file,
     create_folder,
@@ -192,6 +196,9 @@ def explore_prototype():
     prompt = f"Create a web UI based on this: {context}. "
     create_and_write_file(f"{folder_path}/{globals.PROMPT_FILE_NAME}", prompt)
     create_and_write_file(
+        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}", prompt
+    )
+    create_and_write_file(
         f"{folder_path}/{globals.MATRIX_FILE_NAME}", json.dumps(globals.matrix)
     )
     return jsonify({"message": "Saved prototype"}), 200
@@ -320,6 +327,124 @@ def get_faked_data():
     )
 
 
+@app.route("/get_tools_requirements", methods=["GET"])
+def get_tools_requirements():
+    print("calling get_tools_requirements...")
+    gpt = False
+    images = False
+    faked_data = False
+    chart_js = False
+    go_js = False
+    folder_path = f"{globals.folder_path}/{globals.current_prototype}"
+    tools_requirements_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
+    gpt = tools_requirements_json["gpt"]["required"] != "no"
+    images = tools_requirements_json["images"]["required"] != "no"
+    faked_data = tools_requirements_json["faked_data"]["required"] != "no"
+    chart_js = tools_requirements_json["chart_js"]["required"] != "no"
+    go_js = tools_requirements_json["go_js"]["required"] != "no"
+    return (
+        jsonify(
+            {
+                "message": "Retrieved tools requirements",
+                "gpt": gpt,
+                "images": images,
+                "faked_data": faked_data,
+                "chart_js": chart_js,
+                "go_js": go_js,
+            }
+        ),
+        200,
+    )
+
+
+@app.route("/set_tools_requirements", methods=["POST"])
+def set_tools_requirements():
+    print("calling get_tools_requirements...")
+    data = request.json
+    gpt = data["gpt"]
+    images = data["images"]
+    faked_data = data["faked_data"]
+    chart_js = data["chart_js"]
+    go_js = data["go_js"]
+    folder_path = f"{globals.folder_path}/{globals.current_prototype}"
+    tools_requirements_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
+    tools_requirements_json["gpt"]["required"] = "no" if not gpt else "yes"
+    tools_requirements_json["gpt"]["why"] = (
+        "The app does not require GPT" if not gpt else "The app requires GPT"
+    )
+    tools_requirements_json["images"]["required"] = "no" if not images else "yes"
+    tools_requirements_json["images"]["why"] = (
+        "The app does not require images by calling GPT"
+        if not images
+        else "The app requires images. Grab these images by calling GPT"
+    )
+    tools_requirements_json["faked_data"]["required"] = (
+        "no" if not faked_data else "yes"
+    )
+    tools_requirements_json["faked_data"]["why"] = (
+        "The app does not require faked_data"
+        if not faked_data
+        else "The app requires faked_data, grab it from the endpoint."
+    )
+    tools_requirements_json["chart_js"]["required"] = "no" if not chart_js else "yes"
+    tools_requirements_json["chart_js"]["why"] = (
+        "The app does not require chartJS"
+        if not chart_js
+        else "The app requires chartJS"
+    )
+    tools_requirements_json["go_js"]["required"] = "no" if not go_js else "yes"
+    tools_requirements_json["go_js"]["why"] = (
+        "The app does not require GoJS" if not go_js else "The app requires GoJS"
+    )
+    create_and_write_file(
+        f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}",
+        json.dumps(tools_requirements_json),
+    )
+    return (
+        jsonify(
+            {
+                "message": "Set Tools Requirement",
+                "gpt": gpt,
+                "images": images,
+                "faked_data": faked_data,
+                "chart_js": chart_js,
+                "go_js": go_js,
+            }
+        ),
+        200,
+    )
+
+
+@app.route("/recommend_tools_requirements", methods=["POST"])
+def recommend_tools_requirements():
+    print("calling recommend_tools_requirements...")
+    prompt = read_file(
+        f"{globals.folder_path}/{globals.current_prototype}/{globals.PROMPT_FILE_NAME}"
+    )
+    folder_path = f"{globals.folder_path}/{globals.current_prototype}"
+    tools_requirements = json.loads(get_tool_requirements(prompt))
+    create_and_write_file(
+        f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}",
+        json.dumps(tools_requirements),
+    )
+    return (
+        jsonify(
+            {
+                "message": "recommended tools requirements",
+            }
+        ),
+        200,
+    )
+
+
 @app.route("/generate_design_hypothesis", methods=["POST"])
 def generate_design_hypothesis():
     print("calling generate_design_hypothesis...")
@@ -327,8 +452,17 @@ def generate_design_hypothesis():
         f"{globals.folder_path}/{globals.current_prototype}/{globals.PROMPT_FILE_NAME}"
     )
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
+    tools_requirements_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
+    tools_requirements_context = get_tools_requirement_context(tools_requirements_json)
+
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
-    design_hypothesis = get_generated_design_hypothesis(prompt, faked_data)
+    design_hypothesis = get_generated_design_hypothesis(
+        prompt, faked_data, tools_requirements_context
+    )
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
@@ -404,6 +538,7 @@ def generate_plan():
     design_hypothesis = read_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
+    print(design_hypothesis)
     plan = get_generated_plan(design_hypothesis)
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))

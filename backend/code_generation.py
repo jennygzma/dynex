@@ -693,7 +693,7 @@ Make sure to implement all that is specified in the task and do not leave anythi
 Ensure that when creating a chart, we do not run into the error where the `useEffect` hook in the `PieChart` or whatever chart component we are creating component is a new instance of the `Chart` object every time the component re-renders, without destroying the previous instance. To fix this, we need to store a reference to the chart instance and destroy it before creating a new one.
 7. If the app requires visualization such as  a flow chart, mind map, or tree, you can use GoJS from the CDN like so:  {sample_gojs_code}
 8. If the app would be better with animation, use three.js from the CDN like so:   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-9. DO NOT LOAD ANYTHING ELSE IN THE CDN UNLESS YOU ARE CONFIDENT THAT IT WOULD WORK. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
+9. DO NOT LOAD ANYTHING ELSE IN THE CDN. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
 10. Do not return separate code files. All the components should be in one code file and returned.
 11. Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
 """
