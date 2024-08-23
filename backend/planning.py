@@ -334,23 +334,73 @@ def cleanup_tools_requirement(tools_requirement):
         return cleanup_tools_requirement(tools_requirement)
 
 
-def get_plan(design_hypothesis):
+def get_plan(design_hypothesis, tools_requirements):
     print("calling LLM for get_plan...")
+
+    #Base user message (assumed no gpt or images)
     user_message = f"""
+            Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features. {app_rules}
+            The first step should focus on creating the general structure of the app. The first step should also recommend whether or not the app needs placeholder data - and if it does, call the placeholder data from the endpoint:
+            No need to have steps to create placeholder data, as that will be created externally and we will have an endpoint that calls for it.
+            Limit the plan to 1-3 steps. If the application is particularly complex, such as requiring complex GPT calls and logic, then allow two extra steps specifically detailing the logic of calling these external libaries - but only if needed.
+            At most, there will be 5 steps.
+            Here is an example of a plan, given a design hypothesis: {plan_example}
+            Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
+            The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
+            """
+
+    #Check the data on tool requirements - If gpt is required
+    if tools_requirements["gpt"]["required"] == "yes" or tools_requirements["images"]["required"] == "yes":
+        user_message = f"""
         Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features. {app_rules}
         The first step should focus on creating the general structure of the app. The first step should also recommend whether or not the app needs placeholder data - and if it does, call the placeholder data from the endpoint:
         No need to have steps to create placeholder data, as that will be created externally and we will have an endpoint that calls for it.
-        Limit the plan to 1-3 steps. If the application is particularly complex, such as requiring complex GPT calls and logic, then allow two extra steps specifically detailing the logic of calling these external libaries - but only if needed.
-        At most, there will be 5 steps.
+        Limit the plan to 4-6 steps. 
+        Dedicate a step to the creation of the gpt process that will allow the application to generate data. 
+        There should be no more than 6 steps. 
+        
         Here is an example of a plan, given a design hypothesis: {plan_example}
         Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		"""
+
+    #Check the data on tool requirements - If images is required
+    if tools_requirements["gpt"]["required"] == "yes" or tools_requirements["images"]["required"] == "yes":
+        user_message = f"""
+        Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features. {app_rules}
+        The first step should focus on creating the general structure of the app. The first step should also recommend whether or not the app needs placeholder data - and if it does, call the placeholder data from the endpoint:
+        No need to have steps to create placeholder data, as that will be created externally and we will have an endpoint that calls for it.
+        Limit the plan to 4-6 steps. 
+        Dedicate a step to the creation of the image generation process that will allow the application to generate images.
+        There should be no more than 6 steps. 
+
+        Here is an example of a plan, given a design hypothesis: {plan_example}
+        Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
+		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
+		"""
+
+    #Check the data on tool requirements - If images AND gpt is required
+    if tools_requirements["gpt"]["required"] == "yes" or tools_requirements["images"]["required"] == "yes":
+        user_message = f"""
+        Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features. {app_rules}
+        The first step should focus on creating the general structure of the app. The first step should also recommend whether or not the app needs placeholder data - and if it does, call the placeholder data from the endpoint:
+        No need to have steps to create placeholder data, as that will be created externally and we will have an endpoint that calls for it.
+        Limit the plan to 5-7 steps. 
+        Dedicate a step to the creation of the image generation process that will allow the application to generate images.
+        And dedicate a step to the creation of the gpt process that will allow the application to generate data.
+        There should be no more than 7 steps. 
+        
+        Here is an example of a plan, given a design hypothesis: {plan_example}
+        Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
+		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
+		"""
+        
     system_message = f"You are a helpful software engineer to answer questions related to implementing this UI based on this design hypothesis: {design_hypothesis}"
     res = call_llm(system_message, user_message)
     plan = cleanup_plan(res)
     print("sucessfully called LLM for get_plan", res)
     return plan
+
 
 
 #  To do: make this recursive so that if the plan cannot be parsed into a json file, we recall GPT until its a valid JSON array
