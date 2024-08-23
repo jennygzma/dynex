@@ -698,6 +698,55 @@ Ensure that when creating a chart, we do not run into the error where the `useEf
 11. Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
 """
 
+code_rules_base = f"""
+ - The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS. The design should not incorporate routes. Everything should exist within one page. No need for design mockups, wireframes, or external dependencies.
+ - The entire app will be written using React and MUI. Load MUI from the CDN. Here is an example: {sample_code}
+ - DO NOT DELETE PREVIOUS CODE. DO NOT RETURN A CODE SNIPPET. RETURN THE ENTIRE CODE. Only ADD to existing code to implement the task properly. DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /*...rest of the code */ or something similar.
+ - If the app would be better with animation, use three.js from the CDN like so:   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+ - DO NOT LOAD ANYTHING ELSE IN THE CDN. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
+ - Do not return separate code files. All the components should be in one code file and returned.
+ - Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
+ 
+ """
+
+code_rules_gpt = f"""
+  - If the app requires it, it can call OpenAI for additional data or API calls like so: {sample_gpt_hook}. If the app requires images, it can also call GPT to grab images like in this example: {sample_gpt_image_code}
+  
+"""
+
+code_rules_chart = f"""
+  - If the app requires some visualization element like a pie chart or a bar chart, you can load chart.js from the CDN like so: : <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>.
+  
+  """
+
+code_rules_visualization = f"""
+  - If the app requires visualization such as  a flow chart, mind map, or tree, you can use GoJS from the CDN like so:  {sample_gojs_code}
+
+  """
+
+code_rules_fake_data = f"""
+  - Grab existing data to help build the application through an endpoint like so: {get_faked_data_code}. USE THIS ENDPOINT TO GRAB THE DATA.
+
+  """
+
+def get_code_rules(tools_requirements=None):
+	
+  # if tools_requirements is None, return the base code rules
+  if tools_requirements is None:
+      return code_rules
+  
+  rules = code_rules_base
+  if "gpt" in tools_requirements:
+      rules += code_rules_gpt
+  if "chart" in tools_requirements:
+      rules += code_rules_chart
+  if "visualization" in tools_requirements:
+      rules += code_rules_visualization
+  if "fake_data" in tools_requirements:
+      rules += code_rules_fake_data
+  return rules
+
+
 def get_fake_data(design_hypothesis, user_input):
 	print("calling LLM for get_fake_data...")
 	system_message = """
