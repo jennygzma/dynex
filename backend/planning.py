@@ -9,13 +9,12 @@ Here are the rules that the application must follow.
 - The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS.
 - The application is a UI app. Do not recommend a mobile app. The app cannot suggest any carousels, since it is a UI. For example, if the prompt suggests a swiping interface, in the UI the "swipe" would be done by clicking, since it is not a mobile interface.
 - The entire app will be written using React and MUI.
-- The app can also call GPT, use ChartJS, and GoJS. For example, if the application suggests using an ML algorithm for a personalization or suggestion-type application, the design should recommend using GPT as an LLM to accomplish this.
 - The app cannot use MaterialUI Icon, Material UI Lab, and other packages that are not available via the CDN.
-- However, if not necessary, do not call ChartJS, GoJS, or GPT. Only call these packages if absolutely necessary, as we don't want to overcomplicate the application.
+- Only use GPT, chart.js, gojs, or placeholder data if it was recommended as a dependency.
 - Do not design applications that require multimedia such as videos, audio, image-based, or drag and drop.
 - The design should not incorporate routes. Everything should exist within one page. No need for design mockups, wireframes, or external dependencies.
 - Keep in mind that we do not have the capacity to build a super fancy application. KEEP THE APPLICATION IN SCOPE TO THE USER PROBLEM AND THEORY AS MUCH AS POSSIBLE BECAUSE THERE IS LIMITED CODE WE CAN WRITE. For example, if this is the prompt: "Create a web UI based on this idea: learn chinese, for users: Retired person seeking a mentally stimulating hobby and a way to connect with their cultural heritage, where the application goal is: To gain conversational fluency to communicate with family members and explore ancestral roots. Use the theory of Spaced Repetition (Reviewing information at optimal intervals reinforces memory and aids long-term retention of the language.), which with interaction pattern Interactive storytelling (A narrative-driven approach with dialogues and scenarios, reinforcing vocabulary and phrases through an engaging story with spaced repetition of key elements.) to guide the design.", we should focus on implementing the spaced repetition part - unnecessary features like a social community feature, or working with multiple different stories is overly complex, as is is multiple decks, a setting bar, a profile page.
-- Additionally, keep in mind that we are attempting to test the application created. If necessary, factor into the planning tasks that will allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
+- Additionally, we are attempting to test the application created, so features that are needed to test the application can be added. For example, if implementing a flashcard learning application that utilizes spaced repetition, one feature to add into the design and plan is a faked date input to allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
 """
 
 design_hypothesis_example = """
@@ -114,6 +113,16 @@ Here is the example plan. It is longer because we are using GPT:
 """
 
 
+def create_design_hypothesis(problem, matrix):
+    hypothesis = f"""
+Create a UI for this {problem}.
+It is for {matrix['PersonXIdea']}. For more details: {matrix['PersonXGrounding']}
+The approach should be: {matrix['ApproachXIdea']}. For more details: {matrix['ApproachXGrounding']}
+The interaction paradigm shown in the interface should be {matrix['InteractionXIdea']}. For more details: {matrix['InteractionXGrounding']}
+    """
+    return hypothesis.strip()
+
+
 def get_plan_from_task_map(folder_path):
     task_map_json = json.loads(read_file(f"{folder_path}/{TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
@@ -155,7 +164,6 @@ def get_design_hypothesis(ui_prompt, faked_data, tools_requirements_context):
 
 
 def get_tool_requirements(ui_prompt):
-
     user_message = f"""
         This is the prompt: {ui_prompt}
     """
@@ -334,19 +342,55 @@ def cleanup_tools_requirement(tools_requirement):
         return cleanup_tools_requirement(tools_requirement)
 
 
-def get_plan(design_hypothesis):
+def get_plan_message(tools_requirements):
+    message = f"""
+    Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features. {app_rules}
+    - Do not use any other dependencies unless specified.
+    - No need to have steps to create placeholder data, as that will be created externally and we will have an endpoint that calls for it.
+    - The first step should focus on creating the general structure of the app.
+    Here is an example of a plan, given a design hypothesis: {plan_example}
+
+    """
+    if tools_requirements is None or tools_requirements == {}:
+        message += "Limit the plan to 1-3 steps. If it's possible to create in one step, you can recommend that."
+    if tools_requirements["gpt"]["required"] == "yes":
+        message += """
+            Limit the plan to 3-5 steps.
+            Dedicate a step to the creation of the gpt process that will allow the application to generate data.
+        """
+    if tools_requirements["images"]["required"] == "yes":
+        message += """
+            Limit the plan to 3-5 steps.
+            Dedicate a step to the creation of the gpt process that will allow the application to generate images and add it to the relevant places.
+        """
+    if tools_requirements["faked_data"]["required"] == "yes":
+        message += """
+            In the first step of the app, also call the placeholder data from the endpoint.
+            Limit the plan to 1-3 steps. If it's possible to create the application in 1-2 steps, do that.
+        """
+    if tools_requirements["chart_js"]["required"] == "yes":
+        message += """
+            Limit the plan to 2-4 steps.
+            Dedicate a step integrate the dependencies of chart_js.
+        """
+    if tools_requirements["go_js"]["required"] == "yes":
+        message += """
+            Limit the plan to 2-4 steps.
+            Dedicate a step integrate the dependencies of go_js.
+        """
+    return message
+
+
+def get_plan(design_hypothesis, tools_requirements):
     print("calling LLM for get_plan...")
-    user_message = f"""
-        Give me a vague implementation plan that is feature-based. Each step should focus on implementing a couple interaction/features. {app_rules}
-        The first step should focus on creating the general structure of the app. The first step should also recommend whether or not the app needs placeholder data - and if it does, call the placeholder data from the endpoint:
-        No need to have steps to create placeholder data, as that will be created externally and we will have an endpoint that calls for it.
-        Limit the plan to 1-3 steps. If the application is particularly complex, such as requiring complex GPT calls and logic, then allow two extra steps specifically detailing the logic of calling these external libaries - but only if needed.
-        At most, there will be 5 steps.
-        Here is an example of a plan, given a design hypothesis: {plan_example}
+    message = get_plan_message(tools_requirements)
+    system_message = f"""
+        You are a helpful senior software engineer building a plan to implement a UI based on a design hypothesis.
+        {message}
         Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		"""
-    system_message = f"You are a helpful software engineer to answer questions related to implementing this UI based on this design hypothesis: {design_hypothesis}"
+    user_message = f"Create a plan for this design hypothesis: {design_hypothesis}."
     res = call_llm(system_message, user_message)
     plan = cleanup_plan(res)
     print("sucessfully called LLM for get_plan", res)

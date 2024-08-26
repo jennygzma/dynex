@@ -156,7 +156,7 @@ const Implementation = () => {
     getCodeForIteration(currentIteration);
     setProblemDescription("");
     setClickedRender(false);
-  }, [plan, designHypothesis, currentTask, currentIteration, currentPrototype]);
+  }, [plan, currentTask, currentIteration, currentPrototype]);
 
   if (!currentPrototype) return <></>;
   return (

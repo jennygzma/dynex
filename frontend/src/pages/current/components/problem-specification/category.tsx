@@ -39,6 +39,7 @@ const Category = ({ description, category }: CategoryProps) => {
   const [question, setQuestion] = useState("");
   const [iteration, setIteration] = useState("");
   const isGrounding = category.includes("Grounding");
+  const [versions, setVersions] = useState([]);
 
   // const updateSpecificationBrainstorm = (
   //   index: number,
@@ -137,14 +138,15 @@ const Category = ({ description, category }: CategoryProps) => {
       params: {
         category: category,
         iteration: iteration,
+        brainstorms: brainstorms,
       },
     })
       .then((response) => {
         console.log("/brainstorm_inputs request successful:", response.data);
-        if (category.includes("Grounding")) {
+        if (isGrounding) {
           setInput(response.data.brainstorms);
         } else {
-          setBrainstorms(response.data.brainstorms);
+          setBrainstorms([...brainstorms, ...response.data.brainstorms]);
         }
       })
       .catch((error) => {
@@ -276,11 +278,20 @@ const Category = ({ description, category }: CategoryProps) => {
         >
           {description}
         </Typography>
+        <Button
+          onClick={brainstormInputs}
+          sx={{
+            width: "100%",
+          }}
+        >
+          Brainstorm
+        </Button>
         {brainstorms.length > 0 || input ? (
           <Stack direction="row" spacing="5px">
             <TextField
-              className={"code"}
-              rows={1}
+              label="Iterate"
+              className={"Iterate"}
+              rows={2}
               value={iteration}
               onChange={(e) => {
                 setIteration(e.target.value);
@@ -292,18 +303,11 @@ const Category = ({ description, category }: CategoryProps) => {
                 width: "20%",
               }}
             >
-              💡
+              Update
             </Button>
           </Stack>
         ) : (
-          <Button
-            onClick={brainstormInputs}
-            sx={{
-              width: "100%",
-            }}
-          >
-            Brainstorm
-          </Button>
+          <></>
         )}
         {brainstorms?.map((brainstorm) => {
           return (
@@ -332,6 +336,27 @@ const Category = ({ description, category }: CategoryProps) => {
           direction="column"
           rows={category.includes("Idea") ? 1 : 8}
         />
+        {isGrounding && (
+          <Stack spacing="5px">
+            <Button onClick={() => setVersions([...versions, input])}>
+              Save Version
+            </Button>
+            {versions?.map((version) => (
+              <Chip
+                key={version}
+                label={version}
+                onClick={() => {
+                  setInput(version);
+                }}
+                clickable
+                selected={version === input}
+                sx={{
+                  alignSelf: "center",
+                }}
+              />
+            ))}
+          </Stack>
+        )}
         {/* <Button
           onClick={getQuestions}
           disabled={!needsSpecification}

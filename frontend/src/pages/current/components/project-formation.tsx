@@ -49,48 +49,48 @@ const ProjectFormation = () => {
     getFakedData();
     getDesignHypothesis();
     getToolsRequirement();
-    getPrompt();
+    // getPrompt();
   }, [currentPrototype]);
 
-  const getPrompt = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_prompt",
-    })
-      .then((response) => {
-        console.log("/get_prompt request successful:", response.data);
-        setUIPrompt(response.data.prompt);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_prompt request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
+  // const getPrompt = () => {
+  //   updateIsLoading(true);
+  //   axios({
+  //     method: "GET",
+  //     url: "/get_prompt",
+  //   })
+  //     .then((response) => {
+  //       console.log("/get_prompt request successful:", response.data);
+  //       setUIPrompt(response.data.prompt);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error calling /get_prompt request:", error);
+  //     })
+  //     .finally(() => {
+  //       updateIsLoading(false);
+  //     });
+  // };
 
-  const savePrompt = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_prompt",
-      data: {
-        prompt: UIPrompt,
-      },
-    })
-      .then((response) => {
-        console.log("/save_prompt request successful:", response.data);
-        getPrompt();
-        setUpdatedPrompt(false);
-      })
-      .catch((error) => {
-        console.error("Error calling /save_prompt request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
+  // const savePrompt = () => {
+  //   updateIsLoading(true);
+  //   axios({
+  //     method: "POST",
+  //     url: "/save_prompt",
+  //     data: {
+  //       prompt: UIPrompt,
+  //     },
+  //   })
+  //     .then((response) => {
+  //       console.log("/save_prompt request successful:", response.data);
+  //       // getPrompt();
+  //       setUpdatedPrompt(false);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error calling /save_prompt request:", error);
+  //     })
+  //     .finally(() => {
+  //       updateIsLoading(false);
+  //     });
+  // };
 
   const generateFakeData = () => {
     updateIsLoading(true);
@@ -322,7 +322,7 @@ const ProjectFormation = () => {
         >
           Project Formation
         </Typography>
-        <Stack spacing="10px">
+        {/* <Stack spacing="10px">
           <TextField
             className={"prompt"}
             label="Prompt"
@@ -342,7 +342,7 @@ const ProjectFormation = () => {
           >
             Update Prompt
           </Button>
-        </Stack>
+        </Stack> */}
         <Stack spacing="10px" direction="row">
           <Stack sx={{ width: "50%" }}>
             <Stack direction="row" spacing="5px" sx={{ alignSelf: "center" }}>

@@ -18,6 +18,7 @@ from matrix import brainstorm_inputs as brainstorm_generated_inputs
 from matrix import brainstorm_question, get_context_from_other_inputs
 from matrix import get_needs_specification as check_needs_specification
 from matrix import summarize_input_from_context
+from planning import create_design_hypothesis
 from planning import get_design_hypothesis as get_generated_design_hypothesis
 from planning import get_plan as get_generated_plan
 from planning import (
@@ -99,8 +100,11 @@ def brainstorm_inputs():
     print("calling brainstorm_inputs...")
     category = request.args.get("category")
     iteration = request.args.get("iteration")
+    existing_brainstorms = request.args.get("brainstorms")
     context = get_context_from_other_inputs(globals.problem, None, globals.matrix)
-    brainstorms = brainstorm_generated_inputs(category, context, iteration)
+    brainstorms = brainstorm_generated_inputs(
+        category, context, existing_brainstorms, iteration
+    )
     return (
         jsonify({"message": "Generated brainstorm_inputs", "brainstorms": brainstorms}),
         200,
@@ -196,7 +200,8 @@ def explore_prototype():
     prompt = f"Create a web UI based on this: {context}. "
     create_and_write_file(f"{folder_path}/{globals.PROMPT_FILE_NAME}", prompt)
     create_and_write_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}", prompt
+        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
+        create_design_hypothesis(globals.problem, globals.matrix),
     )
     create_and_write_file(
         f"{folder_path}/{globals.MATRIX_FILE_NAME}", json.dumps(globals.matrix)
@@ -295,7 +300,12 @@ def generate_fake_data():
     design_hypothesis = read_file(
         f"{globals.folder_path}/{globals.current_prototype}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
-    data = get_generated_fake_data(design_hypothesis, user_iteration)
+    data = get_generated_fake_data(
+        design_hypothesis,
+        user_iteration,
+        globals.matrix["PersonXIdea"],
+        globals.matrix["PersonXGrounding"],
+    )
     faked_data = data
     create_and_write_file(
         f"{globals.folder_path}/{globals.current_prototype}/{globals.FAKED_DATA_FILE_NAME}",
@@ -539,7 +549,13 @@ def generate_plan():
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
     print(design_hypothesis)
-    plan = get_generated_plan(design_hypothesis)
+    tools_requirements_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
+
+    plan = get_generated_plan(design_hypothesis, tools_requirements_json)
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
@@ -671,7 +687,19 @@ def generate_code():
         wipeout_code(folder_path, task_id, task_map, globals.current_prototype)
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
     plan = json.loads(get_plan_from_task_map(folder_path))
-    implement_plan_lock_step(design_hypothesis, plan, folder_path, task_id, faked_data)
+    tools_requirements_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
+    implement_plan_lock_step(
+        design_hypothesis,
+        plan,
+        folder_path,
+        task_id,
+        faked_data,
+        tools_requirements_json,
+    )
     task_main_code_folder_path = (
         f"{folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
     )
@@ -805,6 +833,11 @@ def iterate_code():
     design_hypothesis = read_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
+    tools_requirements_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
     get_iterate_code(
         problem,
         task,
@@ -812,6 +845,7 @@ def iterate_code():
         current_iteration_folder_path,
         design_hypothesis,
         faked_data,
+        tools_requirements_json,
     )
     return (
         jsonify(

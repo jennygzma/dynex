@@ -682,25 +682,62 @@ sample_code = """
 </html>
 """
 
-code_rules= f"""
+code_rules_base= f"""
 Make sure to implement all that is specified in the task and do not leave anything else. Follow these rules when writing code:
-1. The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS. The design should not incorporate routes. Everything should exist within one page. No need for design mockups, wireframes, or external dependencies.
-2. The entire app will be written using React and MUI. Load MUI from the CDN. Here is an example: {sample_code}
-3. DO NOT DELETE PREVIOUS CODE. DO NOT RETURN A CODE SNIPPET. RETURN THE ENTIRE CODE. Only ADD to existing code to implement the task properly. DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /*...rest of the code */ or something similar.
-4. Grab existing data to help build the application through an endpoint like so: {get_faked_data_code}. USE THIS ENDPOINT TO GRAB THE DATA.
-5. If the app requires it, it can call OpenAI for additional data or API calls like so: {sample_gpt_hook}. If the app requires images, it can also call GPT to grab images like in this example: {sample_gpt_image_code}
-6. If the app requires some visualization element like a pie chart or a bar chart, you can load chart.js from the CDN like so: : <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>.
-Ensure that when creating a chart, we do not run into the error where the `useEffect` hook in the `PieChart` or whatever chart component we are creating component is a new instance of the `Chart` object every time the component re-renders, without destroying the previous instance. To fix this, we need to store a reference to the chart instance and destroy it before creating a new one.
-7. If the app requires visualization such as  a flow chart, mind map, or tree, you can use GoJS from the CDN like so:  {sample_gojs_code}
-8. If the app would be better with animation, use three.js from the CDN like so:   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-9. DO NOT LOAD ANYTHING ELSE IN THE CDN. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
-10. Do not return separate code files. All the components should be in one code file and returned.
-11. Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
+- The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS. The design should not incorporate routes. Everything should exist within one page. No need for design mockups, wireframes, or external dependencies.
+- The entire app will be written using React and MUI. Load MUI from the CDN. Here is an example: {sample_code}
+- DO NOT DELETE PREVIOUS CODE. DO NOT RETURN A CODE SNIPPET. RETURN THE ENTIRE CODE. Only ADD to existing code to implement the task properly. DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /*...rest of the code */ or something similar.
+- When creating buttons, instead of using text like "chevron_icon" or "back" or "forward", if possible, use emojis. For example: 🗑️ for delete,  ➕ for add, ➖ for remove.
+- DO NOT LOAD ANYTHING ELSE IN THE CDN. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
+- Do not return separate code files. All the components should be in one code file and returned.
+- Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
+- Do not use MUI components: Calendar, DatePicker, TimePicker, as they do not exist.
 """
 
-def get_fake_data(design_hypothesis, user_input):
+code_rules_gpt = f"""
+  - The app should call OpenAI for additional data or API calls like so: {sample_gpt_hook}.
+"""
+
+code_rules_image = f"""
+  - Since the app requires images, it can also call GPT to grab images like in this example: {sample_gpt_image_code}
+"""
+
+code_rules_faked_data = f"""
+  - Grab existing data to help build the application through an endpoint like so: {get_faked_data_code}. USE THIS ENDPOINT TO GRAB THE DATA.
+"""
+
+code_rules_chart_js = """
+  - The app requires a visualization element like a pie chart or a bar chart. You can load chart.js from the CDN like so: : <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>.
+  - Ensure that when creating a chart, we do not run into the error where the `useEffect` hook in the `PieChart` or whatever chart component we are creating component is a new instance of the `Chart` object every time the component re-renders, without destroying the previous instance. To fix this, we need to store a reference to the chart instance and destroy it before creating a new one.
+"""
+
+code_rules_go_js = f"""
+  - If the app requires visualization such as  a flow chart, mind map, or tree, you can use GoJS from the CDN like so:  {sample_gojs_code}
+"""
+
+code_rules_threes_js = """
+  - If the app would be better with animation, use three.js from the CDN like so:   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+"""
+
+def get_code_rules(tools_requirements=None):
+  rules = code_rules_base
+  if tools_requirements is None or tools_requirements == {}:
+    return code_rules_base
+  if tools_requirements["gpt"]["required"] == "yes":
+    rules += code_rules_gpt
+  if tools_requirements["images"]["required"] == "yes":
+    rules += code_rules_image
+  if tools_requirements["faked_data"]["required"] == "yes":
+    rules += code_rules_faked_data
+  if tools_requirements["chart_js"]["required"] == "yes":
+    rules += code_rules_chart_js
+  if tools_requirements["go_js"]["required"] == "yes":
+    rules += code_rules_go_js
+  return rules
+
+def get_fake_data(design_hypothesis, user_input, person_idea, person_grounding):
 	print("calling LLM for get_fake_data...")
-	system_message = """
+	system_message = f"""
         You are generating fake JSON data for a UI that a user wants to create. The design hypothesis should give instructures as to what data needs to be generated.
 
         For example, for this design hypothesis:
@@ -726,6 +763,8 @@ def get_fake_data(design_hypothesis, user_input):
         - The liked outfits will be saved in the "Saved Outfits" section for future reference.
         - Create placeholder data for initial wardrobe."
   we only want to generate fake data for the INITIAL wardrobe, not the outfit recommendations.
+
+  Also, consider the user in this situation, and generate data tailored to the user if necessary. The application is for {person_idea}, with these details: {person_grounding}
 
 	Please generate a JSON array of fake data with appropriate fields. THE USER INPUT WILL INCLUDE THE DATA FIELDS. PLEASE INCLUDE ALL FIELDS THE USER INPUT SUGGEST. Here is an example:
 
@@ -778,7 +817,7 @@ def implement_plan(prompt, plan, design_hypothesis, code_folder_path, faked_data
 	cleanup_code(cleaned_code_file_path, main_code_file_path)
 	return main_code_file_path
 
-def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data):
+def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules):
 	print("calling LLM for get_ui_code...")
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
@@ -801,7 +840,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
 
-def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id, faked_data):
+def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id, faked_data, tools_requirements):
 	print("calling LLM for implement_plan_lock_step...")
 	if len(plan) == 0 or plan is None:
 		print("ERROR: there was no plan...")
@@ -813,8 +852,9 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	task_cleaned_code_file_path = f"{task_code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
 	task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
 	task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
+	code_rules = get_code_rules(tools_requirements)
 	if task_id==1:
-		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path, faked_data)
+		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path, faked_data, code_rules)
 		cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 		return task_cleaned_code_file_path
 	# task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
@@ -823,11 +863,11 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	# identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
 	# inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
 	# below is for Claude
-	get_ui_code(plan, step["task"], design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data)
+	get_ui_code(plan, step["task"], design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
 	cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 	print("finished executing lock step for task_id", {task_id})
 
-def implement_first_task(design_hypothesis, task, task_merged_code_file_path, faked_data):
+def implement_first_task(design_hypothesis, task, task_merged_code_file_path, faked_data, code_rules):
 	print("calling LLM for implement_first_task...")
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
@@ -903,12 +943,13 @@ def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_p
         inject_code(task, previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
     print("successfully called LLM for merge_code...")
 
-def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, design_hypothesis, faked_data):
+def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, design_hypothesis, faked_data, tools_requirements):
     print("calling LLM for get_iterate_code...")
     task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
     task_debug_merge_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_MERGE_FILE_NAME}"
     task_debug_cleaned_code_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_CLEANED_FILE_NAME}"
     task_code = read_file(task_main_code_file_path)
+    code_rules = get_code_rules(tools_requirements)
     user_message = f"Please fix the problem that the user describes: {problem}, please fix the problem in the existing code and return the entire code! Thank you!"
     system_message = f"""
                 A coding task has been implemented for a project we are working on.

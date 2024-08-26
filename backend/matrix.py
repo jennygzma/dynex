@@ -44,15 +44,15 @@ InteractionXIdea: Feed with 5 options to date
 InteractionXGrounding: - The daily message should include a concise profile summary for each of the five matches, highlighting essential details such as name, age, occupation, and a short personal note or shared interest. \n - Include compatibility scores or commonalities (e.g., mutual friends, hobbies) to help users quickly assess each match’s potential. \n - Provide clear action buttons within the message to either like, pass, or start a conversation, making it easy for users to engage with their daily options.
 """
 
-PERSONXIDEA_EXAMPLES = """Person ideas focus on who the target user of the application is. This could be the demographic, such as age, gender class, job, or societal role (busy professional, working mom, teenager).
-For example, if the idea is "learn chinese", some examples of users are "30 year-old english-speaker" or or "busy professional". If the idea is "journaling app", some examples of users are "student" or "mother". If the idea is "finding a nail salon", some examples are "celebrity assistant" or "female teen".
-For OkCupid, Tinder, and CoffeeMeetsBagel, the PersonXIdea is "Single person". KEEP THE ANSWER SIMPLE - MAXIMUM OF 3 WORDS.
+PERSONXIDEA_EXAMPLES = """Person ideas focus on who the target user of the application is.
+For example, if the idea is "learn chinese", some examples of users are "30 year old english-speaking student" or or "busy professional who only has 30 minutes a day to learn chinese"
+If the idea is "journaling app", some examples of users are "someone struggling with depression" or "someone going through a breakup". If the idea is "finding a nail salon", some examples are "celebrity assistant looking for personalized nail salon" or "female teenager looking for affordable nail salons". For OkCupid, the PersonXIdea is "Single person looking for a partner." For Tinder, the PersonXIdea is "Single person looking for hookups." For CoffeeMeetsBagel, the PersonXIdea is "Single person looking for a serious life partner".
 """
 PERSONXGROUNDING_EXAMPLES = """Person Grounding focuses on the goal of the application and what problem it's trying to solve for the person.
-For example, if the idea is to "learn chinese" for "a 30 year old english speaker", some example goals of the application could be "gain vocabulary to travel to China for a week and learn Chinese in 3 weeks", versus "learn grammar".
-If the idea is "finding a nail salon" for "a female teenager", the goal of the application could be to "explore all the nail salons in NYC to formulate where to go when I visit", or "go to a nail salon ASAP for prom".
-For OkCupid, where the PersonXIdea is "Single person":  - Difficulty in finding potential partners who meet specific criteria like race, religion, age, or occupation. \n - Challenges in efficiently filtering through dating apps to locate compatible matches. \n - Need for an application that streamlines the process by allowing users to set precise criteria and receive curated suggestions.
-For Tinder, where the PersonXIdea is "Single person": - Users often struggle to find matches that meet their physical preferences quickly and efficiently. \n - The abundance of profiles makes it challenging to identify those that align with specific looks or appearances. \n - A streamlined approach to swiping and filtering by appearance would help users connect with potential matches faster, focusing on visual attraction.
+For example, if the idea is to "learn chinese" for "a 30 year old english-speaking student", some example goals of the application could be "gain vocabulary to travel to China for a week and learn Chinese in 3 weeks", versus "learn grammar".
+If the idea is "finding a nail salon" for "a female teenager", the goal of the application could be to "explore a all the nail salons in NYC to formulate where to go when I visit", or "go to a nail salon ASAP for prom".
+For OkCupid, where the PersonXIdea is "Single person looking for a partner.":  - Difficulty in finding potential partners who meet specific criteria like race, religion, age, or occupation. \n - Challenges in efficiently filtering through dating apps to locate compatible matches. \n - Need for an application that streamlines the process by allowing users to set precise criteria and receive curated suggestions.
+For Tinder, where the PersonXIdea is "Single person looking for hookups.": - Users often struggle to find matches that meet their physical preferences quickly and efficiently. \n - The abundance of profiles makes it challenging to identify those that align with specific looks or appearances. \n - A streamlined approach to swiping and filtering by appearance would help users connect with potential matches faster, focusing on visual attraction.
 For CoffeeMeetsBagel, where the PersonXIdea is "Single person looking for a serious life partner": - Users who are looking for serious relationships prefer fewer, high-quality matches over endless swiping. \n - The overwhelming number of potential matches on other apps can make it difficult to focus on finding a meaningful connection.\n - An app designed for serious dating should streamline the process by offering a curated selection of potential partners, reducing time spent on the app.
 """
 
@@ -85,6 +85,7 @@ For CoffeeMeetsBagel, where the ApproachXIdea is "Lower the cognitive load by pr
 
 INTERACTIONXGROUNDING_EXAMPLES = """Interaction Grounding should focus on how exactly the interaction idea of the UI Paradigm should be implemented, while factoring in other context.
 Keep in mind that we do not have the capacity to build a super fancy application. KEEP THE APPLICATION IN SCOPE TO THE USER PROBLEM AND THEORY AS MUCH AS POSSIBLE BECAUSE THERE IS LIMITED CODE WE CAN WRITE. For example, if this is the prompt: "Create a web UI based on this idea: learn chinese, for users: Retired person seeking a mentally stimulating hobby and a way to connect with their cultural heritage, where the application goal is: To gain conversational fluency to communicate with family members and explore ancestral roots. Use the theory of Spaced Repetition (Reviewing information at optimal intervals reinforces memory and aids long-term retention of the language.), which with interaction pattern Interactive storytelling (A narrative-driven approach with dialogues and scenarios, reinforcing vocabulary and phrases through an engaging story with spaced repetition of key elements.) to guide the design.", we should focus on implementing the spaced repetition part - unnecessary features like a social community feature, or working with multiple different stories is overly complex, as is is multiple decks, a setting bar, a profile page.
+Only brainstorm interactions that are based in web UI. We cannot support mobile interfaces - so carousel, or push notifications, maps view, cannot be supported.
 For OkCupid, where the InteractionXIdea is "Faceted Browsing", the InteractionXGrounding is: - Provide users with multiple facet filters, including age, gender, religion, occupation, and location, to refine their search effectively. \n - Ensure the UI dynamically updates search results in real-time as users adjust their facet filters, offering immediate feedback. \n - Design intuitive navigation with clear options to reset filters, switch criteria, and save searches, using checkboxes, sliders, and dropdowns for ease of use.
 For Tinder, where the InteractionXIdea is "Card Swipe", the InteractionXGrounding is: - Limit the displayed information to essential details, such as a single profile photo and a brief tagline, to encourage snap judgments. \n - Focus on visual appeal as the primary matching criterion, reducing the need for users to sift through extensive profiles. \n - Use an algorithm to prioritize matches based on visual preferences and minimal data inputs, streamlining the matching process.
 For CoffeeMeetsBagel, where the InteractionXIdea is "Feed with 5 options to date", the InteractionXGrounding is: - The daily message should include a concise profile summary for each of the five matches, highlighting essential details such as name, age, occupation, and a short personal note or shared interest. \n - Include compatibility scores or commonalities (e.g., mutual friends, hobbies) to help users quickly assess each match’s potential. \n - Provide clear action buttons within the message to either like, pass, or start a conversation, making it easy for users to engage with their daily options.
@@ -188,12 +189,14 @@ def get_needs_specification(category, input):
     print("sucessfully called LLM for get_needs_specification", res)
     return needs_specification
 
-def brainstorm_inputs(category, context, iteration):
+def brainstorm_inputs(category, context, existing_brainstorms, iteration):
     print("calling LLM for brainstorm_inputs...")
     is_grounding = "Grounding" in category
     print(f"category {category} is_grounding {is_grounding}")
     iteration_message = f"The user would also like you to factor this into the brainstormed answer: {iteration}" if iteration != "" else ""
-    user_message = f"This is the category you are brainstorming for: {category}. {iteration_message}"
+    user_message = f"""This is the category you are brainstorming for: {category}. {iteration_message}.
+    Make sure not to repeat brainstorms from this list: {existing_brainstorms}
+    """
     grounding_format = """
         The answers should be as specific as possible, but do not be overly verbose in your response. USE AS LITTLE WORDS AS POSSIBLE. Do not repeat what is said in the corresponding idea section.
         The answer should be 50-100 words.
@@ -212,7 +215,7 @@ def brainstorm_inputs(category, context, iteration):
     You are a helpful assistant that helps brainstorm specification answers for a category to narrow down inputs.
     {MATRIX_DESCRIPTION}
     ONLY IF NECESSARY WILL WE SUPPORT AI/ML features in our application by calling GPT. However, we can only call GPT, so do not suggest "ML Algorithm" or "AI-powered" - it must be "GPT-powered".
-    Keep in mind that we cannot support physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code.
+    Keep in mind that we cannot support push notifications, physical sensors, emotion scanning, forms of media like audio recordings, videos, etc. We cannot voice record or take photos. All approaches should be able to be implemented with code.
     {PPAI_EXAMPLES}
     Here is the context for this problem: {context}
     {MATRIX_EXAMPLES[category]}
