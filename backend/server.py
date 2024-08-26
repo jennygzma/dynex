@@ -538,8 +538,13 @@ def generate_plan():
     design_hypothesis = read_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
+    tools_requirements = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {print("NO FILE FOUND!!!!!!! ------------------------")}
+    )
     print(design_hypothesis)
-    plan = get_generated_plan(design_hypothesis)
+    plan = get_generated_plan(design_hypothesis, tools_requirements)
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
@@ -665,13 +670,20 @@ def generate_code():
     design_hypothesis = read_file(
         f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
     )
+    #Gets the tool requirements file for code rules
+    tools_requirements = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
+
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(task_code_folder_path):
         wipeout_code(folder_path, task_id, task_map, globals.current_prototype)
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
     plan = json.loads(get_plan_from_task_map(folder_path))
-    implement_plan_lock_step(design_hypothesis, plan, folder_path, task_id, faked_data)
+    implement_plan_lock_step(design_hypothesis, plan, folder_path, task_id, faked_data, tools_requirements)
     task_main_code_folder_path = (
         f"{folder_path}/{task_id}/{globals.MAIN_CODE_FILE_NAME}"
     )
@@ -780,6 +792,11 @@ def iterate_code():
     data = request.json
     task_id = data["task_id"]
     problem = data["problem"]
+    tools_requirements = (
+        json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
+        else {}
+    )
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
@@ -812,6 +829,7 @@ def iterate_code():
         current_iteration_folder_path,
         design_hypothesis,
         faked_data,
+        tools_requirements,
     )
     return (
         jsonify(

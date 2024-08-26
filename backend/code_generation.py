@@ -817,17 +817,17 @@ def get_fake_data(design_hypothesis, user_input):
 
 # this code generated is one shot
 # NOT NECESSARY
-def implement_plan(prompt, plan, design_hypothesis, code_folder_path, faked_data):
+def implement_plan(prompt, plan, design_hypothesis, code_folder_path, faked_data, tools_requirements=None):
 	print("calling LLM for implement_plan...")
 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
 	initial_code_file_path = f"{code_folder_path}/initial.html"
 	main_code_file_path = f"{code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
-	get_ui_code(prompt, plan, design_hypothesis, initial_code_file_path, main_code_file_path, faked_data)
+	get_ui_code(prompt, plan, design_hypothesis, initial_code_file_path, main_code_file_path, faked_data, tools_requirements)
 	# overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
 	cleanup_code(cleaned_code_file_path, main_code_file_path)
 	return main_code_file_path
 
-def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data):
+def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, tools_requirements=None):
 	print("calling LLM for get_ui_code...")
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
@@ -838,7 +838,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 				Currently, you are working on this task: {task}.
 				For context, this is the faked_data: {faked_data}
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
-				{code_rules}
+				{get_code_rules(tools_requirements)}
 """
 	code = call_llm(system_message, user_message)
 	create_and_write_file(task_merged_code_file_path, code)
@@ -850,7 +850,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
 
-def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id, faked_data):
+def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id, faked_data, tools_requirements=None):
 	print("calling LLM for implement_plan_lock_step...")
 	if len(plan) == 0 or plan is None:
 		print("ERROR: there was no plan...")
@@ -863,7 +863,7 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
 	task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
 	if task_id==1:
-		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path, faked_data)
+		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path, faked_data, tools_requirements)
 		cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 		return task_cleaned_code_file_path
 	# task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
@@ -876,15 +876,17 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 	print("finished executing lock step for task_id", {task_id})
 
-def implement_first_task(design_hypothesis, task, task_merged_code_file_path, faked_data):
+def implement_first_task(design_hypothesis, task, task_merged_code_file_path, faked_data, tools_requirements=None):
 	print("calling LLM for implement_first_task...")
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
                 You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}. Here is the faked data for context: {faked_data}.
 				We will grab the faked_data from the endpoint, if it exists. Grab it like so: {get_faked_data_code}.
-				{code_rules}
+				{get_code_rules(tools_requirements)}
             """
 	code = call_llm(system_message, user_message)
+	print("code rules", get_code_rules(tools_requirements))
+	print('---------------------------------')
 	print("called LLM for initial html file code", code)
 	user_message = f"This is the existing code {code}"
 	system_message = f"""
@@ -952,7 +954,7 @@ def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_p
         inject_code(task, previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
     print("successfully called LLM for merge_code...")
 
-def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, design_hypothesis, faked_data):
+def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, design_hypothesis, faked_data, tools_requirements=None):
     print("calling LLM for get_iterate_code...")
     task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
     task_debug_merge_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_MERGE_FILE_NAME}"
@@ -964,7 +966,7 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
 				For context, this is the project description: {design_hypothesis}. The task was this: {task}. This is the faked_data: {faked_data}
 				However, the task was not implemented fully correctly. The user explains what is wrong in the problem {problem}.
 				There is already existing code in the index.html file. Using the existing code {task_code}. Please fix the problem.
-				{code_rules}
+				{get_code_rules(tools_requirements)}
 				PLEASE DO NOT DELETE EXISTING CODE.
                 Return the FULL CODE NEEDED TO HAVE THE APP WORK, INSIDE THE INDEX.HTML file.
             """
@@ -973,6 +975,8 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
 	# Uncomment for GPT
     # inject_code(problem, task_cleaned_code_file_path, task_debug_merge_file_path, task_debug_code_file_path)
     cleanup_code(task_debug_cleaned_code_file_path, task_debug_merge_file_path, task_main_code_file_path)
+    print("rules for get_iterate_code", get_code_rules(tools_requirements))
+    print("----------------------")
     print("successfully called LLM for get_iterate_code...", iterated_code)
     return task_main_code_file_path
 
