@@ -885,8 +885,8 @@ def implement_first_task(design_hypothesis, task, task_merged_code_file_path, fa
 				{get_code_rules(tools_requirements)}
             """
 	code = call_llm(system_message, user_message)
-	print("code rules", get_code_rules(tools_requirements))
-	print('---------------------------------')
+	#print("code rules", get_code_rules(tools_requirements))
+	#print('---------------------------------')
 	print("called LLM for initial html file code", code)
 	user_message = f"This is the existing code {code}"
 	system_message = f"""
@@ -975,8 +975,8 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
 	# Uncomment for GPT
     # inject_code(problem, task_cleaned_code_file_path, task_debug_merge_file_path, task_debug_code_file_path)
     cleanup_code(task_debug_cleaned_code_file_path, task_debug_merge_file_path, task_main_code_file_path)
-    print("rules for get_iterate_code", get_code_rules(tools_requirements))
-    print("----------------------")
+    #print("rules for get_iterate_code", get_code_rules(tools_requirements))
+    #print("----------------------")
     print("successfully called LLM for get_iterate_code...", iterated_code)
     return task_main_code_file_path
 
