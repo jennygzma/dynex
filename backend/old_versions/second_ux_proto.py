@@ -30,16 +30,16 @@ def generate_design_spec():
 	prompt_map[iteration_index] = prompt
 	results = ["", "", ""]
 	for i in range(3):
-		print("calling for design hypothesis " + str(i))
-		results[i] = get_design_hypothesis(prompt, "") if iteration_index == 0 else get_design_hypothesis(prompt, prompt_map[iteration_index-1])
-	print("id for this design hypothesis generation is " + str(iteration_index))
+		print("calling for spec " + str(i))
+		results[i] = get_spec(prompt, "") if iteration_index == 0 else get_spec(prompt, prompt_map[iteration_index-1])
+	print("id for this spec generation is " + str(iteration_index))
 	design_spec_map[iteration_index] = results
 	iteration_index = iteration_index + 1
 	return jsonify({"message": "Generated design spec", "spec": results}), 200
 
 		
-def get_design_hypothesis(ui_prompt_current, ui_prompt_previous):
-	print("calling get_design_hypothesis...")
+def get_spec(ui_prompt_current, ui_prompt_previous):
+	print("calling get_spec...")
 	prompt = "This is the UI the user wants: "
 	if ui_prompt_previous:
 		prompt = prompt + ui_prompt_previous + " with these improvements " + ui_prompt_current
@@ -58,7 +58,7 @@ def get_design_hypothesis(ui_prompt_current, ui_prompt_previous):
 		{"role": "user", "content": prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
-	print("Sucessfully called GPT for design hypothesis", res);
+	print("Sucessfully called GPT for spec", res);
 	return res.choices[0].message.content
 
 
