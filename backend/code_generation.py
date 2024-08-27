@@ -735,12 +735,12 @@ def get_code_rules(tools_requirements=None):
     rules += code_rules_go_js
   return rules
 
-def get_fake_data(design_hypothesis, user_input, person_idea, person_grounding):
+def get_fake_data(spec, user_input, person_idea, person_grounding):
 	print("calling LLM for get_fake_data...")
 	system_message = f"""
-        You are generating fake JSON data for a UI that a user wants to create. The design hypothesis should give instructures as to what data needs to be generated.
+        You are generating fake JSON data for a UI that a user wants to create. The dspec should give instructures as to what data needs to be generated.
 
-        For example, for this design hypothesis:
+        For example, for this spec:
         "Application Layout:
 
         - Create a clean, minimalist interface with a prominent central area for displaying outfit recommendations.
@@ -800,29 +800,29 @@ def get_fake_data(design_hypothesis, user_input, person_idea, person_grounding):
         2. Array length should be length 10-20.
         3. Please ensure that the generated data makes sense.
     """
-	user_message = f"please generate data given this UI: {design_hypothesis}. Factor in this user suggestion into generating the data: {user_input}"
+	user_message = f"please generate data given this UI: {spec}. Factor in this user suggestion into generating the data: {user_input}"
 	res = call_llm(system_message, user_message)
 	print("sucessfully called LLM for get_fake_data", res)
 	return res
 
 # this code generated is one shot
 # NOT NECESSARY
-def implement_plan(prompt, plan, design_hypothesis, code_folder_path, faked_data):
+def implement_plan(prompt, plan, spec, code_folder_path, faked_data):
 	print("calling LLM for implement_plan...")
 	cleaned_code_file_path = f"{code_folder_path}/{globals.CLEANED_CODE_FILE_NAME}"
 	initial_code_file_path = f"{code_folder_path}/initial.html"
 	main_code_file_path = f"{code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
-	get_ui_code(prompt, plan, design_hypothesis, initial_code_file_path, main_code_file_path, faked_data)
-	# overall_check(design_hypothesis, checked_code_file_path, main_code_file_path)
+	get_ui_code(prompt, plan, spec, initial_code_file_path, main_code_file_path, faked_data)
+	# overall_check(spec, checked_code_file_path, main_code_file_path)
 	cleanup_code(cleaned_code_file_path, main_code_file_path)
 	return main_code_file_path
 
-def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules):
+def get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules):
 	print("calling LLM for get_ui_code...")
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
 	system_message = f"""
-                You are working on an app described here: {design_hypothesis}.
+                You are working on an app described here: {spec}.
                 The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}. DO NOT DELETE PREVIOUS CODE WHEN WRITING THIS TASK. ONLY ADD TO THE EXISTING CODE.
@@ -836,11 +836,11 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	previous_code_lines=len(previous_code.splitlines())
 	if previous_code_lines-50 > merged_code_lines:
 		print("trying again... writing code failed...")
-		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data)
+		get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged_code_file_path, faked_data)
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
 
-def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id, faked_data, tools_requirements):
+def implement_plan_lock_step(spec, plan, code_folder_path, task_id, faked_data, tools_requirements):
 	print("calling LLM for implement_plan_lock_step...")
 	if len(plan) == 0 or plan is None:
 		print("ERROR: there was no plan...")
@@ -854,24 +854,24 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
 	code_rules = get_code_rules(tools_requirements)
 	if task_id==1:
-		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path, faked_data, code_rules)
+		implement_first_task(spec, step["task"], task_merged_code_file_path, faked_data, code_rules)
 		cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 		return task_cleaned_code_file_path
 	# task_code_file_path = f"{task_code_folder_path}/{globals.TASK_FILE_NAME}"
 	previous_task_main_code_file_path = f"{code_folder_path}/{step["task_id"]-1}/{globals.MAIN_CODE_FILE_NAME}"
     # uncomment below for GPT
-	# identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
+	# identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, spec)
 	# inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
 	# below is for Claude
-	get_ui_code(plan, step["task"], design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
+	get_ui_code(plan, step["task"], spec, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
 	cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 	print("finished executing lock step for task_id", {task_id})
 
-def implement_first_task(design_hypothesis, task, task_merged_code_file_path, faked_data, code_rules):
+def implement_first_task(spec, task, task_merged_code_file_path, faked_data, code_rules):
 	print("calling LLM for implement_first_task...")
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
-                You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}. Here is the faked data for context: {faked_data}.
+                You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {spec}. Here is the faked data for context: {faked_data}.
 				We will grab the faked_data from the endpoint, if it exists. Grab it like so: {get_faked_data_code}.
 				{code_rules}
             """
@@ -943,7 +943,7 @@ def inject_code(task, previous_task_main_code_file_path, task_merged_code_file_p
         inject_code(task, previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
     print("successfully called LLM for merge_code...")
 
-def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, design_hypothesis, faked_data, tools_requirements):
+def get_iterate_code(problem, task, task_code_folder_path, current_iteration_folder_path, spec, faked_data, tools_requirements):
     print("calling LLM for get_iterate_code...")
     task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
     task_debug_merge_file_path = f"{current_iteration_folder_path}/{globals.ITERATION_MERGE_FILE_NAME}"
@@ -953,7 +953,7 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
     user_message = f"Please fix the problem that the user describes: {problem}, please fix the problem in the existing code and return the entire code! Thank you!"
     system_message = f"""
                 A coding task has been implemented for a project we are working on.
-				For context, this is the project description: {design_hypothesis}. The task was this: {task}. This is the faked_data: {faked_data}
+				For context, this is the project description: {spec}. The task was this: {task}. This is the faked_data: {faked_data}
 				However, the task was not implemented fully correctly. The user explains what is wrong in the problem {problem}.
 				There is already existing code in the index.html file. Using the existing code {task_code}. Please fix the problem.
 				{code_rules}
@@ -969,17 +969,17 @@ def get_iterate_code(problem, task, task_code_folder_path, current_iteration_fol
     return task_main_code_file_path
 
 
-def test_code_per_lock_step(task, design_hypothesis):
+def test_code_per_lock_step(task, spec):
     print("calling LLM for test_code_per_lock_step...")
     user_message=f"Provide test cases for the user to test that this task {task} was successfully implemented."
     system_message = f"""
                 You are helping a user test their code given a certain task. The user will test their code on the UI. Assume the  UI is already open on the web browser. Provide 1-3 examples of how the user should test their UI to check that the task works.
-				For context, the overall application has this design: {design_hypothesis}.
+				For context, the overall application has this design: {spec}.
 				However, you are focused on testing the TASK specified. The task you are helping the user check is this: {task}.
                 There is no need to test responsiveness of HTML regarding browser size.
 				Return the response in an array with this format: [test1, test2], where test1 and test2 are strings describing how to test the code.
 				
-				For example, if the design hypothesis was: "The UI will be designed as a table, resembling Gmail, featuring columns like 'Item name', 'Quantity', 'Expiration Date', and 'Category'. Users can add, delete and update items. Clicking a row will open a detailed view of the item, including its nutritional information. A search bar, at the top, allows users to quickly find specific items.",
+				For example, if the spec was: "The UI will be designed as a table, resembling Gmail, featuring columns like 'Item name', 'Quantity', 'Expiration Date', and 'Category'. Users can add, delete and update items. Clicking a row will open a detailed view of the item, including its nutritional information. A search bar, at the top, allows users to quickly find specific items.",
 				and the task was: "Create a form with fields corresponding to the table columns to add new items", an example response could be: ["Clicking the 'Add Now' button should have a form pop up to add items", "Entering items into the form should add it to the table"]
             """
     cases = call_llm(system_message, user_message)

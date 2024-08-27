@@ -10,7 +10,7 @@ const Implementation = () => {
   const {
     updateIsLoading,
     plan,
-    designHypothesis,
+    spec,
     currentTask,
     currentIteration,
     updateCurrentIteration,

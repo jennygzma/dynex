@@ -14,17 +14,17 @@ app = Flask(__name__)
 client = OpenAI(api_key="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")
 
 faked_data = None;
-design_hypotheses_map = {};
+design_spec_map = {};
 prompt_map = {};
 iteration_index = 0;
 existing_code = None;
 
-@app.route("/generate_design_hypotheses", methods=["POST"])
-def generate_design_hypotheses():
-	global design_hypotheses_map
+@app.route("/generate_design_spec", methods=["POST"])
+def generate_design_spec():
+	global design_spec_map
 	global prompt_map 
 	global iteration_index
-	print("calling generate_design_hypotheses...")
+	print("calling generate_design_spec...")
 	data = request.json
 	prompt = data["ui_prompt"]
 	prompt_map[iteration_index] = prompt
@@ -33,9 +33,9 @@ def generate_design_hypotheses():
 		print("calling for design hypothesis " + str(i))
 		results[i] = get_design_hypothesis(prompt, "") if iteration_index == 0 else get_design_hypothesis(prompt, prompt_map[iteration_index-1])
 	print("id for this design hypothesis generation is " + str(iteration_index))
-	design_hypotheses_map[iteration_index] = results
+	design_spec_map[iteration_index] = results
 	iteration_index = iteration_index + 1
-	return jsonify({"message": "Generated design hypotheses", "hypotheses": results}), 200
+	return jsonify({"message": "Generated design spec", "spec": results}), 200
 
 		
 def get_design_hypothesis(ui_prompt_current, ui_prompt_previous):

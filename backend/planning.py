@@ -1,4 +1,4 @@
-# This file handles brainstorming the design hypothesis and creating the task list.
+# This file handles brainstorming the spec and creating the task list.
 import json
 
 from globals import TASK_MAP_FILE_NAME, call_llm
@@ -17,8 +17,8 @@ Here are the rules that the application must follow.
 - Additionally, we are attempting to test the application created, so features that are needed to test the application can be added. For example, if implementing a flashcard learning application that utilizes spaced repetition, one feature to add into the design and plan is a faked date input to allow us to test spaced repetition over time - such as creating an input where the user can type in what day they are on in using the app to test it out. Or, if the app built is a mood tracker, to test it, we also need to see it over time, so the user should be able to type in what day they are, etc. This should depend on what theory is enacted and how we can test it - do not just blindly add fake dates to increment dates.
 """
 
-design_hypothesis_example = """
-Here is an example of the design hypothesis of a music-recommendation app.
+spec_example = """
+Here is an example of the spec of a music-recommendation app.
 Application Layout:
 - Create a clean, simple interface divided into two main sections: "Discover" and "Favorites."
 - The "Discover" section would have a large area that changes dynamically to display song details with each swipe (song name, artist, album, genre, and description).
@@ -37,7 +37,7 @@ Inputs and Logic:
 - The saved favorite songs will be stored
 - There is no need to create placeholder data for music, as GPT will return the music recommendations.
 
-Here is an example of a design hypothesis of a outfit-generator app.
+Here is an example of a spec of a outfit-generator app.
 Application Layout:
 
 - Create a clean, minimalist interface with a prominent central area for displaying outfit recommendations.
@@ -60,7 +60,7 @@ Inputs and Logic:
 - The liked outfits will be saved in the "Saved Outfits" section for future reference.
 - Create placeholder data for initial wardrobe.
 
-Here is an example of a design hypothesis for a plant watering system:
+Here is an example of a spec for a plant watering system:
 Application Layout:
 
 - Create a clean and intuitive interface with a prominent section for the "Watering Calendar."
@@ -86,7 +86,7 @@ Inputs and Logic:
 """
 
 plan_example = """
-For design hypothesis:
+For spec:
 Application Layout:
 - Create a clean, minimalist interface with a prominent central area for displaying outfit recommendations.
 - Divide the interface into three main sections: "Outfit Recommendations," "Wardrobe," and "Saved Outfits."
@@ -113,25 +113,25 @@ Here is the example plan. It is longer because we are using GPT:
 """
 
 
-def create_design_hypothesis(problem, matrix):
-    hypothesis = f"Create a UI for this {problem}."
+def create_spec(problem, matrix):
+    spec = f"Create a UI for this {problem}."
 
     if matrix.get("PersonXIdea"):
-        hypothesis += f"\nIt is for {matrix['PersonXIdea']}."
+        spec += f"\nIt is for {matrix['PersonXIdea']}."
         if matrix.get("PersonXGrounding"):
-            hypothesis += f" For more details: {matrix['PersonXGrounding']}"
+            spec += f" For more details: {matrix['PersonXGrounding']}"
 
     if matrix.get("ApproachXIdea"):
-        hypothesis += f"\nThe approach should be: {matrix['ApproachXIdea']}."
+        spec += f"\nThe approach should be: {matrix['ApproachXIdea']}."
         if matrix.get("ApproachXGrounding"):
-            hypothesis += f" For more details: {matrix['ApproachXGrounding']}"
+            spec += f" For more details: {matrix['ApproachXGrounding']}"
 
     if matrix.get("InteractionXIdea"):
-        hypothesis += f"\nThe interaction paradigm shown in the interface should be {matrix['InteractionXIdea']}."
+        spec += f"\nThe interaction paradigm shown in the interface should be {matrix['InteractionXIdea']}."
         if matrix.get("InteractionXGrounding"):
-            hypothesis += f" For more details: {matrix['InteractionXGrounding']}"
+            spec += f" For more details: {matrix['InteractionXGrounding']}"
 
-    return hypothesis.strip()
+    return spec.strip()
 
 
 def get_plan_from_task_map(folder_path):
@@ -156,8 +156,8 @@ def get_tools_requirement_context(tools_requirements):
     return paragraph.strip()
 
 
-def get_design_hypothesis(ui_prompt, faked_data, tools_requirements_context):
-    print("calling LLM for get_design_hypothesis...")
+def get_spec(ui_prompt, faked_data, tools_requirements_context):
+    print("calling LLM for get_spec...")
     user_message = f"""
         This is the UI prompt: {ui_prompt}
         This is the faked_data: {faked_data}
@@ -167,10 +167,10 @@ def get_design_hypothesis(ui_prompt, faked_data, tools_requirements_context):
 				Each design should detail the application layout, user interactions, and consider all inputs and logic that the app will use.
                 The app will use these dependencies: {tools_requirements_context}. If any of the dependencies are not used, DO NOT USE THEM. MAKE SURE NOT TO USE THEM. If they are used, MAKE SURE TO INCLDUE IT IN THE DESIGN.
                 It should be less than 300 words, and each sentence should be a bullet point.
-                {design_hypothesis_example}
+                {spec_example}
             """
     res = call_llm(system_message, user_message)
-    print("sucessfully called LLM for get_design_hypothesis", res)
+    print("sucessfully called LLM for get_spec", res)
     return res
 
 
@@ -359,7 +359,7 @@ def get_plan_message(tools_requirements):
     - Do not use any other dependencies unless specified.
     - No need to have steps to create placeholder data, as that will be created externally and we will have an endpoint that calls for it.
     - The first step should focus on creating the general structure of the app.
-    Here is an example of a plan, given a design hypothesis: {plan_example}
+    Here is an example of a plan, given a spec: {plan_example}
 
     """
     if tools_requirements is None or tools_requirements == {}:
@@ -395,16 +395,16 @@ def get_plan_message(tools_requirements):
     return message
 
 
-def get_plan(design_hypothesis, tools_requirements):
+def get_plan(spec, tools_requirements):
     print("calling LLM for get_plan...")
     message = get_plan_message(tools_requirements)
     system_message = f"""
-        You are a helpful senior software engineer building a plan to implement a UI based on a design hypothesis.
+        You are a helpful senior software engineer building a plan to implement a UI based on a spec.
         {message}
         Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		"""
-    user_message = f"Create a plan for this design hypothesis: {design_hypothesis}."
+    user_message = f"Create a plan for this spec: {spec}."
     res = call_llm(system_message, user_message)
     plan = cleanup_plan(res)
     print("sucessfully called LLM for get_plan", res)

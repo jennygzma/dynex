@@ -18,8 +18,8 @@ from matrix import brainstorm_inputs as brainstorm_generated_inputs
 from matrix import brainstorm_question, get_context_from_other_inputs
 from matrix import get_needs_specification as check_needs_specification
 from matrix import summarize_input_from_context
-from planning import create_design_hypothesis
-from planning import get_design_hypothesis as get_generated_design_hypothesis
+from planning import create_spec
+from planning import get_spec as get_generated_spec
 from planning import get_plan as get_generated_plan
 from planning import (
     get_plan_from_task_map,
@@ -200,8 +200,8 @@ def explore_prototype():
     prompt = f"Create a web UI based on this: {context}. "
     create_and_write_file(f"{folder_path}/{globals.PROMPT_FILE_NAME}", prompt)
     create_and_write_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
-        create_design_hypothesis(globals.problem, globals.matrix),
+        f"{folder_path}/{globals.SPEC_FILE_NAME}",
+        create_spec(globals.problem, globals.matrix),
     )
     create_and_write_file(
         f"{folder_path}/{globals.MATRIX_FILE_NAME}", json.dumps(globals.matrix)
@@ -279,7 +279,7 @@ def save_prompt():
     if folder_exists(f"{folder_path}/1"):
         wipeout_code(folder_path, 1, task_map, globals.current_prototype)
     create_and_write_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
+        f"{folder_path}/{globals.SPEC_FILE_NAME}",
         "",
     )
     create_and_write_file(
@@ -297,11 +297,11 @@ def save_prompt():
 def generate_fake_data():
     print("calling generate_fake_data...")
     user_iteration = request.json["user_iteration"]
-    design_hypothesis = read_file(
-        f"{globals.folder_path}/{globals.current_prototype}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+    spec = read_file(
+        f"{globals.folder_path}/{globals.current_prototype}/{globals.SPEC_FILE_NAME}"
     )
     data = get_generated_fake_data(
-        design_hypothesis,
+        spec,
         user_iteration,
         globals.matrix["PersonXIdea"],
         globals.matrix["PersonXGrounding"],
@@ -455,9 +455,9 @@ def recommend_tools_requirements():
     )
 
 
-@app.route("/generate_design_hypothesis", methods=["POST"])
-def generate_design_hypothesis():
-    print("calling generate_design_hypothesis...")
+@app.route("/generate_spec", methods=["POST"])
+def generate_spec():
+    print("calling generate_spec...")
     prompt = read_file(
         f"{globals.folder_path}/{globals.current_prototype}/{globals.PROMPT_FILE_NAME}"
     )
@@ -470,7 +470,7 @@ def generate_design_hypothesis():
     tools_requirements_context = get_tools_requirement_context(tools_requirements_json)
 
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
-    design_hypothesis = get_generated_design_hypothesis(
+    spec = get_generated_spec(
         prompt, faked_data, tools_requirements_context
     )
     task_map_json = (
@@ -486,25 +486,25 @@ def generate_design_hypothesis():
         prompt,
     )
     create_and_write_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
-        design_hypothesis,
+        f"{folder_path}/{globals.SPEC_FILE_NAME}",
+        spec,
     )
     return (
         jsonify(
             {
-                "message": "Generated design hypothesis",
-                "hypothesis": design_hypothesis,
+                "message": "Generated spec",
+                "spec": spec,
             }
         ),
         200,
     )
 
 
-@app.route("/save_design_hypothesis", methods=["POST"])
-def save_design_hypothesis():
-    print("calling save_design_hypothesis...")
+@app.route("/save_spec", methods=["POST"])
+def save_spec():
+    print("calling save_spec...")
     data = request.json
-    design_hypothesis = data["design_hypothesis"]
+    spec = data["spec"]
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
@@ -515,26 +515,26 @@ def save_design_hypothesis():
     if folder_exists(f"{folder_path}/1"):
         wipeout_code(folder_path, 1, task_map, globals.current_prototype)
     create_and_write_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}",
-        design_hypothesis,
+        f"{folder_path}/{globals.SPEC_FILE_NAME}",
+        spec,
     )
     return (
-        jsonify({"message": "Saved design hypothesis", "data": design_hypothesis}),
+        jsonify({"message": "Saved spec", "data": spec}),
         200,
     )
 
 
-@app.route("/get_design_hypothesis", methods=["GET"])
-def get_design_hypothesis():
-    print("calling get_design_hypothesis...")
-    design_hypothesis = read_file(
-        f"{globals.folder_path}/{globals.current_prototype}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+@app.route("/get_spec", methods=["GET"])
+def get_spec():
+    print("calling get_spec...")
+    spec = read_file(
+        f"{globals.folder_path}/{globals.current_prototype}/{globals.SPEC_FILE_NAME}"
     )
     return (
         jsonify(
             {
-                "message": "getting design hypothesis",
-                "design_hypothesis": design_hypothesis,
+                "message": "getting spec",
+                "spec": spec,
             }
         ),
         200,
@@ -545,17 +545,17 @@ def get_design_hypothesis():
 def generate_plan():
     print("calling generate_plan...")
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
-    design_hypothesis = read_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+    spec = read_file(
+        f"{folder_path}/{globals.SPEC_FILE_NAME}"
     )
-    print(design_hypothesis)
+    print(spec)
     tools_requirements_json = (
         json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
         else {}
     )
 
-    plan = get_generated_plan(design_hypothesis, tools_requirements_json)
+    plan = get_generated_plan(spec, tools_requirements_json)
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
@@ -678,8 +678,8 @@ def generate_code():
     task_id = int(data["task_id"])
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
     task_code_folder_path = f"{folder_path}/{task_id}"
-    design_hypothesis = read_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+    spec = read_file(
+        f"{folder_path}/{globals.SPEC_FILE_NAME}"
     )
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
@@ -693,7 +693,7 @@ def generate_code():
         else {}
     )
     implement_plan_lock_step(
-        design_hypothesis,
+        spec,
         plan,
         folder_path,
         task_id,
@@ -830,8 +830,8 @@ def iterate_code():
     task_code_folder_path = f"{folder_path}/{task_id}"
     current_iteration_folder_path = f"{task_code_folder_path}/{globals.ITERATION_FOLDER_NAME}/{current_debug_iteration}"
     create_folder(current_iteration_folder_path)
-    design_hypothesis = read_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+    spec = read_file(
+        f"{folder_path}/{globals.SPEC_FILE_NAME}"
     )
     tools_requirements_json = (
         json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
@@ -843,7 +843,7 @@ def iterate_code():
         task,
         task_code_folder_path,
         current_iteration_folder_path,
-        design_hypothesis,
+        spec,
         faked_data,
         tools_requirements_json,
     )
@@ -866,10 +866,10 @@ def get_test_cases_per_lock_step():
     index = task_id - 1
     plan = json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
     task = plan[index]["task"]
-    design_hypothesis = read_file(
-        f"{folder_path}/{globals.DESIGN_HYPOTHESIS_FILE_NAME}"
+    spec = read_file(
+        f"{folder_path}/{globals.SPEC_FILE_NAME}"
     )
-    test_cases = test_code_per_lock_step(task, design_hypothesis)
+    test_cases = test_code_per_lock_step(task, spec)
     return (
         jsonify(
             {
