@@ -612,6 +612,81 @@ sample_gpt_image_code = f"""
 </html>
 """
 
+sample_gpt_and_image_code = """
+try:
+    response = await fetch('https://api.openai.com/v1/chat/completions', {
+        'method': 'POST',
+        'headers': {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer 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'
+        },
+        'body': json.dumps({
+            'model': 'gpt-4',
+            'messages': [
+                {
+                    'role': 'system',
+                    'content': 'You are a helpful assistant providing grocery recommendations based on dietary preferences and restrictions.'
+                },
+                {
+                    'role': 'user',
+                    'content': '''
+                    Based on the following dietary preferences and restrictions, provide a list of recommended grocery items in the following JSON format:
+                    [
+                        {
+                            "name": "Organic Quinoa",
+                            "description": "A gluten-free, high-protein grain.",
+                            "category": "Grains",
+                            "nutritionalInfo": {
+                                "calories": 120,
+                                "fat": 2.1,
+                                "protein": 4.4,
+                                "carbs": 21.3
+                            },
+                            "compatibility": "Vegan, Gluten-Free, Vegetarian"
+                        },
+                        ...
+                    ]
+
+                    Preferences and Restrictions: {preferences}
+
+                    Ensure the JSON is valid and adheres strictly to this format. Do not type any additional text, only provide the JSON.
+                    '''
+                }
+            ]
+        })
+    })
+
+    result = await response.json()
+    parsed_data = json.loads(result['choices'][0]['message']['content'])
+
+    # Fetch images for each recommendation
+    for item in parsed_data:
+        image_response = await fetch('https://api.openai.com/v1/images/generations', {
+            'method': 'POST',
+            'headers': {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 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'
+            },
+            'body': json.dumps({
+                'prompt': f"An image of {item['name']}, a {item['category']} item.",
+                'n': 1,
+                'size': "256x256"
+            })
+        })
+
+        image_result = await image_response.json()
+        item['imageUrl'] = image_result['data'][0]['url']
+
+    set_recommendations(parsed_data)
+
+except Exception as err:
+    print(err)
+    set_error(str(err))
+
+finally:
+    set_loading(False)
+"""
+
 sample_code = """
 <!DOCTYPE html>
 <html lang="en">
@@ -686,7 +761,8 @@ code_rules_base= f"""
 Make sure to implement all that is specified in the task and do not leave anything else. Follow these rules when writing code:
 - The entire app will be in one index.html file. It will be written entirely in HTML, Javascript, and CSS. The design should not incorporate routes. Everything should exist within one page. No need for design mockups, wireframes, or external dependencies.
 - The entire app will be written using React and MUI. Load MUI from the CDN. Here is an example: {sample_code}
-- DO NOT DELETE PREVIOUS CODE. DO NOT RETURN A CODE SNIPPET. RETURN THE ENTIRE CODE. Only ADD to existing code to implement the task properly. DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /*...rest of the code */ or something similar.
+- DO NOT DELETE PREVIOUS CODE. DO NOT RETURN A CODE SNIPPET. RETURN THE ENTIRE CODE. Only ADD to existing code to implement the task properly. DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /*...rest of the code */ or something similar. DO NOT COMMENT ANY PARTS OF THE CODE OUT. DO NOT COMMENT ANY PARTS OF THE CODE OUT FROM PREVIOUS CODES.
+- DO NOT COMMENT {{/* Other sections remain the same */}}. ALL THE CODE MUST EXIST. ALL YOU ARE DOING IS ADDING FUNCTIONALITY. ADDING FUNCTIONALITY - DO NOT REMOVE ANY PREVIOUS CODE.
 - When creating buttons, instead of using text like "chevron_icon" or "back" or "forward", if possible, use emojis. For example: 🗑️ for delete,  ➕ for add, ➖ for remove.
 - DO NOT LOAD ANYTHING ELSE IN THE CDN. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
 - Do not return separate code files. All the components should be in one code file and returned.
@@ -696,12 +772,17 @@ Make sure to implement all that is specified in the task and do not leave anythi
 
 code_rules_gpt = f"""
   - The app should call OpenAI for additional data or API calls like so: {sample_gpt_hook}.
+  Make sure the ACTUAL API token is included. Do not mind that it is a security issue.
 """
 
 code_rules_image = f"""
   - Since the app requires images, it can also call GPT to grab images like in this example: {sample_gpt_image_code}
+  Make sure the ACTUAL API token is included. Do not mind that it is a security issue.
 """
-
+code_rules_image_and_gpt = f"""
+  - Since the app requires images AND it also already calls GPT, add image grabbing logic to the existing hook, similar to this example: {sample_gpt_and_image_code}
+  Make sure the ACTUAL API token is included. Do not mind that it is a security issue.
+"""
 code_rules_faked_data = f"""
   - Grab existing data to help build the application through an endpoint like so: {get_faked_data_code}. USE THIS ENDPOINT TO GRAB THE DATA.
 """
@@ -726,7 +807,10 @@ def get_code_rules(tools_requirements=None):
   if tools_requirements["gpt"]["required"] == "yes":
     rules += code_rules_gpt
   if tools_requirements["images"]["required"] == "yes":
-    rules += code_rules_image
+    if tools_requirements["gpt"]["required"] == "yes":
+      rules += code_rules_image_and_gpt
+    else:
+      rules += code_rules_image
   if tools_requirements["faked_data"]["required"] == "yes":
     rules += code_rules_faked_data
   if tools_requirements["chart_js"]["required"] == "yes":
@@ -772,7 +856,7 @@ def get_fake_data(design_hypothesis, user_input, person_idea, person_grounding):
 
         System result:
         [
-            {
+            {{
                 "id": 11,
                 "title": "perfume Oil",
                 "description": "Mega Discount, Impression of A...",
@@ -782,8 +866,8 @@ def get_fake_data(design_hypothesis, user_input, person_idea, person_grounding):
                 "stock": 65,
                 "brand": "Impression of Acqua Di Gio",
                 "category": "fragrances",
-            },
-            {
+            }},
+            {{
                 "id": 12,
                 "title": "perfume Oil",
                 "description": "Half Off",
@@ -793,7 +877,7 @@ def get_fake_data(design_hypothesis, user_input, person_idea, person_grounding):
                 "stock": 2343,
                 "brand": "Victoria Secret",
                 "category": "fragrances",
-            },
+            }},
         ]
         Please follow these rules while creating the JSON array
         1. Please only return the JSON array and nothing else.
@@ -823,10 +907,10 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	user_message = f"Please execute this task: {task}"
 	system_message = f"""
                 You are working on an app described here: {design_hypothesis}.
-                The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
+                The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.  DO NOT REMOVE PREVIOUS FUNCTIONALITIES, LOGIC, OR SECTIONS FROM THE PREVIOUS CODE WHEN WRITING THIS TASK. ONLY ADD TO THE EXISTING CODE.
 				We've broken down the development of it into these tasks: {plan}.
-				Currently, you are working on this task: {task}. DO NOT DELETE PREVIOUS CODE WHEN WRITING THIS TASK. ONLY ADD TO THE EXISTING CODE.
-				For context, this is the faked_data: {faked_data}
+				Currently, you are working on this task: {task}.
+				DO NOT DELETE ANY PREVIOUS CODE WHEN IMPLEMENTING THIS TASK. SIMPLY ADD CODE TO THE PREVIOUS CODE. DO NOT COMMENT PARTS OF THE CODE OUT AND SAY "previous functionality is the same" OR ANYTHING SIMILAR TO THAT.
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
 				{code_rules}
 """
@@ -834,9 +918,9 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	create_and_write_file(task_merged_code_file_path, code)
 	merged_code_lines = len(code.splitlines())
 	previous_code_lines=len(previous_code.splitlines())
-	if previous_code_lines-50 > merged_code_lines:
+	if previous_code_lines-10 > merged_code_lines:
 		print("trying again... writing code failed...")
-		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data)
+		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
 

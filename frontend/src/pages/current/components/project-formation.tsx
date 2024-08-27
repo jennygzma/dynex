@@ -544,12 +544,14 @@ const ProjectFormation = () => {
               />
               <Button
                 onClick={generateFakeData}
-                disabled={!UIPrompt || !designHypothesis}
+                disabled={!designHypothesis}
                 sx={{
                   width: "100%",
                 }}
               >
-                {dataInput ? "Regenerate Fake Data" : "Generate Fake Data"}
+                {dataInput
+                  ? "Regenerate Placeholder Data"
+                  : "Generate Placeholder Data"}
               </Button>
               {dataInput !== "null" && dataInput && (
                 <>

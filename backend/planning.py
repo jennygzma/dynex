@@ -323,6 +323,7 @@ def get_tool_requirements(ui_prompt):
                 “go_js”: {“required”: “no”, “why”: “The application uses a node-based flowchart system which can be created through a GoJS diagram.”},
                 }
 }
+            Generally, a rule of thumb is if GPT is not used to retrieve data, then we should generated faked_data.
             """
     res = call_llm(system_message, user_message)
     print("sucessfully called LLM for get_tool_requirements", res)
@@ -371,12 +372,19 @@ def get_plan_message(tools_requirements):
             When calling GPT, ensure there is a button (for example: a submit, or a get recommendations button) that calls GPT to prevent calling GPT continuously. Also, have the button show if the GPT API is loading or not (after clicking, can have the button say "Loading")
         """
     if tools_requirements["images"]["required"] == "yes":
-        message += f"""
-            Limit the plan to 3-5 steps.
-            MAKE SURE to dedicate a step to the creation of the gpt process that will allow the application to generate images and add it to the relevant places in the UI deemed necessary.
-            {tools_requirements["images"]["why"]}
-            When calling GPT, ensure there is a button (for example: a submit, or a get recommendations button) that calls GPT to prevent calling GPT continuously. Also, have the button show if the GPT API is loading or not (after clicking, can have the button say "Loading")
-        """
+        if tools_requirements["gpt"]["required"] == "yes":
+            message += f"""
+                ADD LOGIC TO THE EXISTING GPT CALL TO GRAB IMAGES FROM GPT AS WELL.
+                {tools_requirements["images"]["why"]}
+            """
+        else:
+            message += f"""
+                Limit the plan to 3-5 steps.
+                ONE STEP MUST BE DEDICATED TO GRABBING IMAGES FROM GPT.
+                MAKE SURE TO DEDICATE A STEP TO GRAB IMAGES FROM GPT, and have logic to the creation of the gpt process that will allow the application to generate images and add it to the relevant places in the UI deemed necessary.
+                {tools_requirements["images"]["why"]}
+                When calling GPT for images, only call GPT once to populate the images.
+            """
     if tools_requirements["faked_data"]["required"] == "yes":
         message += """
             In the first step of the app, also call the placeholder data from the endpoint.
@@ -401,6 +409,7 @@ def get_plan(design_hypothesis, tools_requirements):
     system_message = f"""
         You are a helpful senior software engineer building a plan to implement a UI based on a design hypothesis.
         {message}
+        Only include placeholder data, GPT calls, ChartJS, or GoJS if specified. NOT ALL APPS USE PLACEHOLDER DATA.
         Format it like this: [{{"task_id: task_id, "task": task, "dep": dependency_task_ids}}].
 		The "dep" field denotes the id of the previous tasks which generates a new resource upon which the current task relies.
 		"""
