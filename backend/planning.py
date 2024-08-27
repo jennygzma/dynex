@@ -400,6 +400,14 @@ def get_plan_message(tools_requirements):
             Limit the plan to 2-4 steps.
             Dedicate a step integrate the dependencies of go_js.
         """
+    if (
+        tools_requirements["gpt"]["required"] != "yes"
+        and tools_requirements["images"]["required"] != "yes"
+        and tools_requirements["faked_data"]["required"] != "yes"
+        and tools_requirements["chart_js"]["required"] != "yes"
+        and tools_requirements["go_js"]["required"] != "yes"
+    ):
+        message += """Limit the plan to 1-2 steps. DO NOT RECOMMEND ANY OTHER PACKAGES THAT WERE NOT ALREADY SPECIFIED."""
     return message
 
 
