@@ -14,32 +14,32 @@ app = Flask(__name__)
 client = OpenAI(api_key="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")
 
 faked_data = None;
-design_spec_map = {};
+design_hypotheses_map = {};
 prompt_map = {};
 iteration_index = 0;
 existing_code = None;
 
-@app.route("/generate_design_spec", methods=["POST"])
-def generate_design_spec():
-	global design_spec_map
+@app.route("/generate_design_hypotheses", methods=["POST"])
+def generate_design_hypotheses():
+	global design_hypotheses_map
 	global prompt_map 
 	global iteration_index
-	print("calling generate_design_spec...")
+	print("calling generate_design_hypotheses...")
 	data = request.json
 	prompt = data["ui_prompt"]
 	prompt_map[iteration_index] = prompt
 	results = ["", "", ""]
 	for i in range(3):
-		print("calling for spec " + str(i))
-		results[i] = get_spec(prompt, "") if iteration_index == 0 else get_spec(prompt, prompt_map[iteration_index-1])
-	print("id for this spec generation is " + str(iteration_index))
-	design_spec_map[iteration_index] = results
+		print("calling for design hypothesis " + str(i))
+		results[i] = get_design_hypothesis(prompt, "") if iteration_index == 0 else get_design_hypothesis(prompt, prompt_map[iteration_index-1])
+	print("id for this design hypothesis generation is " + str(iteration_index))
+	design_hypotheses_map[iteration_index] = results
 	iteration_index = iteration_index + 1
-	return jsonify({"message": "Generated design spec", "spec": results}), 200
+	return jsonify({"message": "Generated design hypotheses", "hypotheses": results}), 200
 
 		
-def get_spec(ui_prompt_current, ui_prompt_previous):
-	print("calling get_spec...")
+def get_design_hypothesis(ui_prompt_current, ui_prompt_previous):
+	print("calling get_design_hypothesis...")
 	prompt = "This is the UI the user wants: "
 	if ui_prompt_previous:
 		prompt = prompt + ui_prompt_previous + " with these improvements " + ui_prompt_current
@@ -58,7 +58,7 @@ def get_spec(ui_prompt_current, ui_prompt_previous):
 		{"role": "user", "content": prompt}
     ]
 	res = client.chat.completions.create(model="gpt-4", messages=messages)
-	print("Sucessfully called GPT for spec", res);
+	print("Sucessfully called GPT for design hypothesis", res);
 	return res.choices[0].message.content
 
 

@@ -15,8 +15,8 @@ import Box from "../../../components/Box";
 const ProjectFormation = () => {
   const {
     updateIsLoading,
-    spec,
-    updateSpec,
+    designHypothesis,
+    updateDesignHypothesis,
     currentPrototype,
   } = useAppContext();
 
@@ -24,7 +24,7 @@ const ProjectFormation = () => {
   const [dataIteration, setDataIteration] = useState("");
   const [UIPrompt, setUIPrompt] = useState("");
   const [updatedPrompt, setUpdatedPrompt] = useState(false);
-  const [updatedSpec, setUpdatedSpec] = useState(false);
+  const [updatedDesignHypothesis, setUpdatedDesignHypothesis] = useState(false);
   const [updatedDataInput, setUpdatedDataInput] = useState(false);
   const [checkedState, setCheckedState] = useState({
     checkedGPT: false,
@@ -43,11 +43,11 @@ const ProjectFormation = () => {
     setUpdatedCheckBoxes(true);
   };
 
-  useEffect(() => {}, [spec, dataInput, UIPrompt]);
+  useEffect(() => {}, [designHypothesis, dataInput, UIPrompt]);
   useEffect(() => {
     if (!currentPrototype) return;
     getFakedData();
-    getSpec();
+    getDesignHypothesis();
     getToolsRequirement();
     // getPrompt();
   }, [currentPrototype]);
@@ -153,23 +153,23 @@ const ProjectFormation = () => {
       });
   };
 
-  const generateSpec = () => {
+  const generateDesignHypothesis = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/generate_spec",
+      url: "/generate_design_hypothesis",
     })
       .then((response) => {
         console.log(
-          "/generate_spec request successful:",
+          "/generate_design_hypothesis request successful:",
           response.data,
         );
-        getSpec();
+        getDesignHypothesis();
         getToolsRequirement();
       })
       .catch((error) => {
         console.error(
-          "Error calling /generate_spec request:",
+          "Error calling /generate_design_hypotheses request:",
           error,
         );
       })
@@ -178,46 +178,46 @@ const ProjectFormation = () => {
       });
   };
 
-  const saveSpec = () => {
+  const saveDesignHypothesis = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_spec",
+      url: "/save_design_hypothesis",
       data: {
-        spec: spec,
+        design_hypothesis: designHypothesis,
       },
     })
       .then((response) => {
         console.log(
-          "/save_spec request successful:",
+          "/save_design_hypothesis request successful:",
           response.data,
         );
-        getSpec();
+        getDesignHypothesis();
       })
       .catch((error) => {
-        console.error("Error calling /save_spec request:", error);
+        console.error("Error calling /save_design_hypothesis request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
       });
   };
 
-  const getSpec = () => {
+  const getDesignHypothesis = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_spec",
+      url: "/get_design_hypothesis",
     })
       .then((response) => {
         console.log(
-          "/get_spec request successful:",
+          "/get_design_hypothesis request successful:",
           response.data,
         );
-        updateSpec(response.data.spec);
-        setUpdatedSpec(false);
+        updateDesignHypothesis(response.data.design_hypothesis);
+        setUpdatedDesignHypothesis(false);
       })
       .catch((error) => {
-        console.error("Error calling /get_spec request:", error);
+        console.error("Error calling /get_design_hypothesis request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -483,35 +483,35 @@ const ProjectFormation = () => {
                 fontFamily: "monospace",
               }}
             >
-              Spec
+              Design Hypothesis
             </Typography>
             <Button
-              onClick={generateSpec}
+              onClick={generateDesignHypothesis}
               sx={{
                 width: "100%",
               }}
             >
-              {spec
-                ? "Generate new spec"
-                : "Generate spec"}
+              {designHypothesis
+                ? "Generate new design hypothesis"
+                : "Generate design hypothesis"}
             </Button>
-            {spec && (
+            {designHypothesis && (
               <>
                 <TextField
-                  className={"spec"}
-                  label="Spec"
+                  className={"design-hypothesis"}
+                  label="Design Hypothesis"
                   rows={13}
-                  value={spec}
+                  value={designHypothesis}
                   onChange={(e) => {
-                    updateSpec(e.target.value);
-                    setUpdatedSpec(true);
+                    updateDesignHypothesis(e.target.value);
+                    setUpdatedDesignHypothesis(true);
                   }}
                 />
                 <Button
-                  onClick={saveSpec}
-                  disabled={!updatedSpec}
+                  onClick={saveDesignHypothesis}
+                  disabled={!updatedDesignHypothesis}
                 >
-                  Update spec
+                  Update design hypothesis
                 </Button>
               </>
             )}
@@ -544,7 +544,7 @@ const ProjectFormation = () => {
               />
               <Button
                 onClick={generateFakeData}
-                disabled={!UIPrompt || !spec}
+                disabled={!designHypothesis}
                 sx={{
                   width: "100%",
                 }}
