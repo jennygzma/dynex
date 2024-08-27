@@ -487,7 +487,6 @@ const ProjectFormation = () => {
             </Typography>
             <Button
               onClick={generateDesignHypothesis}
-              disabled={!UIPrompt}
               sx={{
                 width: "100%",
               }}

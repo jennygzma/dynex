@@ -825,7 +825,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
                 You are working on an app described here: {design_hypothesis}.
                 The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
 				We've broken down the development of it into these tasks: {plan}.
-				Currently, you are working on this task: {task}.
+				Currently, you are working on this task: {task}. DO NOT DELETE PREVIOUS CODE WHEN WRITING THIS TASK. ONLY ADD TO THE EXISTING CODE.
 				For context, this is the faked_data: {faked_data}
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
 				{code_rules}

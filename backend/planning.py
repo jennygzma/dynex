@@ -114,12 +114,23 @@ Here is the example plan. It is longer because we are using GPT:
 
 
 def create_design_hypothesis(problem, matrix):
-    hypothesis = f"""
-Create a UI for this {problem}.
-It is for {matrix['PersonXIdea']}. For more details: {matrix['PersonXGrounding']}
-The approach should be: {matrix['ApproachXIdea']}. For more details: {matrix['ApproachXGrounding']}
-The interaction paradigm shown in the interface should be {matrix['InteractionXIdea']}. For more details: {matrix['InteractionXGrounding']}
-    """
+    hypothesis = f"Create a UI for this {problem}."
+
+    if matrix.get("PersonXIdea"):
+        hypothesis += f"\nIt is for {matrix['PersonXIdea']}."
+        if matrix.get("PersonXGrounding"):
+            hypothesis += f" For more details: {matrix['PersonXGrounding']}"
+
+    if matrix.get("ApproachXIdea"):
+        hypothesis += f"\nThe approach should be: {matrix['ApproachXIdea']}."
+        if matrix.get("ApproachXGrounding"):
+            hypothesis += f" For more details: {matrix['ApproachXGrounding']}"
+
+    if matrix.get("InteractionXIdea"):
+        hypothesis += f"\nThe interaction paradigm shown in the interface should be {matrix['InteractionXIdea']}."
+        if matrix.get("InteractionXGrounding"):
+            hypothesis += f" For more details: {matrix['InteractionXGrounding']}"
+
     return hypothesis.strip()
 
 
@@ -357,11 +368,14 @@ def get_plan_message(tools_requirements):
         message += """
             Limit the plan to 3-5 steps.
             Dedicate a step to the creation of the gpt process that will allow the application to generate data.
+            When calling GPT, ensure there is a button (for example: a submit, or a get recommendations button) that calls GPT to prevent calling GPT continuously. Also, have the button show if the GPT API is loading or not (after clicking, can have the button say "Loading")
         """
     if tools_requirements["images"]["required"] == "yes":
-        message += """
+        message += f"""
             Limit the plan to 3-5 steps.
-            Dedicate a step to the creation of the gpt process that will allow the application to generate images and add it to the relevant places.
+            MAKE SURE to dedicate a step to the creation of the gpt process that will allow the application to generate images and add it to the relevant places in the UI deemed necessary.
+            {tools_requirements["images"]["why"]}
+            When calling GPT, ensure there is a button (for example: a submit, or a get recommendations button) that calls GPT to prevent calling GPT continuously. Also, have the button show if the GPT API is loading or not (after clicking, can have the button say "Loading")
         """
     if tools_requirements["faked_data"]["required"] == "yes":
         message += """
