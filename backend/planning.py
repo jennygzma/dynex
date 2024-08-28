@@ -365,26 +365,29 @@ def get_plan_message(tools_requirements):
     """
     if tools_requirements is None or tools_requirements == {}:
         message += "Limit the plan to 1-3 steps. If it's possible to create in one step, you can recommend that."
-    if tools_requirements["gpt"]["required"] == "yes":
+    if (
+        tools_requirements["gpt"]["required"] == "yes"
+        and tools_requirements["images"]["required"] == "yes"
+    ):
+        message += f"""
+            Limit the plan to 3-5 steps.
+            Dedicate a step to the creation of the gpt process that will allow the application to generate data and images. {tools_requirements["images"]["why"]}
+            When calling GPT, ensure there is a button (for example: a submit, or a get recommendations button) that calls GPT to prevent calling GPT continuously. Also, have the button show if the GPT API is loading or not (after clicking, can have the button say "Loading")
+        """
+    elif tools_requirements["gpt"]["required"] == "yes":
         message += """
             Limit the plan to 3-5 steps.
             Dedicate a step to the creation of the gpt process that will allow the application to generate data.
             When calling GPT, ensure there is a button (for example: a submit, or a get recommendations button) that calls GPT to prevent calling GPT continuously. Also, have the button show if the GPT API is loading or not (after clicking, can have the button say "Loading")
         """
-    if tools_requirements["images"]["required"] == "yes":
-        if tools_requirements["gpt"]["required"] == "yes":
-            message += f"""
-                ADD LOGIC TO THE EXISTING GPT CALL TO GRAB IMAGES FROM GPT AS WELL.
-                {tools_requirements["images"]["why"]}
-            """
-        else:
-            message += f"""
-                Limit the plan to 3-5 steps.
-                ONE STEP MUST BE DEDICATED TO GRABBING IMAGES FROM GPT.
-                MAKE SURE TO DEDICATE A STEP TO GRAB IMAGES FROM GPT, and have logic to the creation of the gpt process that will allow the application to generate images and add it to the relevant places in the UI deemed necessary.
-                {tools_requirements["images"]["why"]}
-                When calling GPT for images, only call GPT once to populate the images.
-            """
+    elif tools_requirements["images"]["required"] == "yes":
+        message += f"""
+            Limit the plan to 3-5 steps.
+            ONE STEP MUST BE DEDICATED TO GRABBING IMAGES FROM GPT.
+            MAKE SURE TO DEDICATE A STEP TO GRAB IMAGES FROM GPT, and have logic to the creation of the gpt process that will allow the application to generate images and add it to the relevant places in the UI deemed necessary.
+            {tools_requirements["images"]["why"]}
+            When calling GPT for images, only call GPT once to populate the images.
+        """
     if tools_requirements["faked_data"]["required"] == "yes":
         message += """
             In the first step of the app, also call the placeholder data from the endpoint.

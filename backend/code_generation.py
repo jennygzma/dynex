@@ -612,67 +612,67 @@ sample_gpt_image_code = f"""
 </html>
 """
 
-sample_gpt_and_image_code = """
+sample_gpt_and_image_code = f"""
 try:
-    response = await fetch('https://api.openai.com/v1/chat/completions', {
+    response = await fetch('https://api.openai.com/v1/chat/completions', {{
         'method': 'POST',
-        'headers': {
+        'headers': {{
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer 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'
-        },
-        'body': json.dumps({
+            'Authorization': 'Bearer {openai_api_key}'
+        }},
+        'body': json.dumps({{
             'model': 'gpt-4',
             'messages': [
-                {
+                {{
                     'role': 'system',
                     'content': 'You are a helpful assistant providing grocery recommendations based on dietary preferences and restrictions.'
-                },
-                {
+                }},
+                {{
                     'role': 'user',
-                    'content': '''
+                    'content': \"\"\"
                     Based on the following dietary preferences and restrictions, provide a list of recommended grocery items in the following JSON format:
                     [
-                        {
+                        {{
                             "name": "Organic Quinoa",
                             "description": "A gluten-free, high-protein grain.",
                             "category": "Grains",
-                            "nutritionalInfo": {
+                            "nutritionalInfo": {{
                                 "calories": 120,
                                 "fat": 2.1,
                                 "protein": 4.4,
                                 "carbs": 21.3
-                            },
+                            }},
                             "compatibility": "Vegan, Gluten-Free, Vegetarian"
-                        },
+                        }},
                         ...
                     ]
 
-                    Preferences and Restrictions: {preferences}
+                    Preferences and Restrictions: {{preferences}}
 
                     Ensure the JSON is valid and adheres strictly to this format. Do not type any additional text, only provide the JSON.
-                    '''
-                }
+                    \"\"\"
+                }}
             ]
-        })
-    })
+        }})
+    }})
 
     result = await response.json()
     parsed_data = json.loads(result['choices'][0]['message']['content'])
 
     # Fetch images for each recommendation
     for item in parsed_data:
-        image_response = await fetch('https://api.openai.com/v1/images/generations', {
+        image_response = await fetch('https://api.openai.com/v1/images/generations', {{
             'method': 'POST',
-            'headers': {
+            'headers': {{
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer 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'
-            },
-            'body': json.dumps({
-                'prompt': f"An image of {item['name']}, a {item['category']} item.",
+                'Authorization': 'Bearer {openai_api_key}'
+            }},
+            'body': json.dumps({{
+                'prompt': f"An image of {{item['name']}}, a {{item['category']}} item.",
                 'n': 1,
                 'size': "256x256"
-            })
-        })
+            }})
+        }})
 
         image_result = await image_response.json()
         item['imageUrl'] = image_result['data'][0]['url']
@@ -686,6 +686,7 @@ except Exception as err:
 finally:
     set_loading(False)
 """
+
 
 sample_code = """
 <!DOCTYPE html>
@@ -804,13 +805,12 @@ def get_code_rules(tools_requirements=None):
   rules = code_rules_base
   if tools_requirements is None or tools_requirements == {}:
     return code_rules_base
-  if tools_requirements["gpt"]["required"] == "yes":
+  if tools_requirements["gpt"]["required"] == "yes" and tools_requirements["images"]["required"] == "yes":
+    rules += code_rules_image_and_gpt
+  elif tools_requirements["gpt"]["required"] == "yes":
     rules += code_rules_gpt
-  if tools_requirements["images"]["required"] == "yes":
-    if tools_requirements["gpt"]["required"] == "yes":
-      rules += code_rules_image_and_gpt
-    else:
-      rules += code_rules_image
+  elif tools_requirements["images"]["required"] == "yes":
+    rules += code_rules_image
   if tools_requirements["faked_data"]["required"] == "yes":
     rules += code_rules_faked_data
   if tools_requirements["chart_js"]["required"] == "yes":
@@ -901,7 +901,7 @@ def implement_plan(prompt, plan, design_hypothesis, code_folder_path, faked_data
 	cleanup_code(cleaned_code_file_path, main_code_file_path)
 	return main_code_file_path
 
-def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules):
+def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data_info, code_rules):
 	print("calling LLM for get_ui_code...")
 	previous_code = read_file(previous_task_main_code_file_path)
 	user_message = f"Please execute this task: {task}"
@@ -913,6 +913,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 				DO NOT DELETE ANY PREVIOUS CODE WHEN IMPLEMENTING THIS TASK. SIMPLY ADD CODE TO THE PREVIOUS CODE. DO NOT COMMENT PARTS OF THE CODE OUT AND SAY "previous functionality is the same" OR ANYTHING SIMILAR TO THAT.
 				There is already existing code in the index.html file. Using the existing code {previous_code}.
 				{code_rules}
+        {faked_data_info}
 """
 	code = call_llm(system_message, user_message)
 	create_and_write_file(task_merged_code_file_path, code)
@@ -920,7 +921,7 @@ def get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path
 	previous_code_lines=len(previous_code.splitlines())
 	if previous_code_lines-10 > merged_code_lines:
 		print("trying again... writing code failed...")
-		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
+		get_ui_code(plan, task, design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data_info, code_rules)
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
 
@@ -937,6 +938,7 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	task_merged_code_file_path = f"{task_code_folder_path}/{globals.MERGED_CODE_FILE_NAME}"
 	task_main_code_file_path = f"{task_code_folder_path}/{globals.MAIN_CODE_FILE_NAME}"
 	code_rules = get_code_rules(tools_requirements)
+	faked_data_info = f"Here is the faked_data (placeholder data) for context: {faked_data}" if tools_requirements["faked_data"]["required"] == "yes" else ""
 	if task_id==1:
 		implement_first_task(design_hypothesis, step["task"], task_merged_code_file_path, faked_data, code_rules)
 		cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
@@ -947,18 +949,18 @@ def implement_plan_lock_step(design_hypothesis, plan, code_folder_path, task_id,
 	# identify_code_changes(plan, step["task"], task_code_file_path, previous_task_main_code_file_path, design_hypothesis)
 	# inject_code(step["task"], previous_task_main_code_file_path, task_merged_code_file_path, task_code_file_path)
 	# below is for Claude
-	get_ui_code(plan, step["task"], design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
+	get_ui_code(plan, step["task"], design_hypothesis, previous_task_main_code_file_path, task_merged_code_file_path, faked_data_info, code_rules)
 	cleanup_code(task_cleaned_code_file_path, task_merged_code_file_path, task_main_code_file_path)
 	print("finished executing lock step for task_id", {task_id})
 
-def implement_first_task(design_hypothesis, task, task_merged_code_file_path, faked_data, code_rules):
+def implement_first_task(design_hypothesis, task, task_merged_code_file_path, faked_data_info, code_rules):
 	print("calling LLM for implement_first_task...")
 	user_message = f"Please execute this task: {task}."
 	system_message = f"""
-                You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}. Here is the faked data for context: {faked_data}.
-				We will grab the faked_data from the endpoint, if it exists. Grab it like so: {get_faked_data_code}.
-				{code_rules}
-            """
+    You are writing HTML, Javascript, and CSS code for creating a UI given a data model. For context, this is the goal: {design_hypothesis}.
+		{code_rules}
+    {faked_data_info}
+"""
 	code = call_llm(system_message, user_message)
 	print("called LLM for initial html file code", code)
 	user_message = f"This is the existing code {code}"

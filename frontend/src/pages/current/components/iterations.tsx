@@ -114,7 +114,6 @@ const Iterations = () => {
         getPlan();
         setClickedAddStep(false);
         setAddStepNewTaskDescription(undefined);
-        updateCurrentTask(plan[plan.length]);
       })
       .catch((error) => {
         console.error("Error calling /add_step_in_plan request:", error);
@@ -251,7 +250,7 @@ const Iterations = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     getIterations();
-  }, [plan, currentIteration, currentTask, currentPrototype]);
+  }, [plan, currentIteration, currentTask]);
 
   if (!designHypothesis) return <></>;
 
