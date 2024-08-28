@@ -921,8 +921,7 @@ def get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged
 	previous_code_lines=len(previous_code.splitlines())
 	if previous_code_lines-10 > merged_code_lines:
 		print("trying again... writing code failed...")
-
-	get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
+		get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
 
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
