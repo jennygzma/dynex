@@ -26,7 +26,7 @@ const Iterations = () => {
     currentIteration,
     updateCurrentIteration,
     updateCurrentTask,
-    designHypothesis,
+    spec,
     currentPrototype,
   } = useAppContext();
   const [newTaskDescription, setNewTaskDescription] = useState(undefined);
@@ -237,7 +237,7 @@ const Iterations = () => {
     getPlan();
     updateCurrentIteration(0);
   }, [currentPrototype]);
-  useEffect(() => {}, [plan, designHypothesis, currentPrototype]);
+  useEffect(() => {}, [plan, spec, currentPrototype]);
   useEffect(() => {
     if (currentTask === undefined) return;
     setUpdatedNewTaskDescription(false);
@@ -252,7 +252,7 @@ const Iterations = () => {
     getIterations();
   }, [plan, currentIteration, currentTask]);
 
-  if (!designHypothesis) return <></>;
+  if (!spec) return <></>;
 
   return (
     <Box sx={{ width: "90%" }}>

@@ -22,8 +22,8 @@ export interface AppState {
   updateIterations: Dispatch<SetStateAction<Record<number, string>>>;
   currentIteration: number;
   updateCurrentIteration: Dispatch<SetStateAction<number>>;
-  designHypothesis: string;
-  updateDesignHypothesis: Dispatch<SetStateAction<string>>;
+  spec: string;
+  updateSpec: Dispatch<SetStateAction<string>>;
   theoriesAndParadigmsToExplore: string[];
   updateTheoriesAndParadigmsToExplore: Dispatch<SetStateAction<string[]>>;
   currentTheoryAndParadigm: string;
@@ -41,7 +41,7 @@ export const useAppContext = () => useContext(AppContext);
 export const PlanProvider = ({ children }) => {
   const [plan, updatePlan] = useState(undefined);
   const [currentTask, updateCurrentTask] = useState(undefined);
-  const [designHypothesis, updateDesignHypothesis] = useState(undefined);
+  const [spec, updateSpec] = useState(undefined);
   const [isLoading, updateIsLoading] = useState(false);
   const [iterations, updateIterations] = useState(undefined);
   const [currentIteration, updateCurrentIteration] = useState(0);
@@ -64,8 +64,8 @@ export const PlanProvider = ({ children }) => {
         updateIterations,
         currentIteration,
         updateCurrentIteration,
-        designHypothesis,
-        updateDesignHypothesis,
+        spec,
+        updateSpec,
         theoriesAndParadigmsToExplore,
         updateTheoriesAndParadigmsToExplore,
         currentTheoryAndParadigm,

@@ -1,4 +1,4 @@
-# This file handles brainstorming the design hypothesis and creating the task list.
+# This file handles brainstorming the spec and creating the task list.
 import json
 
 from globals import call_llm
