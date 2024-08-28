@@ -822,7 +822,7 @@ def get_code_rules(tools_requirements=None):
 def get_fake_data(spec, user_input, person_idea, person_grounding):
 	print("calling LLM for get_fake_data...")
 	system_message = f"""
-        You are generating fake JSON data for a UI that a user wants to create. The dspec should give instructures as to what data needs to be generated.
+        You are generating fake JSON data for a UI that a user wants to create. The spec should give instructures as to what data needs to be generated.
 
         For example, for this spec:
         "Application Layout:
