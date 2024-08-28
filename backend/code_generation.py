@@ -908,6 +908,7 @@ def get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged
 	system_message = f"""
         You are working on an app described here: {spec}.
         The entire app will be written in React and MUI within an index.html file. There is only this index.html file for the entire app.
+        DO NOT REMOVE PREVIOUS FUNCTIONALITIES, LOGIC, OR SECTIONS FROM THE PREVIOUS CODE WHEN WRITING THIS TASK. ONLY ADD TO THE EXISTING CODE.
 				We've broken down the development of it into these tasks: {plan}.
 				Currently, you are working on this task: {task}.
 				DO NOT DELETE ANY PREVIOUS CODE WHEN IMPLEMENTING THIS TASK. SIMPLY ADD CODE TO THE PREVIOUS CODE. DO NOT COMMENT PARTS OF THE CODE OUT AND SAY "previous functionality is the same" OR ANYTHING SIMILAR TO THAT.
@@ -921,7 +922,7 @@ def get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged
 	if previous_code_lines-10 > merged_code_lines:
 		print("trying again... writing code failed...")
 
-	get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged_code_file_path, faked_data)
+	get_ui_code(plan, task, spec, previous_task_main_code_file_path, task_merged_code_file_path, faked_data, code_rules)
 
 	print("sucessfully called LLM for get_ui_code", code)
 	return code
