@@ -3,9 +3,11 @@ import React, { useEffect } from "react";
 import CodeGeneration from "./components/implementation";
 import { useAppContext } from "./hooks/app-context";
 import Spinner from "./components/spinner";
-import ControlPanel from "./components/control-panel";
+import Prototypes from "./components/prototypes";
 import { MatrixProvider } from "./hooks/matrix-context";
 import ProblemSpecification from "./components/problem-specification";
+import Steps from "./components/steps";
+import ProjectFormation from "./components/project-formation";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
@@ -25,18 +27,18 @@ const Home = () => {
       >
         <Stack
           direction="row"
-          spacing="20px"
+          spacing="10px"
           sx={{
             alignItems: "flex-start",
             alignContent: "flex-end",
             justifyContent: "center",
           }}
         >
-          <img
+          {/* <img
             src={require("../../assets/franky-icon.ico")}
             alt="franky"
             width="150x"
-          />
+          /> */}
           <Typography
             variant="h1"
             sx={{
@@ -52,8 +54,11 @@ const Home = () => {
         <MatrixProvider>
           <ProblemSpecification />
         </MatrixProvider>
+        <Prototypes />
+        <ProjectFormation />
         <Stack direction="row">
-          <ControlPanel />
+          <Steps />
+
           <CodeGeneration />
         </Stack>
       </Stack>

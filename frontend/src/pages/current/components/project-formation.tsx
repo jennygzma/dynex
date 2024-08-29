@@ -13,12 +13,8 @@ import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 
 const ProjectFormation = () => {
-  const {
-    updateIsLoading,
-    spec,
-    updateSpec,
-    currentPrototype,
-  } = useAppContext();
+  const { updateIsLoading, spec, updateSpec, currentPrototype } =
+    useAppContext();
 
   const [dataInput, setDataInput] = useState("");
   const [dataIteration, setDataIteration] = useState("");
@@ -160,18 +156,12 @@ const ProjectFormation = () => {
       url: "/generate_spec",
     })
       .then((response) => {
-        console.log(
-          "/generate_spec request successful:",
-          response.data,
-        );
+        console.log("/generate_spec request successful:", response.data);
         getSpec();
         getToolsRequirement();
       })
       .catch((error) => {
-        console.error(
-          "Error calling /generate_spec request:",
-          error,
-        );
+        console.error("Error calling /generate_spec request:", error);
       })
       .finally(() => {
         updateIsLoading(false);
@@ -188,10 +178,7 @@ const ProjectFormation = () => {
       },
     })
       .then((response) => {
-        console.log(
-          "/save_spec request successful:",
-          response.data,
-        );
+        console.log("/save_spec request successful:", response.data);
         getSpec();
       })
       .catch((error) => {
@@ -209,10 +196,7 @@ const ProjectFormation = () => {
       url: "/get_spec",
     })
       .then((response) => {
-        console.log(
-          "/get_spec request successful:",
-          response.data,
-        );
+        console.log("/get_spec request successful:", response.data);
         updateSpec(response.data.spec);
         setUpdatedSpec(false);
       })
@@ -310,7 +294,7 @@ const ProjectFormation = () => {
 
   if (!currentPrototype) return <></>;
   return (
-    <Box sx={{ width: "90%" }}>
+    <Box sx={{ width: "98%" }}>
       <Stack spacing="20px">
         <Typography
           variant="body1"
@@ -322,29 +306,8 @@ const ProjectFormation = () => {
         >
           Project Formation
         </Typography>
-        {/* <Stack spacing="10px">
-          <TextField
-            className={"prompt"}
-            label="Prompt"
-            value={UIPrompt}
-            rows={8}
-            onChange={(e) => {
-              setUIPrompt(e.target.value);
-              setUpdatedPrompt(true);
-            }}
-          />
-          <Button
-            onClick={savePrompt}
-            disabled={!updatedPrompt}
-            sx={{
-              width: "100%",
-            }}
-          >
-            Update Prompt
-          </Button>
-        </Stack> */}
         <Stack spacing="10px" direction="row">
-          <Stack sx={{ width: "50%" }}>
+          <Stack sx={{ width: "100%" }}>
             <Stack direction="row" spacing="5px" sx={{ alignSelf: "center" }}>
               <Typography
                 variant="body1"
@@ -474,7 +437,7 @@ const ProjectFormation = () => {
               Update Tools Requirement
             </Button>
           </Stack>
-          <Stack spacing="10px" sx={{ width: "50%" }}>
+          <Stack spacing="10px" sx={{ width: "100%" }}>
             <Typography
               variant="body2"
               sx={{
@@ -491,9 +454,7 @@ const ProjectFormation = () => {
                 width: "100%",
               }}
             >
-              {spec
-                ? "Generate new spec"
-                : "Generate spec"}
+              {spec ? "Generate new spec" : "Generate spec"}
             </Button>
             {spec && (
               <>
@@ -507,74 +468,73 @@ const ProjectFormation = () => {
                     setUpdatedSpec(true);
                   }}
                 />
-                <Button
-                  onClick={saveSpec}
-                  disabled={!updatedSpec}
-                >
+                <Button onClick={saveSpec} disabled={!updatedSpec}>
                   Update spec
                 </Button>
               </>
             )}
           </Stack>
-        </Stack>
-
-        <Stack spacing="10px" width="100%">
-          {checkedState.checkedFakedData && (
-            <Stack spacing="10px">
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: "bold",
-                  alignSelf: "center",
-                  fontFamily: "monospace",
-                }}
-              >
-                Fake Data
-              </Typography>
-              <TextField
-                className={"generated-data"}
-                label="Data Input Suggestions"
-                variant="outlined"
-                multiline
-                rows={2}
-                value={dataIteration}
-                onChange={(e) => {
-                  setDataIteration(e.target.value);
-                }}
-              />
-              <Button
-                onClick={generateFakeData}
-                disabled={!spec}
-                sx={{
-                  width: "100%",
-                }}
-              >
-                {dataInput
-                  ? "Regenerate Placeholder Data"
-                  : "Generate Placeholder Data"}
-              </Button>
-              {dataInput !== "null" && dataInput && (
-                <>
-                  <TextField
-                    code={true}
-                    className={"generated-data"}
-                    label="Data Input"
-                    variant="outlined"
-                    multiline
-                    rows={13}
-                    value={dataInput}
-                    onChange={(e) => {
-                      setDataInput(e.target.value);
-                      setUpdatedDataInput(true);
-                    }}
-                  />
-                  <Button onClick={saveFakedData} disabled={!updatedDataInput}>
-                    Update faked data
-                  </Button>
-                </>
-              )}
-            </Stack>
-          )}
+          <Stack spacing="10px" width="100%">
+            {checkedState.checkedFakedData && (
+              <Stack spacing="10px">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: "bold",
+                    alignSelf: "center",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  Fake Data
+                </Typography>
+                <TextField
+                  className={"generated-data"}
+                  label="Data Input Suggestions"
+                  variant="outlined"
+                  multiline
+                  rows={2}
+                  value={dataIteration}
+                  onChange={(e) => {
+                    setDataIteration(e.target.value);
+                  }}
+                />
+                <Button
+                  onClick={generateFakeData}
+                  disabled={!spec}
+                  sx={{
+                    width: "100%",
+                  }}
+                >
+                  {dataInput
+                    ? "Regenerate Placeholder Data"
+                    : "Generate Placeholder Data"}
+                </Button>
+                {dataInput !== "null" && dataInput && (
+                  <>
+                    <TextField
+                      code={true}
+                      className={"generated-data"}
+                      label="Data Input"
+                      variant="outlined"
+                      multiline
+                      rows={13}
+                      value={dataInput}
+                      onChange={(e) => {
+                        setDataInput(e.target.value);
+                        setUpdatedDataInput(true);
+                      }}
+                    />
+                    <Button
+                      onClick={saveFakedData}
+                      disabled={!updatedDataInput}
+                    >
+                      Update faked data
+                    </Button>
+                  </>
+                )}
+              </Stack>
+            )}
+          </Stack>
         </Stack>
       </Stack>
     </Box>

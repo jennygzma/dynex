@@ -4,13 +4,9 @@ import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
 import Button from "../../../components/Button";
 import Box from "../../../components/Box";
-import Steps from "./steps";
-import ProjectFormation from "./project-formation";
 
-const ControlPanel = () => {
+const Prototypes = () => {
   const {
-    iterations,
-    updateCurrentIteration,
     updateIsLoading,
     prototypes,
     updatePrototypes,
@@ -46,7 +42,7 @@ const ControlPanel = () => {
   if (prototypes?.length === 0 || !prototypes) return <></>;
 
   return (
-    <Box sx={{ width: "40%" }}>
+    <Box sx={{ width: "98%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -56,11 +52,11 @@ const ControlPanel = () => {
             fontFamily: "monospace",
           }}
         >
-          Control Panel
+          Prototypes
         </Typography>
         {prototypes && (
           <Stack direction="row" spacing="10px">
-            <Stack sx={{ width: "100%" }}>
+            <Stack direction="row" spacing="5px">
               {prototypes?.map((prototype) => {
                 return (
                   <Stack spacing="10px">
@@ -80,10 +76,11 @@ const ControlPanel = () => {
                           updateCurrentPrototype(prototype);
                           setCurrentPrototype(prototype);
                         }}
-                        sx={{ padding: "15px" }}
+                        sx={{ padding: "15px", borderRadius: "20px" }}
                       >
                         <Stack
                           direction="row"
+                          spacing="5px"
                           sx={{ justifyContent: "space-between" }}
                         >
                           <Typography>{prototype}</Typography>
@@ -94,24 +91,10 @@ const ControlPanel = () => {
                               )
                             }
                           >
-                            Remove
+                            🗑️
                           </Button>
                         </Stack>
                       </CardActionArea>
-                      {currentPrototype === prototype && (
-                        <Stack
-                          spacing="10px"
-                          padding="15px"
-                          sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                          }}
-                        >
-                          <ProjectFormation />
-                          <Steps />
-                        </Stack>
-                      )}
                     </Card>
                   </Stack>
                 );
@@ -119,38 +102,9 @@ const ControlPanel = () => {
             </Stack>
           </Stack>
         )}
-        <Box
-          border={5}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Stack spacing="10px">
-            <Typography
-              variant="body1"
-              sx={{
-                fontWeight: "bold",
-                alignSelf: "center",
-                fontFamily: "monospace",
-              }}
-            >
-              Iterate, Debug, or Repair Versions
-            </Typography>
-            {iterations && (
-              <Button
-                onClick={() => {
-                  updateCurrentIteration(0);
-                }}
-              >
-                Revert to Original
-              </Button>
-            )}
-          </Stack>
-        </Box>
       </Stack>
     </Box>
   );
 };
 
-export default ControlPanel;
+export default Prototypes;

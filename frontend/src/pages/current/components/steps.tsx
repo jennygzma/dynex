@@ -22,9 +22,6 @@ const Steps = () => {
     plan,
     updatePlan,
     currentTask,
-    iterations,
-    updateIterations,
-    currentIteration,
     updateCurrentIteration,
     updateCurrentTask,
     spec,
@@ -37,7 +34,6 @@ const Steps = () => {
   const [addStepNewTaskDescription, setAddStepNewTaskDescription] =
     useState(undefined);
   // const [testCases, setTestCases] = useState(undefined);
-  const [clickedDeleteIteration, setClickedDeleteIteration] = useState(false);
 
   const generatePlan = () => {
     updateIsLoading(true);
@@ -170,68 +166,6 @@ const Steps = () => {
       });
   };
 
-  const getIterations = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_iteration_map_per_step",
-      params: {
-        task_id: currentTask.taskId,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/get_iteration_map_per_step request successful:",
-          response.data,
-        );
-        if (Object.entries(response.data.iterations).length > 0) {
-          console.log(response.data.iterations);
-          updateIterations(response.data.iterations);
-        } else {
-          updateIterations(undefined);
-        }
-      })
-      .catch((error) => {
-        console.error(
-          "Error calling /get_iteration_map_per_step request:",
-          error,
-        );
-        updateIterations(undefined);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
-  const deleteCodeForIteration = (iteration: number) => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/delete_code_per_step_per_iteration",
-      data: {
-        task_id: currentTask.taskId,
-        iteration: iteration,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/delete_code_per_step_per_iteration request successful:",
-          response.data,
-        );
-        setClickedDeleteIteration(!clickedDeleteIteration);
-        getIterations();
-      })
-      .catch((error) => {
-        console.error(
-          "Error calling /delete_code_per_step_per_iteration request:",
-          error,
-        );
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
   // const getTestCases = () => {
   //   updateIsLoading(true);
   //   axios({
@@ -272,19 +206,13 @@ const Steps = () => {
     setUpdatedNewTaskDescription(false);
     setNewTaskDescription(currentTask.task);
     // setTestCases(undefined);
-    getIterations();
     updateCurrentIteration(0);
   }, [currentTask]);
-
-  useEffect(() => {
-    if (currentTask === undefined) return;
-    getIterations();
-  }, [currentIteration, currentTask]);
 
   if (!spec) return <></>;
 
   return (
-    <Box sx={{ width: "90%" }}>
+    <Box sx={{ width: "30%" }}>
       <Stack spacing="10px">
         <Typography
           variant="h4"
@@ -412,66 +340,6 @@ const Steps = () => {
             </Stack>
           </Stack>
         </Box> */}
-        <Box
-          border={5}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Stack spacing="10px">
-            <Typography
-              variant="body1"
-              sx={{
-                fontWeight: "bold",
-                alignSelf: "center",
-                fontFamily: "monospace",
-              }}
-            >
-              Iterate
-            </Typography>
-            {iterations && (
-              <Button
-                onClick={() => {
-                  updateCurrentIteration(0);
-                }}
-              >
-                Revert to Original
-              </Button>
-            )}
-            {iterations &&
-              Object.keys(iterations).map((key) => (
-                <Stack direction="row" spacing="5px">
-                  <Card
-                    sx={{
-                      padding: "10px",
-                      width: "90%",
-                      backgroundColor:
-                        +key === currentIteration
-                          ? "rgba(154, 78, 78, 0.5)"
-                          : "transparent",
-                    }}
-                  >
-                    <Typography variant="body2">{iterations[key]}</Typography>
-                  </Card>
-                  <Button
-                    onClick={() => {
-                      updateCurrentIteration(+key);
-                    }}
-                  >
-                    Set
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      deleteCodeForIteration(+key);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </Stack>
-              ))}
-          </Stack>
-        </Box>
       </Stack>
     </Box>
   );
