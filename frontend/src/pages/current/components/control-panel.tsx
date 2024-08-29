@@ -4,7 +4,7 @@ import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
 import Button from "../../../components/Button";
 import Box from "../../../components/Box";
-import Iterations from "./iterations";
+import Steps from "./steps";
 import ProjectFormation from "./project-formation";
 
 const ControlPanel = () => {
@@ -109,7 +109,7 @@ const ControlPanel = () => {
                           }}
                         >
                           <ProjectFormation />
-                          <Iterations />
+                          <Steps />
                         </Stack>
                       )}
                     </Card>

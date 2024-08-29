@@ -19,13 +19,10 @@ from matrix import brainstorm_question, get_context_from_other_inputs
 from matrix import get_needs_specification as check_needs_specification
 from matrix import summarize_input_from_context
 from planning import create_spec
-from planning import get_spec as get_generated_spec
 from planning import get_plan as get_generated_plan
-from planning import (
-    get_plan_from_task_map,
-    get_tool_requirements,
-    get_tools_requirement_context,
-)
+from planning import get_plan_from_task_map
+from planning import get_spec as get_generated_spec
+from planning import get_tool_requirements, get_tools_requirement_context
 from utils import (
     create_and_write_file,
     create_folder,
@@ -279,8 +276,7 @@ def save_prompt():
     if folder_exists(f"{folder_path}/1"):
         wipeout_code(folder_path, 1, task_map, globals.current_prototype)
     create_and_write_file(
-        f"{folder_path}/{globals.SPEC_FILE_NAME}"
-        "",
+        f"{folder_path}/{globals.SPEC_FILE_NAME}" "",
     )
     create_and_write_file(
         f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}",
@@ -470,9 +466,7 @@ def generate_spec():
     tools_requirements_context = get_tools_requirement_context(tools_requirements_json)
 
     faked_data = read_file(f"{folder_path}/{globals.FAKED_DATA_FILE_NAME}")
-    spec = get_generated_spec(
-        prompt, faked_data, tools_requirements_context
-    )
+    spec = get_generated_spec(prompt, faked_data, tools_requirements_context)
     task_map_json = (
         json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
@@ -545,9 +539,7 @@ def get_spec():
 def generate_plan():
     print("calling generate_plan...")
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
-    spec = read_file(
-        f"{folder_path}/{globals.SPEC_FILE_NAME}"
-    )
+    spec = read_file(f"{folder_path}/{globals.SPEC_FILE_NAME}")
     print(spec)
     tools_requirements_json = (
         json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
@@ -578,6 +570,31 @@ def generate_plan():
     )
     print(task_map)
     return jsonify({"message": "Generated Plan", "plan": plan}), 200
+
+
+@app.route("/get_first_task_id_without_code", methods=["GET"])
+def get_first_task_id_without_code():
+    print("calling get_first_task_id_without_code...")
+    folder_path = f"{globals.folder_path}/{globals.current_prototype}"
+    task_map_json = (
+        json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
+        if file_exists(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}")
+        else {}
+    )
+    if not task_map_json:
+        return jsonify({"message": "Task map is empty", "task_id": 0}), 200
+    task_map = {int(key): value for key, value in task_map_json.items()}
+    task_keys = list(task_map.keys())
+    task_id = task_keys[-1]
+    for key in task_keys:
+        code_exists = file_exists(f"{folder_path}/{key}/{globals.MAIN_CODE_FILE_NAME}")
+        if not code_exists:
+            task_id = key
+            break
+    return (
+        jsonify({"message": "getting first task id without code", "task_id": task_id}),
+        200,
+    )
 
 
 @app.route("/get_plan", methods=["GET"])
@@ -678,9 +695,7 @@ def generate_code():
     task_id = int(data["task_id"])
     folder_path = f"{globals.folder_path}/{globals.current_prototype}"
     task_code_folder_path = f"{folder_path}/{task_id}"
-    spec = read_file(
-        f"{folder_path}/{globals.SPEC_FILE_NAME}"
-    )
+    spec = read_file(f"{folder_path}/{globals.SPEC_FILE_NAME}")
     task_map_json = json.loads(read_file(f"{folder_path}/{globals.TASK_MAP_FILE_NAME}"))
     task_map = {int(key): value for key, value in task_map_json.items()}
     if folder_exists(task_code_folder_path):
@@ -830,9 +845,7 @@ def iterate_code():
     task_code_folder_path = f"{folder_path}/{task_id}"
     current_iteration_folder_path = f"{task_code_folder_path}/{globals.ITERATION_FOLDER_NAME}/{current_debug_iteration}"
     create_folder(current_iteration_folder_path)
-    spec = read_file(
-        f"{folder_path}/{globals.SPEC_FILE_NAME}"
-    )
+    spec = read_file(f"{folder_path}/{globals.SPEC_FILE_NAME}")
     tools_requirements_json = (
         json.loads(read_file(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}"))
         if file_exists(f"{folder_path}/{globals.TOOLS_REQUIREMENT_FILE_NAME}")
@@ -866,9 +879,7 @@ def get_test_cases_per_lock_step():
     index = task_id - 1
     plan = json.loads(read_file(f"{folder_path}/{globals.PLAN_FILE_NAME}"))
     task = plan[index]["task"]
-    spec = read_file(
-        f"{folder_path}/{globals.SPEC_FILE_NAME}"
-    )
+    spec = read_file(f"{folder_path}/{globals.SPEC_FILE_NAME}")
     test_cases = test_code_per_lock_step(task, spec)
     return (
         jsonify(

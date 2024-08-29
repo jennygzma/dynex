@@ -11,11 +11,12 @@ const mapPlan = (jsonPlan) => {
     return {
       taskId: step.task_id,
       task: step.task,
+      hasCode: false,
     };
   });
 };
 
-const Iterations = () => {
+const Steps = () => {
   const {
     updateIsLoading,
     plan,
@@ -35,7 +36,7 @@ const Iterations = () => {
   const [clickedAddStep, setClickedAddStep] = useState(false);
   const [addStepNewTaskDescription, setAddStepNewTaskDescription] =
     useState(undefined);
-  const [testCases, setTestCases] = useState(undefined);
+  // const [testCases, setTestCases] = useState(undefined);
   const [clickedDeleteIteration, setClickedDeleteIteration] = useState(false);
 
   const generatePlan = () => {
@@ -70,6 +71,31 @@ const Iterations = () => {
       .catch((error) => {
         console.error("Error calling /get_plan request:", error);
         updatePlan([]);
+      })
+      .finally(() => {
+        updateIsLoading(false);
+      });
+  };
+
+  const getFirstTaskIdWithoutCode = () => {
+    updateIsLoading(true);
+    axios({
+      method: "GET",
+      url: "/get_first_task_id_without_code",
+    })
+      .then((response) => {
+        console.log(
+          "/get_first_task_id_without_code request successful:",
+          response.data,
+        );
+        const taskId = response.data.task_id;
+        if (plan) updateCurrentTask(plan[taskId - 1]);
+      })
+      .catch((error) => {
+        console.error(
+          "Error calling /get_first_task_id_without_code request:",
+          error,
+        );
       })
       .finally(() => {
         updateIsLoading(false);
@@ -206,43 +232,46 @@ const Iterations = () => {
       });
   };
 
-  const getTestCases = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_test_cases_per_lock_step",
-      params: {
-        task_id: currentTask.taskId,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/get_test_cases_per_lock_step request successful:",
-          response.data,
-        );
-        setTestCases(response.data.test_cases);
-      })
-      .catch((error) => {
-        console.error(
-          "Error calling /get_test_cases_per_lock_step request:",
-          error,
-        );
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
+  // const getTestCases = () => {
+  //   updateIsLoading(true);
+  //   axios({
+  //     method: "GET",
+  //     url: "/get_test_cases_per_lock_step",
+  //     params: {
+  //       task_id: currentTask.taskId,
+  //     },
+  //   })
+  //     .then((response) => {
+  //       console.log(
+  //         "/get_test_cases_per_lock_step request successful:",
+  //         response.data,
+  //       );
+  //       setTestCases(response.data.test_cases);
+  //     })
+  //     .catch((error) => {
+  //       console.error(
+  //         "Error calling /get_test_cases_per_lock_step request:",
+  //         error,
+  //       );
+  //     })
+  //     .finally(() => {
+  //       updateIsLoading(false);
+  //     });
+  // };
 
   useEffect(() => {
     getPlan();
     updateCurrentIteration(0);
   }, [currentPrototype]);
-  useEffect(() => {}, [plan, spec, currentPrototype]);
+  useEffect(() => {
+    getFirstTaskIdWithoutCode();
+  }, [plan]);
+
   useEffect(() => {
     if (currentTask === undefined) return;
     setUpdatedNewTaskDescription(false);
     setNewTaskDescription(currentTask.task);
-    setTestCases(undefined);
+    // setTestCases(undefined);
     getIterations();
     updateCurrentIteration(0);
   }, [currentTask]);
@@ -250,7 +279,7 @@ const Iterations = () => {
   useEffect(() => {
     if (currentTask === undefined) return;
     getIterations();
-  }, [plan, currentIteration, currentTask]);
+  }, [currentIteration, currentTask]);
 
   if (!spec) return <></>;
 
@@ -448,4 +477,4 @@ const Iterations = () => {
   );
 };
 
-export default Iterations;
+export default Steps;

@@ -10,7 +10,6 @@ const Implementation = () => {
   const {
     updateIsLoading,
     plan,
-    spec,
     currentTask,
     currentIteration,
     updateCurrentIteration,
@@ -19,7 +18,6 @@ const Implementation = () => {
   const [code, setCode] = useState("");
   const [updatedCode, setUpdatedCode] = useState(false);
   const [problemDescription, setProblemDescription] = useState(undefined);
-  const [clickedRender, setClickedRender] = useState(false);
 
   const renderUI = () => {
     const output = document.getElementById("output");
@@ -155,8 +153,13 @@ const Implementation = () => {
     getCode();
     getCodeForIteration(currentIteration);
     setProblemDescription("");
-    setClickedRender(false);
   }, [plan, currentTask, currentIteration, currentPrototype]);
+
+  useEffect(() => {
+    if (code) {
+      renderUI();
+    }
+  }, [code]);
 
   if (!currentPrototype) return <></>;
   return (
@@ -250,32 +253,11 @@ const Implementation = () => {
                 </Stack>
               </Box>
             </Stack>
-            <Button
-              disabled={!code}
-              onClick={() => {
-                renderUI();
-                setClickedRender(true);
-              }}
-            >
-              Render
-            </Button>
-            {!clickedRender && (
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: "bold",
-                  alignSelf: "center",
-                  fontFamily: "monospace",
-                }}
-              >
-                Your UI will be rendered here!
-              </Typography>
-            )}
-            <Box border={clickedRender ? 5 : 0}>
+            <Box border={code ? 5 : 0}>
               <Paper
                 id="output"
                 className="output"
-                sx={{ height: clickedRender ? "1200px" : "0px" }}
+                sx={{ height: code ? "1200px" : "0px" }}
               />
             </Box>
           </>
