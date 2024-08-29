@@ -265,7 +265,7 @@ const Iterations = () => {
             fontFamily: "monospace",
           }}
         >
-          Iterations
+          Steps
         </Typography>
         <Button
           onClick={generatePlan}

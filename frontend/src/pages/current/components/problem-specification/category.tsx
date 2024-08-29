@@ -12,6 +12,7 @@ import Chip from "../../../../components/Chip";
 interface CategoryProps {
   category: CategoryType;
   description: string;
+  isDependency: boolean;
 }
 
 interface Specification {
@@ -29,16 +30,29 @@ const mapQuestionsToSpecifications = (
     answer: "",
   }));
 
-const Category = ({ description, category }: CategoryProps) => {
+const Category = ({
+  description,
+  category,
+  isDependency = false,
+}: CategoryProps) => {
   const { updateIsLoading, currentPrototype } = useAppContext();
-  const { submittedProblem, updateUpdatedMatrix } = useMatrixContext();
+  const {
+    submittedProblem,
+    updateUpdatedMatrix,
+    currentCategory,
+    updateCurrentCategory,
+    updateMatrixCategoryInfo,
+    matrixCategoryInfo,
+  } = useMatrixContext();
   const [input, setInput] = useState("");
-  const [needsSpecification, setNeedsSpecification] = useState(false);
+  // const [needsSpecification, setNeedsSpecification] = useState(false);
   const [brainstorms, setBrainstorms] = useState([]);
   // const [specifications, setSpecifications] = useState([]);
   const [question, setQuestion] = useState("");
   const [iteration, setIteration] = useState("");
   const isGrounding = category.includes("Grounding");
+  const ideaPair = category.split("X")[0] + "XIdea";
+  const disabled = isGrounding && matrixCategoryInfo[ideaPair].length === 0;
   const [versions, setVersions] = useState([]);
 
   // const updateSpecificationBrainstorm = (
@@ -62,29 +76,29 @@ const Category = ({ description, category }: CategoryProps) => {
   //   setSpecifications(updatedSpecifications);
   // };
 
-  const getNeedsSpecification = () => {
-    updateIsLoading(true);
-    axios({
-      method: "GET",
-      url: "/get_needs_specification",
-      params: {
-        category: category,
-      },
-    })
-      .then((response) => {
-        console.log(
-          "/get_needs_specification request successful:",
-          response.data,
-        );
-        setNeedsSpecification(response.data.needs_specification);
-      })
-      .catch((error) => {
-        console.error("Error calling /get_needs_specification request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
+  // const getNeedsSpecification = () => {
+  //   updateIsLoading(true);
+  //   axios({
+  //     method: "GET",
+  //     url: "/get_needs_specification",
+  //     params: {
+  //       category: category,
+  //     },
+  //   })
+  //     .then((response) => {
+  //       console.log(
+  //         "/get_needs_specification request successful:",
+  //         response.data,
+  //       );
+  //       setNeedsSpecification(response.data.needs_specification);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error calling /get_needs_specification request:", error);
+  //     })
+  //     .finally(() => {
+  //       updateIsLoading(false);
+  //     });
+  // };
 
   const getInput = () => {
     updateIsLoading(true);
@@ -120,7 +134,7 @@ const Category = ({ description, category }: CategoryProps) => {
       .then((response) => {
         console.log("/update_input request successful:", response.data);
         getInput();
-        getNeedsSpecification();
+        // getNeedsSpecification();
       })
       .catch((error) => {
         console.error("Error calling /update_input request:", error);
@@ -231,7 +245,7 @@ const Category = ({ description, category }: CategoryProps) => {
 
   useEffect(() => {
     getInput();
-    getNeedsSpecification();
+    // getNeedsSpecification();
   }, [submittedProblem]);
 
   useEffect(() => {
@@ -240,124 +254,160 @@ const Category = ({ description, category }: CategoryProps) => {
   }, [currentPrototype]);
 
   return (
-    <Box border={5} sx={{ padding: "10px", maxWidth: "600px" }}>
-      <Stack spacing="10px">
-        {needsSpecification && (
-          <Badge
-            badgeContent={"Needs Specification"}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            color="primary"
+    <Box
+      border={5}
+      sx={{
+        padding: "10px",
+        maxWidth: "700px",
+        borderColor: isDependency ? "yellow" : "transparent",
+      }}
+    >
+      <Box border={5} sx={{ padding: "10px", maxWidth: "650px" }}>
+        <Stack spacing="10px">
+          {!input && (
+            <Badge
+              badgeContent={"Needs Specification"}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              color="primary"
+              sx={{
+                top: 8,
+                right: 70,
+                "& .MuiBadge-badge": {
+                  backgroundColor: "lightblue",
+                  color: "white",
+                  fontWeight: "bold",
+                  fontFamily: "monospace",
+                },
+              }}
+            />
+          )}
+          <Typography
+            variant="subtitle1"
             sx={{
-              top: 8,
-              right: 70,
-              "& .MuiBadge-badge": {
-                backgroundColor: "lightblue",
-                color: "white",
-                fontWeight: "bold",
-                fontFamily: "monospace",
-              },
+              fontWeight: "bold",
+              alignSelf: "center",
+              fontFamily: "monospace",
             }}
-          />
-        )}
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: "bold",
-            alignSelf: "center",
-            fontFamily: "monospace",
-          }}
-        >
-          {category}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            alignSelf: "center",
-            fontFamily: "monospace",
-          }}
-        >
-          {description}
-        </Typography>
-        <Button
-          onClick={brainstormInputs}
-          sx={{
-            width: "100%",
-          }}
-        >
-          Brainstorm
-        </Button>
-        {brainstorms.length > 0 || input ? (
-          <Stack direction="row" spacing="5px">
-            <TextField
-              label="Iterate"
-              className={"Iterate"}
-              rows={2}
-              value={iteration}
-              onChange={(e) => {
-                setIteration(e.target.value);
-              }}
-            />
-            <Button
-              onClick={brainstormInputs}
-              sx={{
-                width: "20%",
-              }}
-            >
-              Update
-            </Button>
-          </Stack>
-        ) : (
-          <></>
-        )}
-        {brainstorms?.map((brainstorm) => {
-          return (
-            <Chip
-              key={brainstorm}
-              label={brainstorm}
-              onClick={() => {
-                setInput(brainstorm);
-              }}
-              clickable
-              selected={brainstorm === input}
-              sx={{
-                alignSelf: "center",
-              }}
-            />
-          );
-        })}
-        <InputWithButton
-          label="Input"
-          input={input}
-          setInput={setInput}
-          onClick={() => {
-            updateInput();
-            updateUpdatedMatrix(true);
-          }}
-          direction="column"
-          rows={category.includes("Idea") ? 1 : 8}
-        />
-        {isGrounding && (
-          <Stack spacing="5px">
-            <Button onClick={() => setVersions([...versions, input])}>
-              Save Version
-            </Button>
-            {versions?.map((version) => (
+          >
+            {category}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              alignSelf: "center",
+              fontFamily: "monospace",
+            }}
+          >
+            {description}
+          </Typography>
+          <Button
+            onClick={() => {
+              brainstormInputs();
+              if (currentCategory !== category) {
+                updateCurrentCategory(category);
+              }
+            }}
+            disabled={disabled}
+            sx={{
+              width: "100%",
+            }}
+          >
+            Brainstorm
+          </Button>
+          {brainstorms?.length > 0 || input ? (
+            <Stack direction="row" spacing="5px">
+              <TextField
+                label="Iterate"
+                className={"Iterate"}
+                rows={2}
+                value={iteration}
+                onChange={(e) => {
+                  setIteration(e.target.value);
+                }}
+              />
+              <Button
+                onClick={brainstormInputs}
+                disabled={disabled}
+                sx={{
+                  width: "20%",
+                }}
+              >
+                Update
+              </Button>
+            </Stack>
+          ) : (
+            <></>
+          )}
+          {brainstorms?.map((brainstorm) => {
+            return (
               <Chip
-                key={version}
-                label={version}
+                key={brainstorm}
+                label={brainstorm}
                 onClick={() => {
-                  setInput(version);
+                  setInput(brainstorm);
+                  if (currentCategory !== category) {
+                    updateCurrentCategory(category);
+                  }
                 }}
                 clickable
-                selected={version === input}
+                selected={brainstorm === input}
                 sx={{
                   alignSelf: "center",
                 }}
               />
-            ))}
-          </Stack>
-        )}
-        {/* <Button
+            );
+          })}
+          <InputWithButton
+            label="Input"
+            input={input}
+            setInput={setInput}
+            disabled={disabled}
+            onClick={() => {
+              updateInput();
+              updateUpdatedMatrix(true);
+              updateMatrixCategoryInfo(category, input);
+              if (currentCategory !== category) {
+                updateCurrentCategory(category);
+              }
+            }}
+            onChange={() => {
+              if (currentCategory !== category) {
+                updateCurrentCategory(category);
+              }
+            }}
+            direction="column"
+            rows={category.includes("Idea") ? 1 : 8}
+          />
+          {isGrounding && (
+            <Stack spacing="5px">
+              <Button
+                disabled={disabled}
+                onClick={() => {
+                  setVersions([...versions, input]);
+                  if (currentCategory !== category) {
+                    updateCurrentCategory(category);
+                  }
+                }}
+              >
+                Save Version
+              </Button>
+              {versions?.map((version) => (
+                <Chip
+                  key={version}
+                  label={version}
+                  onClick={() => {
+                    setInput(version);
+                  }}
+                  clickable
+                  selected={version === input}
+                  sx={{
+                    alignSelf: "center",
+                  }}
+                />
+              ))}
+            </Stack>
+          )}
+          {/* <Button
           onClick={getQuestions}
           disabled={!needsSpecification}
           sx={{
@@ -415,7 +465,8 @@ const Category = ({ description, category }: CategoryProps) => {
         >
           Update Specifications
         </Button> */}
-      </Stack>
+        </Stack>
+      </Box>
     </Box>
   );
 };

@@ -14,22 +14,15 @@ export type CategoryType =
   | "InteractionXIdea"
   | "InteractionXGrounding";
 
-interface MatrixCategory {
-  input: string;
-  needsSpecification: false;
-}
-
 export interface MatrixState {
-  matrixCategoryInfo: Record<CategoryType, MatrixCategory>;
-  updateMatrixCategoryInfo: (
-    category: CategoryType,
-    newNeedsSpecification?: boolean,
-    newInput?: string,
-  ) => void;
+  matrixCategoryInfo: Record<CategoryType, string>;
+  updateMatrixCategoryInfo: (category: CategoryType, newInput?: string) => void;
   submittedProblem: boolean;
   updateSubmittedProblem: Dispatch<SetStateAction<boolean>>;
   updatedMatrix: boolean;
   updateUpdatedMatrix: Dispatch<SetStateAction<boolean>>;
+  currentCategory: CategoryType;
+  updateCurrentCategory: Dispatch<SetStateAction<CategoryType>>;
 }
 
 export const MatrixContext = createContext<MatrixState | undefined>(undefined);
@@ -39,50 +32,28 @@ export const useMatrixContext = () => useContext(MatrixContext);
 export const MatrixProvider = ({ children }) => {
   const [submittedProblem, updateSubmittedProblem] = useState(false);
   const [updatedMatrix, updateUpdatedMatrix] = useState(false);
+  const [currentCategory, updateCurrentCategory] = useState<
+    CategoryType | undefined
+  >(undefined);
 
   const [matrixCategoryInfo, setUpdateMatrixCategoryInfo] = useState<
-    Record<CategoryType, MatrixCategory>
+    Record<CategoryType, string>
   >({
-    PersonXIdea: {
-      input: "",
-      needsSpecification: false,
-    },
-    PersonXGrounding: {
-      input: "",
-      needsSpecification: false,
-    },
-    ApproachXIdea: {
-      input: "",
-      needsSpecification: false,
-    },
-    ApproachXGrounding: {
-      input: "",
-      needsSpecification: false,
-    },
-    InteractionXIdea: {
-      input: "",
-      needsSpecification: false,
-    },
-    InteractionXGrounding: {
-      input: "",
-      needsSpecification: false,
-    },
+    PersonXIdea: "",
+    PersonXGrounding: "",
+    ApproachXIdea: "",
+    ApproachXGrounding: "",
+    InteractionXIdea: "",
+    InteractionXGrounding: "",
   });
 
   const updateMatrixCategoryInfo = (
     category: CategoryType,
-    newNeedsSpecification?: boolean,
     newInput?: string,
   ) => {
     setUpdateMatrixCategoryInfo((prevState) => ({
       ...prevState,
-      [category]: {
-        ...prevState[category],
-        input: newInput ? newInput : prevState[category].input,
-        needsSpecification: newNeedsSpecification
-          ? newNeedsSpecification
-          : prevState[category].input,
-      },
+      [category]: newInput,
     }));
   };
 
@@ -95,6 +66,8 @@ export const MatrixProvider = ({ children }) => {
         updateSubmittedProblem,
         updatedMatrix,
         updateUpdatedMatrix,
+        currentCategory,
+        updateCurrentCategory,
       }}
     >
       {children}

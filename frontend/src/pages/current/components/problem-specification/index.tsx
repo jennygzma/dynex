@@ -31,6 +31,26 @@ const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
     "Here, we delve into the specific elements, content, or interaction mechanisms that make the abstract UI paradigm meaningful and effective in the given context.",
 };
 
+const getDependencies = (
+  category: CategoryType | undefined,
+  matrixCategoryInfo: Record<CategoryType, string>,
+): CategoryType[] => {
+  let dependencies = [];
+  if (category == undefined) return dependencies;
+  Object.entries(matrixCategoryInfo).forEach(([key, value]) => {
+    if (value.length > 0) dependencies.push(key);
+  });
+
+  const isIdea = category?.includes("Idea");
+  if (isIdea) {
+    const col = category.split("X")[0];
+    dependencies = dependencies.filter((d) => !d?.includes(col));
+  } else {
+    dependencies = dependencies.filter((d) => d !== category);
+  }
+  return dependencies;
+};
+
 const ProjectSpecification = () => {
   const { currentPrototype, updateIsLoading, updatePrototypes } =
     useAppContext();
@@ -39,9 +59,17 @@ const ProjectSpecification = () => {
     updateSubmittedProblem,
     updatedMatrix,
     updateUpdatedMatrix,
+    currentCategory,
+    matrixCategoryInfo,
+    updateCurrentCategory,
   } = useMatrixContext();
   const [problem, setProblem] = useState("");
   const [prototypeName, setPrototypeName] = useState("");
+  const [dependencies, setDependencies] = useState([]);
+
+  useEffect(() => {
+    setDependencies(getDependencies(currentCategory, matrixCategoryInfo));
+  }, [currentCategory]);
 
   const getProblem = () => {
     updateIsLoading(true);
@@ -232,6 +260,7 @@ const ProjectSpecification = () => {
                         description={
                           MATRIX_CATEGORY_DESCRIPTIONS["PersonXIdea"]
                         }
+                        isDependency={dependencies?.includes("PersonXIdea")}
                       />
                     </TableCell>
                     <TableCell>
@@ -240,6 +269,7 @@ const ProjectSpecification = () => {
                         description={
                           MATRIX_CATEGORY_DESCRIPTIONS["ApproachXIdea"]
                         }
+                        isDependency={dependencies?.includes("ApproachXIdea")}
                       />
                     </TableCell>
                     <TableCell>
@@ -248,6 +278,9 @@ const ProjectSpecification = () => {
                         description={
                           MATRIX_CATEGORY_DESCRIPTIONS["InteractionXIdea"]
                         }
+                        isDependency={dependencies?.includes(
+                          "InteractionXIdea",
+                        )}
                       />
                     </TableCell>
                   </TableRow>
@@ -269,6 +302,9 @@ const ProjectSpecification = () => {
                         description={
                           MATRIX_CATEGORY_DESCRIPTIONS["PersonXGrounding"]
                         }
+                        isDependency={dependencies?.includes(
+                          "PersonXGrounding",
+                        )}
                       />
                     </TableCell>
                     <TableCell>
@@ -277,6 +313,9 @@ const ProjectSpecification = () => {
                         description={
                           MATRIX_CATEGORY_DESCRIPTIONS["ApproachXGrounding"]
                         }
+                        isDependency={dependencies?.includes(
+                          "ApproachXGrounding",
+                        )}
                       />
                     </TableCell>
                     <TableCell>
@@ -285,6 +324,9 @@ const ProjectSpecification = () => {
                         description={
                           MATRIX_CATEGORY_DESCRIPTIONS["InteractionXGrounding"]
                         }
+                        isDependency={dependencies?.includes(
+                          "InteractionXGrounding",
+                        )}
                       />
                     </TableCell>
                   </TableRow>
@@ -299,6 +341,9 @@ const ProjectSpecification = () => {
               onClick={() => {
                 explorePrototype();
                 updateUpdatedMatrix(false);
+              }}
+              onChange={() => {
+                updateCurrentCategory(undefined);
               }}
               direction="column"
               buttonName="Explore Prototype"

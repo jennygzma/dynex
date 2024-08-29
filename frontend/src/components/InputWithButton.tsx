@@ -9,6 +9,7 @@ interface InputWithSubmissionProps {
   setInput: Dispatch<SetStateAction<string>>;
   buttonName?: string;
   onClick: () => void;
+  onChange?: () => void;
   disabled?: boolean;
   rows?: number;
   width?: string;
@@ -24,6 +25,7 @@ const InputWithButton = ({
   rows = 1,
   className = "text-field",
   onClick,
+  onChange = () => {},
   buttonName = "Submit",
   disabled = false,
   direction = "row",
@@ -41,6 +43,7 @@ const InputWithButton = ({
         onChange={(e) => {
           setInput(e.target.value);
           setSubmittedInput(false);
+          onChange();
         }}
       />
       <Button
