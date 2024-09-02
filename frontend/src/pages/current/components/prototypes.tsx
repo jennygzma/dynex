@@ -46,6 +46,8 @@ const Prototypes = () => {
       spacing="10px"
       sx={{
         padding: "10px",
+        backgroundColor: "#F8F3CA",
+        height: "100vh",
       }}
     >
       {/* <Typography

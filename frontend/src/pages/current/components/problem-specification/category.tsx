@@ -258,8 +258,8 @@ const Category = ({
       border={0}
       sx={{
         maxWidth: "700px",
-        borderColor: isDependency ? "yellow" : "transparent",
-        backgroundColor: isDependency ? "yellow" : "transparent",
+        borderColor: isDependency ? "#F8F3CA" : "transparent",
+        backgroundColor: isDependency ? "#F8F3CA" : "transparent",
       }}
     >
       <Stack spacing="10px">
@@ -292,12 +292,11 @@ const Category = ({
           </Typography> */}
         <Typography
           variant="body2"
-          sx={
-            {
-              // alignSelf: "center",
-              //fontFamily: "monospace",
-            }
-          }
+          sx={{
+            // alignSelf: "center",
+            //fontFamily: "monospace",
+            fontWeight: "bold",
+          }}
         >
           {description}
         </Typography>
@@ -320,7 +319,7 @@ const Category = ({
             <TextField
               label="Iterate"
               className={"Iterate"}
-              rows={2}
+              rows={1}
               value={iteration}
               onChange={(e) => {
                 setIteration(e.target.value);
@@ -403,6 +402,7 @@ const Category = ({
                 selected={version === input}
                 sx={{
                   alignSelf: "center",
+                  maxWidth: "698px",
                 }}
               />
             ))}

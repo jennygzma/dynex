@@ -75,8 +75,7 @@ const Header = () => {
         spacing="10px"
         sx={{
           alignItems: "center",
-          alignContent: "flex-end",
-          justifyContent: "flex-start",
+          // justifyContent: "flex-start",
           width: "90%",
         }}
       >
@@ -99,6 +98,7 @@ const Header = () => {
           <DrawerHeader
             sx={{
               paddingTop: "100px",
+              backgroundColor: "#F8F3CA",
             }}
           >
             <Button onClick={toggleDrawer(false)} colorVariant="red">
@@ -124,6 +124,10 @@ const Header = () => {
           input={problem}
           setInput={setProblem}
           onClick={saveProblem}
+          sx={{
+            alignSelf: "end",
+            width: "50%",
+          }}
         />
       </Stack>
     </Box>

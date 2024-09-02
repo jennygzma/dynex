@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Stack, SxProps } from "@mui/material";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Button from "./Button";
 import TextField from "./TextField";
@@ -15,6 +15,7 @@ interface InputWithSubmissionProps {
   width?: string;
   className?: string;
   direction?: "row" | "column";
+  sx?: SxProps;
 }
 
 const InputWithButton = ({
@@ -29,12 +30,17 @@ const InputWithButton = ({
   buttonName = "Submit",
   disabled = false,
   direction = "row",
+  sx,
 }: InputWithSubmissionProps) => {
   const [submittedInput, setSubmittedInput] = useState(false);
   useEffect(() => setSubmittedInput(false), [input]);
 
   return (
-    <Stack direction={direction} spacing="10px" sx={{ width: { width } }}>
+    <Stack
+      direction={direction}
+      spacing="10px"
+      sx={{ width: { width }, ...sx }}
+    >
       <TextField
         className={className}
         label={label}

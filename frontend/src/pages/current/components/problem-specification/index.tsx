@@ -48,8 +48,12 @@ const getDependencies = (
 };
 
 const ProjectSpecification = () => {
-  const { currentPrototype, updateIsLoading, updatePrototypes } =
-    useAppContext();
+  const {
+    currentPrototype,
+    updateCurrentPrototype,
+    updateIsLoading,
+    updatePrototypes,
+  } = useAppContext();
   const {
     submittedProblem,
     updateSubmittedProblem,
@@ -246,15 +250,13 @@ const ProjectSpecification = () => {
                     }}
                   >
                     <Typography
-                      variant="body1"
-                      sx={
-                        {
-                          // fontWeight: "bold",
-                          //fontFamily: "monospace",
-                        }
-                      }
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        //fontFamily: "monospace",
+                      }}
                     >
-                      Person
+                      PERSON
                     </Typography>
                   </TableCell>
                   <TableCell
@@ -265,15 +267,13 @@ const ProjectSpecification = () => {
                     }}
                   >
                     <Typography
-                      variant="body1"
-                      sx={
-                        {
-                          // fontWeight: "bold",
-                          // fontFamily: "monospace",
-                        }
-                      }
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        // fontFamily: "monospace",
+                      }}
                     >
-                      Approach
+                      APPROACH
                     </Typography>
                   </TableCell>
                   <TableCell
@@ -284,15 +284,13 @@ const ProjectSpecification = () => {
                     }}
                   >
                     <Typography
-                      variant="body1"
-                      sx={
-                        {
-                          // fontWeight: "bold",
-                          // fontFamily: "monospace",
-                        }
-                      }
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        // fontFamily: "monospace",
+                      }}
                     >
-                      Interaction
+                      INTERACTION
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -307,15 +305,13 @@ const ProjectSpecification = () => {
                     }}
                   >
                     <Typography
-                      variant="body1"
-                      sx={
-                        {
-                          // fontWeight: "bold",
-                          // fontFamily: "monospace",
-                        }
-                      }
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        // fontFamily: "monospace",
+                      }}
                     >
-                      Idea
+                      IDEA
                     </Typography>
                   </TableCell>
                   <TableCell
@@ -368,15 +364,13 @@ const ProjectSpecification = () => {
                     }}
                   >
                     <Typography
-                      variant="body1"
-                      sx={
-                        {
-                          // fontWeight: "bold",
-                          // fontFamily: "monospace",
-                        }
-                      }
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        // fontFamily: "monospace",
+                      }}
                     >
-                      Grounding
+                      GROUNDING
                     </Typography>
                   </TableCell>
                   <TableCell
@@ -437,6 +431,7 @@ const ProjectSpecification = () => {
             onClick={() => {
               explorePrototype();
               updateUpdatedMatrix(false);
+              updateCurrentPrototype(prototypeName);
             }}
             onChange={() => {
               updateCurrentCategory(undefined);
@@ -444,6 +439,10 @@ const ProjectSpecification = () => {
             direction="row"
             buttonName="Explore Prototype"
             disabled={!updatedMatrix}
+            sx={{
+              paddingLeft: "20px",
+              maxWidth: "1080px",
+            }}
           />
         </>
       )}

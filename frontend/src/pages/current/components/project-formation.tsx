@@ -307,7 +307,9 @@ const ProjectFormation = () => {
         <Button colorVariant="red" onClick={() => setExpand(true)}>
           <ExpandMore />
         </Button>
-        <Typography variant="body1">Project Formation</Typography>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          PROJECT FORMATION
+        </Typography>
       </Stack>
     );
 
@@ -323,7 +325,9 @@ const ProjectFormation = () => {
         <Button colorVariant="red" onClick={() => setExpand(false)}>
           <ExpandLess />
         </Button>
-        <Typography variant="body1">Project Formation</Typography>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          PROJECT FORMATION
+        </Typography>
       </Stack>
       <Stack spacing="10px" direction="row">
         <Stack sx={{ width: checkedState.checkedFakedData ? "33%" : "50%" }}>
