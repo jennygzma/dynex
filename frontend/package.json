@@ -7,9 +7,10 @@
   "proxy_second_ux_proto": "http://127.0.0.1:5002//",
   "dependencies": {
     "@babel/standalone": "^7.24.10",
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5",
-    "@mui/material": "^5.16.4",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.0.1",
+    "@mui/material": "^6.0.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

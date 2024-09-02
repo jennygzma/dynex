@@ -8,7 +8,7 @@ import OnePiece from "./pages/one-piece";
 import FistUxProto from "./pages/first-ux-proto";
 import SecondUxProto from "./pages/second-ux-proto";
 import Home from "./pages/current";
-import { PlanProvider } from "./pages/current/hooks/app-context";
+import { AppProvider } from "./pages/current/hooks/app-context";
 
 function App() {
   return (
@@ -17,9 +17,9 @@ function App() {
         <Route
           path="/"
           element={
-            <PlanProvider>
+            <AppProvider>
               <Home />
-            </PlanProvider>
+            </AppProvider>
           }
         />
         <Route path="/proto-2" element={<SecondUxProto />} />

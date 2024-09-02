@@ -212,9 +212,13 @@ const Steps = () => {
   if (!spec) return <></>;
 
   return (
-    <Box sx={{ width: "30%" }}>
-      <Stack spacing="10px">
-        <Typography
+    <Stack
+      spacing="10px"
+      sx={{
+        width: "35%",
+      }}
+    >
+      {/* <Typography
           variant="h4"
           sx={{
             fontWeight: "bold",
@@ -223,93 +227,93 @@ const Steps = () => {
           }}
         >
           Steps
-        </Typography>
-        <Button
-          onClick={generatePlan}
-          sx={{
-            width: "100%",
-          }}
-        >
-          {plan?.length !== 0 ? "Regenerate Plan" : "Create Plan"}
-        </Button>
-        {plan && (
-          <Stack direction="row" spacing="10px">
-            <Stack sx={{ width: "100%" }}>
-              {plan.map((task) => {
-                return (
-                  <Stack spacing="10px">
-                    <Card
-                      key={task.taskId}
-                      sx={{
-                        fontSize: "20px",
-                        lineHeight: "30px",
-                        backgroundColor:
-                          currentTask?.taskId === task.taskId
-                            ? "lightblue"
-                            : "transparent",
-                      }}
+        </Typography> */}
+      <Button
+        onClick={generatePlan}
+        sx={{
+          width: "100%",
+        }}
+      >
+        {plan?.length !== 0 ? "Regenerate Steps" : "Generate Steps"}
+      </Button>
+      {plan && (
+        <Stack direction="row" spacing="10px">
+          <Stack sx={{ width: "100%" }}>
+            {plan.map((task) => {
+              return (
+                <Stack spacing="10px">
+                  <Card
+                    key={task.taskId}
+                    sx={{
+                      fontSize: "20px",
+                      lineHeight: "30px",
+                      boxShadow: "none",
+                      border:
+                        currentTask?.taskId === task.taskId
+                          ? "2px solid #9a4e4e"
+                          : "1px solid transparent",
+                      borderRadius: 0,
+                    }}
+                  >
+                    <CardActionArea
+                      onClick={() => updateCurrentTask(task)}
+                      sx={{ padding: "15px", borderRadius: 0 }}
                     >
-                      <CardActionArea
-                        onClick={() => updateCurrentTask(task)}
-                        sx={{ padding: "15px" }}
-                      >
-                        <Typography>
-                          {`${task.taskId}) ${task.task}`}
-                        </Typography>
-                      </CardActionArea>
-                      {currentTask?.taskId === task.taskId && (
-                        <Stack spacing="10px" padding="15px">
-                          <Stack direction="row" spacing="10px">
-                            <TextField
-                              className={"generated-plan"}
-                              label="Update Step"
-                              value={newTaskDescription}
-                              onChange={(e) => {
-                                setUpdatedNewTaskDescription(true);
-                                setNewTaskDescription(e.target.value);
-                              }}
-                            />
-                            <Button
-                              disabled={!updatedNewTaskDescription}
-                              onClick={updateStep}
-                            >
-                              Update Step
-                            </Button>
-                          </Stack>
-                          <Stack direction="row" spacing="10px">
-                            <Button onClick={() => setClickedAddStep(true)}>
-                              Add Task Beneath
-                            </Button>
-                            <Button onClick={removeStep}>Remove Task</Button>
-                          </Stack>
+                      <Typography>{`${task.taskId}) ${task.task}`}</Typography>
+                    </CardActionArea>
+                    {currentTask?.taskId === task.taskId && (
+                      <Stack spacing="10px" padding="15px">
+                        <Stack direction="row" spacing="10px">
+                          <TextField
+                            className={"generated-plan"}
+                            label="Update Step"
+                            value={newTaskDescription}
+                            onChange={(e) => {
+                              setUpdatedNewTaskDescription(true);
+                              setNewTaskDescription(e.target.value);
+                            }}
+                          />
+                          <Button
+                            disabled={!updatedNewTaskDescription}
+                            onClick={updateStep}
+                          >
+                            Update Step
+                          </Button>
                         </Stack>
-                      )}
-                    </Card>
-                    {clickedAddStep && currentTask?.taskId === task.taskId && (
-                      <Stack direction="row" spacing="10px">
-                        <TextField
-                          className={"add-step-to-plan"}
-                          label="Add Step"
-                          value={addStepNewTaskDescription}
-                          onChange={(e) => {
-                            setAddStepNewTaskDescription(e.target.value);
-                          }}
-                        />
-                        <Button
-                          disabled={!addStepNewTaskDescription}
-                          onClick={addStep}
-                        >
-                          Add Step
-                        </Button>
+                        <Stack direction="row" spacing="10px">
+                          <Button onClick={() => setClickedAddStep(true)}>
+                            Add Task Beneath
+                          </Button>
+                          <Button onClick={removeStep}>Remove Task</Button>
+                        </Stack>
                       </Stack>
                     )}
-                  </Stack>
-                );
-              })}
-            </Stack>
+                  </Card>
+                  {clickedAddStep && currentTask?.taskId === task.taskId && (
+                    <Stack direction="row" spacing="10px">
+                      <TextField
+                        className={"add-step-to-plan"}
+                        label="Add Step"
+                        value={addStepNewTaskDescription}
+                        onChange={(e) => {
+                          setAddStepNewTaskDescription(e.target.value);
+                        }}
+                      />
+                      <Button
+                        disabled={!addStepNewTaskDescription}
+                        onClick={addStep}
+                      >
+                        Add Step
+                      </Button>
+                    </Stack>
+                  )}
+                </Stack>
+              );
+            })}
           </Stack>
-        )}
-        {/* <Box
+        </Stack>
+      )}
+      {/* <Box
           border={5}
           sx={{
             justifyContent: "center",
@@ -340,8 +344,7 @@ const Steps = () => {
             </Stack>
           </Stack>
         </Box> */}
-      </Stack>
-    </Box>
+    </Stack>
   );
 };
 

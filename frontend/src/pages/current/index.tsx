@@ -8,6 +8,7 @@ import { MatrixProvider } from "./hooks/matrix-context";
 import ProblemSpecification from "./components/problem-specification";
 import Steps from "./components/steps";
 import ProjectFormation from "./components/project-formation";
+import Header from "./components/header";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {
@@ -16,47 +17,21 @@ const Home = () => {
   return (
     <div className={"home"}>
       {isLoading && <Spinner />}
+      <MatrixProvider>
+        <Header />
+        <ProblemSpecification />
+      </MatrixProvider>
       <Stack
-        spacing="50px"
+        spacing="10px"
         sx={{
           padding: "20px",
-          backgroundColor: "lightblue",
           height: "100%",
           minHeight: "100vh",
+          // backgroundColor:"#9a4e4e",
         }}
       >
-        <Stack
-          direction="row"
-          spacing="10px"
-          sx={{
-            alignItems: "flex-start",
-            alignContent: "flex-end",
-            justifyContent: "center",
-          }}
-        >
-          {/* <img
-            src={require("../../assets/franky-icon.ico")}
-            alt="franky"
-            width="150x"
-          /> */}
-          <Typography
-            variant="h1"
-            sx={{
-              alignSelf: "center",
-              color: "#9a4e4e",
-              fontWeight: "bold",
-              fontFamily: "monospace",
-            }}
-          >
-            DYNAEXPRO
-          </Typography>
-        </Stack>
-        <MatrixProvider>
-          <ProblemSpecification />
-        </MatrixProvider>
-        <Prototypes />
         <ProjectFormation />
-        <Stack direction="row">
+        <Stack direction="row" spacing="20px">
           <Steps />
 
           <CodeGeneration />

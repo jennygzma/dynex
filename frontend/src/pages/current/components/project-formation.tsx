@@ -11,6 +11,7 @@ import { useAppContext } from "../hooks/app-context";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
+import { ExpandMore, ExpandLess } from "@mui/icons-material";
 
 const ProjectFormation = () => {
   const { updateIsLoading, spec, updateSpec, currentPrototype } =
@@ -30,6 +31,7 @@ const ProjectFormation = () => {
     checkedGoJs: false,
   });
   const [updatedCheckBoxes, setUpdatedCheckBoxes] = useState(false);
+  const [expand, setExpand] = useState(true);
 
   const handleChange = (event) => {
     setCheckedState({
@@ -293,191 +295,198 @@ const ProjectFormation = () => {
   };
 
   if (!currentPrototype) return <></>;
+  if (!expand)
+    return (
+      <Stack
+        direction="row"
+        spacing="10px"
+        sx={{
+          alignItems: "center",
+        }}
+      >
+        <Button colorVariant="red" onClick={() => setExpand(true)}>
+          <ExpandMore />
+        </Button>
+        <Typography variant="body1">Project Formation</Typography>
+      </Stack>
+    );
+
   return (
-    <Box sx={{ width: "98%" }}>
-      <Stack spacing="20px">
-        <Typography
-          variant="body1"
-          sx={{
-            fontWeight: "bold",
-            alignSelf: "center",
-            fontFamily: "monospace",
-          }}
-        >
-          Project Formation
-        </Typography>
-        <Stack spacing="10px" direction="row">
-          <Stack sx={{ width: "100%" }}>
-            <Stack direction="row" spacing="5px" sx={{ alignSelf: "center" }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: "bold",
-                  alignSelf: "center",
-                  fontFamily: "monospace",
-                }}
-              >
-                Choose your options:
-              </Typography>
-              <Button onClick={recommendToolsRequirement}>🧠</Button>
-            </Stack>
-            <FormGroup
-              sx={{
-                alignSelf: "center",
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checkedState.checkedGPT}
-                    onChange={handleChange}
-                    name="checkedGPT"
-                  />
-                }
-                label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      alignSelf: "center",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    GPT
-                  </Typography>
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checkedState.checkedImages}
-                    onChange={handleChange}
-                    name="checkedImages"
-                  />
-                }
-                label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      alignSelf: "center",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    Images
-                  </Typography>
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checkedState.checkedFakedData}
-                    onChange={handleChange}
-                    name="checkedFakedData"
-                  />
-                }
-                label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      alignSelf: "center",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    Faked Data
-                  </Typography>
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checkedState.checkedChartJs}
-                    onChange={handleChange}
-                    name="checkedChartJs"
-                  />
-                }
-                label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      alignSelf: "center",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    ChartJS
-                  </Typography>
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checkedState.checkedGoJs}
-                    onChange={handleChange}
-                    name="checkedGoJs"
-                  />
-                }
-                label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      alignSelf: "center",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    GoJS
-                  </Typography>
-                }
-              />
-            </FormGroup>
-            <Button
-              onClick={() => {
-                setToolsRequirement();
-                setUpdatedCheckBoxes(false);
-              }}
-              disabled={!updatedCheckBoxes}
-            >
-              Update Tools Requirement
-            </Button>
-          </Stack>
-          <Stack spacing="10px" sx={{ width: "100%" }}>
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: "bold",
-                alignSelf: "center",
-                fontFamily: "monospace",
-              }}
-            >
-              Spec
-            </Typography>
-            <Button
-              onClick={generateSpec}
-              sx={{
-                width: "100%",
-              }}
-            >
-              {spec ? "Generate new spec" : "Generate spec"}
-            </Button>
-            {spec && (
-              <>
-                <TextField
-                  className={"design-spec"}
-                  label="Spec"
-                  rows={13}
-                  value={spec}
-                  onChange={(e) => {
-                    updateSpec(e.target.value);
-                    setUpdatedSpec(true);
-                  }}
+    <Stack spacing="20px">
+      <Stack
+        direction="row"
+        spacing="10px"
+        sx={{
+          alignItems: "center",
+        }}
+      >
+        <Button colorVariant="red" onClick={() => setExpand(false)}>
+          <ExpandLess />
+        </Button>
+        <Typography variant="body1">Project Formation</Typography>
+      </Stack>
+      <Stack spacing="10px" direction="row">
+        <Stack sx={{ width: checkedState.checkedFakedData ? "33%" : "50%" }}>
+          <Button onClick={recommendToolsRequirement}>🧠</Button>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkedState.checkedGPT}
+                  onChange={handleChange}
+                  name="checkedGPT"
                 />
-                <Button onClick={saveSpec} disabled={!updatedSpec}>
-                  Update spec
-                </Button>
-              </>
-            )}
-          </Stack>
-          <Stack spacing="10px" width="100%">
-            {checkedState.checkedFakedData && (
-              <Stack spacing="10px">
+              }
+              label={
                 <Typography
+                  variant="body2"
+                  sx={
+                    {
+                      // alignSelf: "center",
+                      // fontFamily: "monospace",
+                    }
+                  }
+                >
+                  GPT
+                </Typography>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkedState.checkedImages}
+                  onChange={handleChange}
+                  name="checkedImages"
+                />
+              }
+              label={
+                <Typography
+                  variant="body2"
+                  sx={
+                    {
+                      // alignSelf: "center",
+                      // fontFamily: "monospace",
+                    }
+                  }
+                >
+                  Images
+                </Typography>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkedState.checkedFakedData}
+                  onChange={handleChange}
+                  name="checkedFakedData"
+                />
+              }
+              label={
+                <Typography
+                  variant="body2"
+                  sx={
+                    {
+                      // alignSelf: "center",
+                      // fontFamily: "monospace",
+                    }
+                  }
+                >
+                  Faked Data
+                </Typography>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkedState.checkedChartJs}
+                  onChange={handleChange}
+                  name="checkedChartJs"
+                />
+              }
+              label={
+                <Typography
+                  variant="body2"
+                  sx={
+                    {
+                      // alignSelf: "center",
+                      // fontFamily: "monospace",
+                    }
+                  }
+                >
+                  ChartJS
+                </Typography>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkedState.checkedGoJs}
+                  onChange={handleChange}
+                  name="checkedGoJs"
+                />
+              }
+              label={
+                <Typography
+                  variant="body2"
+                  sx={
+                    {
+                      // alignSelf: "center",
+                      // fontFamily: "monospace",
+                    }
+                  }
+                >
+                  GoJS
+                </Typography>
+              }
+            />
+          </FormGroup>
+          <Button
+            onClick={() => {
+              setToolsRequirement();
+              setUpdatedCheckBoxes(false);
+            }}
+            disabled={!updatedCheckBoxes}
+          >
+            Update Tools Requirement
+          </Button>
+        </Stack>
+        <Stack
+          spacing="10px"
+          sx={{ width: checkedState.checkedFakedData ? "33%" : "50%" }}
+        >
+          <Button
+            onClick={generateSpec}
+            sx={{
+              width: "100%",
+            }}
+          >
+            {spec ? "Generate new spec" : "Generate spec"}
+          </Button>
+          {spec && (
+            <>
+              <TextField
+                className={"design-spec"}
+                label="Spec"
+                rows={13}
+                value={spec}
+                onChange={(e) => {
+                  updateSpec(e.target.value);
+                  setUpdatedSpec(true);
+                }}
+              />
+              <Button onClick={saveSpec} disabled={!updatedSpec}>
+                Update spec
+              </Button>
+            </>
+          )}
+        </Stack>
+        <Stack
+          spacing="10px"
+          width={checkedState.checkedFakedData ? "33%" : "0%"}
+        >
+          {checkedState.checkedFakedData && (
+            <Stack spacing="10px">
+              {/* <Typography
                   variant="body2"
                   sx={{
                     fontWeight: "bold",
@@ -486,58 +495,54 @@ const ProjectFormation = () => {
                   }}
                 >
                   Fake Data
-                </Typography>
-                <TextField
-                  className={"generated-data"}
-                  label="Data Input Suggestions"
-                  variant="outlined"
-                  multiline
-                  rows={2}
-                  value={dataIteration}
-                  onChange={(e) => {
-                    setDataIteration(e.target.value);
-                  }}
-                />
-                <Button
-                  onClick={generateFakeData}
-                  disabled={!spec}
-                  sx={{
-                    width: "100%",
-                  }}
-                >
-                  {dataInput
-                    ? "Regenerate Placeholder Data"
-                    : "Generate Placeholder Data"}
-                </Button>
-                {dataInput !== "null" && dataInput && (
-                  <>
-                    <TextField
-                      code={true}
-                      className={"generated-data"}
-                      label="Data Input"
-                      variant="outlined"
-                      multiline
-                      rows={13}
-                      value={dataInput}
-                      onChange={(e) => {
-                        setDataInput(e.target.value);
-                        setUpdatedDataInput(true);
-                      }}
-                    />
-                    <Button
-                      onClick={saveFakedData}
-                      disabled={!updatedDataInput}
-                    >
-                      Update faked data
-                    </Button>
-                  </>
-                )}
-              </Stack>
-            )}
-          </Stack>
+                </Typography> */}
+              <TextField
+                className={"generated-data"}
+                label="Data Input Suggestions"
+                variant="outlined"
+                multiline
+                rows={2}
+                value={dataIteration}
+                onChange={(e) => {
+                  setDataIteration(e.target.value);
+                }}
+              />
+              <Button
+                onClick={generateFakeData}
+                disabled={!spec}
+                sx={{
+                  width: "100%",
+                }}
+              >
+                {dataInput
+                  ? "Regenerate Placeholder Data"
+                  : "Generate Placeholder Data"}
+              </Button>
+              {dataInput !== "null" && dataInput && (
+                <>
+                  <TextField
+                    code={true}
+                    className={"generated-data"}
+                    label="Data Input"
+                    variant="outlined"
+                    multiline
+                    rows={13}
+                    value={dataInput}
+                    onChange={(e) => {
+                      setDataInput(e.target.value);
+                      setUpdatedDataInput(true);
+                    }}
+                  />
+                  <Button onClick={saveFakedData} disabled={!updatedDataInput}>
+                    Update faked data
+                  </Button>
+                </>
+              )}
+            </Stack>
+          )}
         </Stack>
       </Stack>
-    </Box>
+    </Stack>
   );
 };
 

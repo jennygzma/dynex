@@ -255,16 +255,15 @@ const Category = ({
 
   return (
     <Box
-      border={5}
+      border={0}
       sx={{
-        padding: "10px",
         maxWidth: "700px",
         borderColor: isDependency ? "yellow" : "transparent",
+        backgroundColor: isDependency ? "yellow" : "transparent",
       }}
     >
-      <Box border={5} sx={{ padding: "10px", maxWidth: "650px" }}>
-        <Stack spacing="10px">
-          {!input && (
+      <Stack spacing="10px">
+        {/* {!input && (
             <Badge
               badgeContent={"Needs Specification"}
               anchorOrigin={{ vertical: "top", horizontal: "right" }}
@@ -280,8 +279,8 @@ const Category = ({
                 },
               }}
             />
-          )}
-          <Typography
+          )} */}
+        {/* <Typography
             variant="subtitle1"
             sx={{
               fontWeight: "bold",
@@ -290,124 +289,126 @@ const Category = ({
             }}
           >
             {category}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              alignSelf: "center",
-              fontFamily: "monospace",
-            }}
-          >
-            {description}
-          </Typography>
-          <Button
-            onClick={() => {
-              brainstormInputs();
-              if (currentCategory !== category) {
-                updateCurrentCategory(category);
-              }
-            }}
-            disabled={disabled}
-            sx={{
-              width: "100%",
-            }}
-          >
-            Brainstorm
-          </Button>
-          {brainstorms?.length > 0 || input ? (
-            <Stack direction="row" spacing="5px">
-              <TextField
-                label="Iterate"
-                className={"Iterate"}
-                rows={2}
-                value={iteration}
-                onChange={(e) => {
-                  setIteration(e.target.value);
-                }}
-              />
-              <Button
-                onClick={brainstormInputs}
-                disabled={disabled}
-                sx={{
-                  width: "20%",
-                }}
-              >
-                Update
-              </Button>
-            </Stack>
-          ) : (
-            <></>
-          )}
-          {brainstorms?.map((brainstorm) => {
-            return (
+          </Typography> */}
+        <Typography
+          variant="body2"
+          sx={
+            {
+              // alignSelf: "center",
+              //fontFamily: "monospace",
+            }
+          }
+        >
+          {description}
+        </Typography>
+        <Button
+          onClick={() => {
+            brainstormInputs();
+            if (currentCategory !== category) {
+              updateCurrentCategory(category);
+            }
+          }}
+          disabled={disabled}
+          sx={{
+            width: "100%",
+          }}
+        >
+          Brainstorm
+        </Button>
+        {brainstorms?.length > 0 || input ? (
+          <Stack direction="row" spacing="5px">
+            <TextField
+              label="Iterate"
+              className={"Iterate"}
+              rows={2}
+              value={iteration}
+              onChange={(e) => {
+                setIteration(e.target.value);
+              }}
+            />
+            <Button
+              onClick={brainstormInputs}
+              disabled={disabled}
+              sx={{
+                width: "20%",
+              }}
+            >
+              Update
+            </Button>
+          </Stack>
+        ) : (
+          <></>
+        )}
+        {brainstorms?.map((brainstorm) => {
+          return (
+            <Chip
+              key={brainstorm}
+              label={brainstorm}
+              onClick={() => {
+                setInput(brainstorm);
+                if (currentCategory !== category) {
+                  updateCurrentCategory(category);
+                }
+              }}
+              clickable
+              selected={brainstorm === input}
+              sx={{
+                alignSelf: "center",
+              }}
+            />
+          );
+        })}
+        <InputWithButton
+          label="Input"
+          input={input}
+          setInput={setInput}
+          disabled={disabled}
+          onClick={() => {
+            updateInput();
+            updateUpdatedMatrix(true);
+            updateMatrixCategoryInfo(category, input);
+            if (currentCategory !== category) {
+              updateCurrentCategory(category);
+            }
+          }}
+          onChange={() => {
+            if (currentCategory !== category) {
+              updateCurrentCategory(category);
+            }
+          }}
+          direction="column"
+          rows={category.includes("Idea") ? 1 : 8}
+        />
+        {isGrounding && (
+          <Stack spacing="5px">
+            <Button
+              disabled={disabled}
+              onClick={() => {
+                setVersions([...versions, input]);
+                if (currentCategory !== category) {
+                  updateCurrentCategory(category);
+                }
+              }}
+            >
+              Save Version
+            </Button>
+            {versions?.map((version) => (
               <Chip
-                key={brainstorm}
-                label={brainstorm}
+                key={version}
+                label={version}
                 onClick={() => {
-                  setInput(brainstorm);
-                  if (currentCategory !== category) {
-                    updateCurrentCategory(category);
-                  }
+                  setInput(version);
                 }}
                 clickable
-                selected={brainstorm === input}
+                selected={version === input}
                 sx={{
                   alignSelf: "center",
                 }}
               />
-            );
-          })}
-          <InputWithButton
-            label="Input"
-            input={input}
-            setInput={setInput}
-            disabled={disabled}
-            onClick={() => {
-              updateInput();
-              updateUpdatedMatrix(true);
-              updateMatrixCategoryInfo(category, input);
-              if (currentCategory !== category) {
-                updateCurrentCategory(category);
-              }
-            }}
-            onChange={() => {
-              if (currentCategory !== category) {
-                updateCurrentCategory(category);
-              }
-            }}
-            direction="column"
-            rows={category.includes("Idea") ? 1 : 8}
-          />
-          {isGrounding && (
-            <Stack spacing="5px">
-              <Button
-                disabled={disabled}
-                onClick={() => {
-                  setVersions([...versions, input]);
-                  if (currentCategory !== category) {
-                    updateCurrentCategory(category);
-                  }
-                }}
-              >
-                Save Version
-              </Button>
-              {versions?.map((version) => (
-                <Chip
-                  key={version}
-                  label={version}
-                  onClick={() => {
-                    setInput(version);
-                  }}
-                  clickable
-                  selected={version === input}
-                  sx={{
-                    alignSelf: "center",
-                  }}
-                />
-              ))}
-            </Stack>
-          )}
-          {/* <Button
+            ))}
+          </Stack>
+        )}
+        {/* <Button
           onClick={getQuestions}
           disabled={!needsSpecification}
           sx={{
@@ -465,8 +466,7 @@ const Category = ({
         >
           Update Specifications
         </Button> */}
-        </Stack>
-      </Box>
+      </Stack>
     </Box>
   );
 };

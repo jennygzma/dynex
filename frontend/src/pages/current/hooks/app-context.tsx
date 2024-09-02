@@ -38,7 +38,7 @@ export const AppContext = createContext<AppState | undefined>(undefined);
 
 export const useAppContext = () => useContext(AppContext);
 
-export const PlanProvider = ({ children }) => {
+export const AppProvider = ({ children }) => {
   const [plan, updatePlan] = useState(undefined);
   const [currentTask, updateCurrentTask] = useState(undefined);
   const [spec, updateSpec] = useState(undefined);

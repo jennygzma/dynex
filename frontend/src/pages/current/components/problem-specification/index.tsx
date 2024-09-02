@@ -17,18 +17,14 @@ import Category from "./category";
 import { CategoryType, useMatrixContext } from "../../hooks/matrix-context";
 
 const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
-  PersonXIdea:
-    "This identifies who the application is for. It defines the target user group or demographic.",
+  PersonXIdea: "Who is the application for?",
   PersonXGrounding:
-    "Here, we dig deeper into understanding the underlying challenges, realities, or constraints that the individual faces in trying to achieve their goal. This represents the contextual factors or pain points that shape their experience.",
+    "What is the users goal? What are problems with existing approaches?",
   ApproachXIdea:
-    "Here, we think about how the conceptual strategy, theory, or logical framework that guides the solution or system design. This reflects the abstract approach or methodology used to address the user’s goal.",
-  ApproachXGrounding:
-    "Here, we focus on the specific, practical considerations or decisions that translate the abstract strategy into actionable features or processes, taking into account the user's needs and the context.",
-  InteractionXIdea:
-    "This contemplates the design or pattern of interaction that defines how users engage with the system. This focuses on the conceptual model of the user interface or user experience.",
-  InteractionXGrounding:
-    "Here, we delve into the specific elements, content, or interaction mechanisms that make the abstract UI paradigm meaningful and effective in the given context.",
+    "What is the concept, theory, or strategy that guides the solution?",
+  ApproachXGrounding: "How do we translate this approach to reality?",
+  InteractionXIdea: "What is the core interaction paradigm?",
+  InteractionXGrounding: "What are the core features for this interaction?",
 };
 
 const getDependencies = (
@@ -180,9 +176,13 @@ const ProjectSpecification = () => {
   }, [currentPrototype]);
 
   return (
-    <Box>
-      <Stack spacing="20px">
-        <Typography
+    <Stack
+      spacing="10px"
+      sx={{
+        paddingTop: "100px",
+      }}
+    >
+      {/* <Typography
           variant="h4"
           sx={{
             fontWeight: "bold",
@@ -191,168 +191,263 @@ const ProjectSpecification = () => {
           }}
         >
           Problem Specification
-        </Typography>
-        <InputWithButton
+        </Typography> */}
+      {/* <Stack
+          direction="row"
+          spacing="10px"
+          sx={{
+            alignItems: "flex-start",
+            alignContent: "flex-end",
+            justifyContent: "flex-start",
+          }}
+        >
+          <img
+            src={require("../../../../assets/franky-icon.ico")}
+            alt="franky"
+            width="50x"
+          />
+          <Typography
+            variant="h4"
+            sx={{
+              // alignSelf: "center",
+              color: "#9a4e4e",
+              fontWeight: "bold",
+              fontFamily: "Courier New",
+            }}
+          >
+            dynaex
+          </Typography>
+          <InputWithButton
           className="problem"
           label="Problem"
           input={problem}
           setInput={setProblem}
           onClick={saveProblem}
         />
-        {submittedProblem && (
-          <>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ width: "7%" }}></TableCell>
-                    <TableCell align="center" sx={{ width: "31%" }}>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: "bold",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        Person
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center" sx={{ width: "31%" }}>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: "bold",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        Approach
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center" sx={{ width: "31%" }}>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: "bold",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        Interaction
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell align="right">
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: "bold",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        Idea
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Category
-                        category={"PersonXIdea"}
-                        description={
-                          MATRIX_CATEGORY_DESCRIPTIONS["PersonXIdea"]
-                        }
-                        isDependency={dependencies?.includes("PersonXIdea")}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Category
-                        category={"ApproachXIdea"}
-                        description={
-                          MATRIX_CATEGORY_DESCRIPTIONS["ApproachXIdea"]
-                        }
-                        isDependency={dependencies?.includes("ApproachXIdea")}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Category
-                        category={"InteractionXIdea"}
-                        description={
-                          MATRIX_CATEGORY_DESCRIPTIONS["InteractionXIdea"]
-                        }
-                        isDependency={dependencies?.includes(
-                          "InteractionXIdea",
-                        )}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell align="right">
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: "bold",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        Grounding
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Category
-                        category="PersonXGrounding"
-                        description={
-                          MATRIX_CATEGORY_DESCRIPTIONS["PersonXGrounding"]
-                        }
-                        isDependency={dependencies?.includes(
-                          "PersonXGrounding",
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Category
-                        category="ApproachXGrounding"
-                        description={
-                          MATRIX_CATEGORY_DESCRIPTIONS["ApproachXGrounding"]
-                        }
-                        isDependency={dependencies?.includes(
-                          "ApproachXGrounding",
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Category
-                        category="InteractionXGrounding"
-                        description={
-                          MATRIX_CATEGORY_DESCRIPTIONS["InteractionXGrounding"]
-                        }
-                        isDependency={dependencies?.includes(
-                          "InteractionXGrounding",
-                        )}
-                      />
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <InputWithButton
-              className="prototyp-name"
-              label="Prototype Name"
-              input={prototypeName}
-              setInput={setPrototypeName}
-              onClick={() => {
-                explorePrototype();
-                updateUpdatedMatrix(false);
+        </Stack> */}
+      {submittedProblem && (
+        <>
+          <TableContainer sx={{ backgroundColor: "white" }}>
+            <Table
+              sx={{
+                borderCollapse: "collapse",
               }}
-              onChange={() => {
-                updateCurrentCategory(undefined);
-              }}
-              direction="column"
-              buttonName="Explore Prototype"
-              disabled={!updatedMatrix}
-            />
-          </>
-        )}
-      </Stack>
-    </Box>
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    sx={{ width: "7%", borderBottom: "none" }}
+                  ></TableCell>
+                  <TableCell
+                    sx={{
+                      width: "31%",
+                      borderBottom: "none",
+                      verticalAlign: "bottom",
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={
+                        {
+                          // fontWeight: "bold",
+                          //fontFamily: "monospace",
+                        }
+                      }
+                    >
+                      Person
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: "31%",
+                      borderBottom: "none",
+                      verticalAlign: "bottom",
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={
+                        {
+                          // fontWeight: "bold",
+                          // fontFamily: "monospace",
+                        }
+                      }
+                    >
+                      Approach
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: "31%",
+                      borderBottom: "none",
+                      verticalAlign: "bottom",
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={
+                        {
+                          // fontWeight: "bold",
+                          // fontFamily: "monospace",
+                        }
+                      }
+                    >
+                      Interaction
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={
+                        {
+                          // fontWeight: "bold",
+                          // fontFamily: "monospace",
+                        }
+                      }
+                    >
+                      Idea
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Category
+                      category={"PersonXIdea"}
+                      description={MATRIX_CATEGORY_DESCRIPTIONS["PersonXIdea"]}
+                      isDependency={dependencies?.includes("PersonXIdea")}
+                    />
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Category
+                      category={"ApproachXIdea"}
+                      description={
+                        MATRIX_CATEGORY_DESCRIPTIONS["ApproachXIdea"]
+                      }
+                      isDependency={dependencies?.includes("ApproachXIdea")}
+                    />
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Category
+                      category={"InteractionXIdea"}
+                      description={
+                        MATRIX_CATEGORY_DESCRIPTIONS["InteractionXIdea"]
+                      }
+                      isDependency={dependencies?.includes("InteractionXIdea")}
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={
+                        {
+                          // fontWeight: "bold",
+                          // fontFamily: "monospace",
+                        }
+                      }
+                    >
+                      Grounding
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Category
+                      category="PersonXGrounding"
+                      description={
+                        MATRIX_CATEGORY_DESCRIPTIONS["PersonXGrounding"]
+                      }
+                      isDependency={dependencies?.includes("PersonXGrounding")}
+                    />
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Category
+                      category="ApproachXGrounding"
+                      description={
+                        MATRIX_CATEGORY_DESCRIPTIONS["ApproachXGrounding"]
+                      }
+                      isDependency={dependencies?.includes(
+                        "ApproachXGrounding",
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      borderBottom: "none",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Category
+                      category="InteractionXGrounding"
+                      description={
+                        MATRIX_CATEGORY_DESCRIPTIONS["InteractionXGrounding"]
+                      }
+                      isDependency={dependencies?.includes(
+                        "InteractionXGrounding",
+                      )}
+                    />
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <InputWithButton
+            className="prototyp-name"
+            label="Prototype Name"
+            input={prototypeName}
+            setInput={setPrototypeName}
+            onClick={() => {
+              explorePrototype();
+              updateUpdatedMatrix(false);
+            }}
+            onChange={() => {
+              updateCurrentCategory(undefined);
+            }}
+            direction="row"
+            buttonName="Explore Prototype"
+            disabled={!updatedMatrix}
+          />
+        </>
+      )}
+    </Stack>
   );
 };
 

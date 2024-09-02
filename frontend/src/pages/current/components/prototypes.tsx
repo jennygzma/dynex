@@ -42,9 +42,13 @@ const Prototypes = () => {
   if (prototypes?.length === 0 || !prototypes) return <></>;
 
   return (
-    <Box sx={{ width: "98%" }}>
-      <Stack spacing="10px">
-        <Typography
+    <Stack
+      spacing="10px"
+      sx={{
+        padding: "10px",
+      }}
+    >
+      {/* <Typography
           variant="h4"
           sx={{
             fontWeight: "bold",
@@ -53,57 +57,62 @@ const Prototypes = () => {
           }}
         >
           Prototypes
-        </Typography>
-        {prototypes && (
-          <Stack direction="row" spacing="10px">
-            <Stack direction="row" spacing="5px">
-              {prototypes?.map((prototype) => {
-                return (
-                  <Stack spacing="10px">
-                    <Card
-                      key={prototype}
-                      sx={{
-                        fontSize: "20px",
-                        lineHeight: "30px",
-                        backgroundColor:
-                          currentPrototype === prototype
-                            ? "lightblue"
-                            : "transparent",
+        </Typography> */}
+      {prototypes && (
+        <Stack spacing="10px">
+          <Stack spacing="5px">
+            {prototypes?.map((prototype) => {
+              return (
+                <Stack spacing="10px">
+                  <Card
+                    key={prototype}
+                    sx={{
+                      fontSize: "20px",
+                      lineHeight: "30px",
+                      boxShadow: "none",
+                      borderRadius: 0,
+                      border:
+                        currentPrototype === prototype
+                          ? "2px solid #9a4e4e"
+                          : "1px solid transparent", // Thicker border and color if currentPrototype matches
+                    }}
+                  >
+                    <CardActionArea
+                      onClick={() => {
+                        updateCurrentPrototype(prototype);
+                        setCurrentPrototype(prototype);
                       }}
+                      sx={{ padding: "15px", borderRadius: 0 }}
                     >
-                      <CardActionArea
-                        onClick={() => {
-                          updateCurrentPrototype(prototype);
-                          setCurrentPrototype(prototype);
-                        }}
-                        sx={{ padding: "15px", borderRadius: "20px" }}
+                      <Stack
+                        direction="row"
+                        spacing="5px"
+                        sx={{ justifyContent: "space-between" }}
                       >
-                        <Stack
-                          direction="row"
-                          spacing="5px"
-                          sx={{ justifyContent: "space-between" }}
+                        <Typography>{prototype}</Typography>
+                        <Button
+                          colorVariant={"transparent"}
+                          onClick={() =>
+                            updatePrototypes(
+                              prototypes.filter((p) => p !== prototype),
+                            )
+                          }
+                          sx={{
+                            padding: 0,
+                          }}
                         >
-                          <Typography>{prototype}</Typography>
-                          <Button
-                            onClick={() =>
-                              updatePrototypes(
-                                prototypes.filter((p) => p !== prototype),
-                              )
-                            }
-                          >
-                            🗑️
-                          </Button>
-                        </Stack>
-                      </CardActionArea>
-                    </Card>
-                  </Stack>
-                );
-              })}
-            </Stack>
+                          🗑️
+                        </Button>
+                      </Stack>
+                    </CardActionArea>
+                  </Card>
+                </Stack>
+              );
+            })}
           </Stack>
-        )}
-      </Stack>
-    </Box>
+        </Stack>
+      )}
+    </Stack>
   );
 };
 

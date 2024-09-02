@@ -234,9 +234,8 @@ const Implementation = () => {
 
   if (!currentPrototype) return <></>;
   return (
-    <Box sx={{ width: "70%" }}>
-      <Stack spacing="10px">
-        {/* <Typography
+    <Stack spacing="10px" width="100%">
+      {/* <Typography
           variant="h4"
           sx={{
             fontWeight: "bold",
@@ -245,49 +244,63 @@ const Implementation = () => {
         >
           Implementation
         </Typography> */}
-        <Tabs
-          value={tab}
-          onChange={(event, newValue) => setTab(newValue)}
-          aria-label="tabs"
-        >
-          <Tab value="code" label="Code" />
-          <Tab value="ui" label="UI" />
-        </Tabs>
-        {tab === "ui" &&
-          (code ? (
-            <Paper
-              id="output"
-              className="output"
-              sx={{ height: code ? "1200px" : "0px" }}
-            />
-          ) : (
-            <Typography variant="body1">
-              No code available to render UI.
-            </Typography>
-          ))}
-        {tab === "code" && (
-          <Stack spacing="5px">
-            <Button
-              onClick={generateCode}
-              sx={{
-                width: "100%",
-              }}
-            >
-              {code ? "Regenerate Code" : "Generate Code"}
-            </Button>
-            {code && (
-              <Stack spacing="10px">
-                <Stack direction="row" spacing="10px">
-                  <Box
-                    border={5}
-                    sx={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Stack spacing="10px">
-                      <Typography
+      <Tabs
+        value={tab}
+        onChange={(event, newValue) => setTab(newValue)}
+        aria-label="tabs"
+        sx={{
+          "& .MuiTabs-indicator": {
+            backgroundColor: "#9a4e4e",
+            height: "4px",
+          },
+        }}
+      >
+        <Tab
+          value="code"
+          label="Code"
+          sx={{
+            "&.Mui-selected": {
+              color: "#9a4e4e",
+            },
+          }}
+        />
+        <Tab
+          value="ui"
+          label="UI"
+          sx={{
+            "&.Mui-selected": {
+              color: "#9a4e4e",
+            },
+          }}
+        />
+      </Tabs>
+      {tab === "ui" &&
+        (code ? (
+          <Paper
+            id="output"
+            className="output"
+            sx={{ height: code ? "1200px" : "0px" }}
+          />
+        ) : (
+          <Typography variant="body1">
+            No code available to render UI.
+          </Typography>
+        ))}
+      {tab === "code" && (
+        <Stack spacing="5px">
+          <Button
+            onClick={generateCode}
+            sx={{
+              width: "100%",
+            }}
+          >
+            {code ? "Regenerate Code" : "Generate Code"}
+          </Button>
+          {code && (
+            <Stack spacing="10px">
+              <Stack direction="row" spacing="10px">
+                <Stack spacing="10px" sx={{ width: "100%" }}>
+                  {/* <Typography
                         variant="body1"
                         sx={{
                           fontWeight: "bold",
@@ -296,113 +309,100 @@ const Implementation = () => {
                         }}
                       >
                         Iterate
-                      </Typography>
-                      <TextField
-                        className={"problem"}
-                        label="Problem Description"
-                        value={problemDescription}
-                        onChange={(e) => {
-                          setProblemDescription(e.target.value);
-                        }}
-                      />
-                      <Button
-                        disabled={!problemDescription}
-                        onClick={iterateCode}
-                      >
-                        Iterate
-                      </Button>
-                    </Stack>
-                  </Box>
+                      </Typography> */}
+                  <TextField
+                    className={"problem"}
+                    label="Problem Description"
+                    value={problemDescription}
+                    onChange={(e) => {
+                      setProblemDescription(e.target.value);
+                    }}
+                  />
+                  <Button disabled={!problemDescription} onClick={iterateCode}>
+                    Iterate
+                  </Button>
                 </Stack>
-                {iterations && (
-                  <Box
-                    border={5}
+              </Stack>
+              {iterations && (
+                <Stack spacing="10px">
+                  <Typography
+                    variant="body1"
                     sx={{
-                      justifyContent: "center",
-                      alignItems: "center",
+                      fontWeight: "bold",
+                      alignSelf: "center",
+                      fontFamily: "monospace",
                     }}
                   >
-                    <Stack spacing="10px">
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          fontWeight: "bold",
-                          alignSelf: "center",
-                          fontFamily: "monospace",
+                    Iterate, Debug, or Repair Versions
+                  </Typography>
+                  {iterations && (
+                    <>
+                      <Button
+                        onClick={() => {
+                          updateCurrentIteration(0);
                         }}
                       >
-                        Iterate, Debug, or Repair Versions
-                      </Typography>
-                      {iterations && (
-                        <>
-                          <Button
-                            onClick={() => {
-                              updateCurrentIteration(0);
+                        Revert to Original
+                      </Button>
+                      {Object.keys(iterations).map((key) => (
+                        <Stack direction="row" spacing="5px">
+                          <Card
+                            sx={{
+                              padding: "10px",
+                              width: "90%",
+                              backgroundColor:
+                                +key === currentIteration
+                                  ? "rgba(154, 78, 78, 0.5)"
+                                  : "transparent",
                             }}
                           >
-                            Revert to Original
+                            <Typography variant="body2">
+                              {iterations[key]}
+                            </Typography>
+                          </Card>
+                          <Button
+                            onClick={() => {
+                              updateCurrentIteration(+key);
+                            }}
+                          >
+                            Set
                           </Button>
-                          {Object.keys(iterations).map((key) => (
-                            <Stack direction="row" spacing="5px">
-                              <Card
-                                sx={{
-                                  padding: "10px",
-                                  width: "90%",
-                                  backgroundColor:
-                                    +key === currentIteration
-                                      ? "rgba(154, 78, 78, 0.5)"
-                                      : "transparent",
-                                }}
-                              >
-                                <Typography variant="body2">
-                                  {iterations[key]}
-                                </Typography>
-                              </Card>
-                              <Button
-                                onClick={() => {
-                                  updateCurrentIteration(+key);
-                                }}
-                              >
-                                Set
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  deleteCodeForIteration(+key);
-                                }}
-                              >
-                                Delete
-                              </Button>
-                            </Stack>
-                          ))}
-                        </>
-                      )}
-                    </Stack>
-                  </Box>
-                )}
+                          <Button
+                            onClick={() => {
+                              deleteCodeForIteration(+key);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Stack>
+                      ))}
+                    </>
+                  )}
+                </Stack>
+              )}
 
-                <TextField
-                  className={"code"}
-                  rows={100}
-                  value={code}
-                  onChange={(e) => {
-                    setCode(e.target.value);
-                    setUpdatedCode(true);
-                  }}
-                  code={true}
-                />
-                <Button
-                  disabled={!updatedCode}
-                  onClick={saveCode}
-                  sx={{ width: "100%" }}
-                >
-                  Update Code
-                </Button>
-              </Stack>
-            )}
-          </Stack>
-        )}
-      </Stack>
-    </Box>
+              <TextField
+                className={"code"}
+                rows={100}
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  setUpdatedCode(true);
+                }}
+                code={true}
+              />
+              <Button
+                disabled={!updatedCode}
+                onClick={saveCode}
+                sx={{ width: "100%" }}
+              >
+                Update Code
+              </Button>
+            </Stack>
+          )}
+        </Stack>
+      )}
+    </Stack>
   );
 };
 

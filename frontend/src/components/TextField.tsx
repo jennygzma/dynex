@@ -8,6 +8,8 @@ interface TextFieldProps extends Omit<MuiTextFieldProps, "inputProps"> {
   code?: boolean;
 }
 
+const COLOR = "#9a4e4e";
+
 const TextField = ({
   code = false,
   className = "text-field",
@@ -33,22 +35,26 @@ const TextField = ({
       inputProps={code ? { style: { fontFamily: "monospace" } } : undefined}
       sx={{
         width: "100%",
+        backgroundColor: "white",
         "& .MuiOutlinedInput-root": {
           "& fieldset": {
-            borderColor: "#9a4e4e", // Default border color
+            borderColor: COLOR,
+            borderRadius: 0,
           },
           "&:hover fieldset": {
-            borderColor: "#9a4e4e", // Border color on hover
+            borderColor: COLOR,
+            borderRadius: 0,
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#9a4e4e", // Border color when focused
+            borderColor: "#9a4e4e",
+            borderRadius: 0,
           },
         },
         "& .MuiInputLabel-root": {
-          color: "#9a4e4e", // Label color
+          color: COLOR,
         },
         "& .MuiInputLabel-root.Mui-focused": {
-          color: "#9a4e4e", // Label color when focused
+          color: "#9a4e4e",
         },
         ...sx,
       }}
