@@ -764,11 +764,12 @@ Make sure to implement all that is specified in the task and do not leave anythi
 - The entire app will be written using React and MUI. Load MUI from the CDN. Here is an example: {sample_code}
 - DO NOT DELETE PREVIOUS CODE. DO NOT RETURN A CODE SNIPPET. RETURN THE ENTIRE CODE. Only ADD to existing code to implement the task properly. DO NOT COMMENT PARTS OF THE CODE OUT AND WRITE /*...rest of the code */ or something similar. DO NOT COMMENT ANY PARTS OF THE CODE OUT. DO NOT COMMENT ANY PARTS OF THE CODE OUT FROM PREVIOUS CODES.
 - DO NOT COMMENT {{/* Other sections remain the same */}}. ALL THE CODE MUST EXIST. ALL YOU ARE DOING IS ADDING FUNCTIONALITY. ADDING FUNCTIONALITY - DO NOT REMOVE ANY PREVIOUS CODE.
+- The entire file should be less than 420 lines of code. MUST BE LESS THAN 420 LINES OF CODE.
 - When creating buttons, instead of using text like "chevron_icon" or "back" or "forward", if possible, use emojis. For example: 🗑️ for delete,  ➕ for add, ➖ for remove.
 - DO NOT LOAD ANYTHING ELSE IN THE CDN. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
 - Do not return separate code files. All the components should be in one code file and returned.
 - Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
-- Do not use MUI components: Calendar, DatePicker, TimePicker, as they do not exist.
+- Do not use MUI components: Calendar, DatePicker, TimePicker, SwipeableViews, SwipeableViewsVirtualizer, Fade, as they do not exist.
 """
 
 code_rules_gpt = f"""

@@ -183,7 +183,8 @@ const ProjectSpecification = () => {
     <Stack
       spacing="10px"
       sx={{
-        paddingTop: "100px",
+        paddingTop: "120px",
+        paddingX: "40px",
       }}
     >
       {/* <Typography
@@ -221,14 +222,14 @@ const ProjectSpecification = () => {
           >
             dynaex
           </Typography>
-          <InputWithButton
-          className="problem"
-          label="Problem"
-          input={problem}
-          setInput={setProblem}
-          onClick={saveProblem}
-        />
         </Stack> */}
+      <InputWithButton
+        className="problem"
+        label="Problem"
+        input={problem}
+        setInput={setProblem}
+        onClick={saveProblem}
+      />
       {submittedProblem && (
         <>
           <TableContainer sx={{ backgroundColor: "white" }}>
@@ -439,10 +440,6 @@ const ProjectSpecification = () => {
             direction="row"
             buttonName="Explore Prototype"
             disabled={!updatedMatrix}
-            sx={{
-              paddingLeft: "20px",
-              maxWidth: "1080px",
-            }}
           />
         </>
       )}

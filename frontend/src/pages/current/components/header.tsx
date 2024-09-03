@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Box from "../../../components/Box";
 import { useAppContext } from "../hooks/app-context";
-import { Drawer, Stack, styled, Typography } from "@mui/material";
+import { Drawer, Stack, styled, Tooltip, Typography } from "@mui/material";
 import React from "react";
 import InputWithButton from "../../../components/InputWithButton";
 import axios from "axios";
@@ -19,11 +19,13 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const Header = () => {
-  const [problem, setProblem] = useState("");
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
-  const { currentPrototype, updateIsLoading, updatePrototypes } =
-    useAppContext();
-  const { updateSubmittedProblem } = useMatrixContext();
+  const {
+    prototypes,
+    updateCurrentPrototype,
+    updateIsLoading,
+    updatePrototypes,
+  } = useAppContext();
 
   const toggleDrawer = (toggleValue) => (event) => {
     if (
@@ -35,27 +37,6 @@ const Header = () => {
     setSidebarIsOpen(toggleValue);
   };
 
-  const saveProblem = () => {
-    updateIsLoading(true);
-    axios({
-      method: "POST",
-      url: "/save_problem",
-      data: {
-        problem: problem,
-      },
-    })
-      .then((response) => {
-        console.log("/save_problem request successful:", response.data);
-        updateSubmittedProblem(true);
-      })
-      .catch((error) => {
-        console.error("Error calling /save_problem request:", error);
-      })
-      .finally(() => {
-        updateIsLoading(false);
-      });
-  };
-
   return (
     <Box
       sx={{
@@ -65,9 +46,7 @@ const Header = () => {
         left: 0,
         width: "100%", // Ensure the header spans the full width
         zIndex: 1300, // Ensure it stays above other content (MUI default zIndex for drawers)
-        // display: "flex",
-        alignItems: "center", // Center items vertically
-        padding: "10px", // Adjust padding as needed
+        padding: "10px",
       }}
     >
       <Stack
@@ -75,7 +54,7 @@ const Header = () => {
         spacing="10px"
         sx={{
           alignItems: "center",
-          // justifyContent: "flex-start",
+          justifyContent: "space-between",
           width: "90%",
         }}
       >
@@ -85,11 +64,6 @@ const Header = () => {
         >
           <Menu />
         </Button>
-        <img
-          src={require("../../../assets/franky.ico")}
-          alt="franky"
-          width="50x"
-        />
         <Drawer
           anchor="left"
           open={sidebarIsOpen}
@@ -107,28 +81,44 @@ const Header = () => {
           </DrawerHeader>
           <Prototypes />
         </Drawer>
-        <Typography
-          variant="h4"
+        <Stack
+          direction="row"
           sx={{
-            // alignSelf: "center",
-            color: "#5BB9C2",
-            fontWeight: "bold",
-            fontFamily: "Courier New",
+            alignItems: "center",
           }}
         >
-          dynaex
-        </Typography>
-        <InputWithButton
-          className="problem"
-          label="Problem"
-          input={problem}
-          setInput={setProblem}
-          onClick={saveProblem}
-          sx={{
-            alignSelf: "end",
-            width: "50%",
-          }}
-        />
+          <img
+            src={require("../../../assets/franky.ico")}
+            alt="franky"
+            width="50x"
+          />
+          <Typography
+            variant="h4"
+            sx={{
+              // alignSelf: "center",
+              color: "#5BB9C2",
+              fontWeight: "bold",
+              fontFamily: "Courier New",
+              textAlign: "center",
+            }}
+          >
+            dynaex
+          </Typography>
+        </Stack>
+        {prototypes?.length !== 0 ? (
+          <Tooltip title="Explore a new prototype!">
+            <Button
+              onClick={() => {
+                updateCurrentPrototype(undefined);
+              }}
+              sx={{ marginLeft: "auto" }}
+            >
+              +
+            </Button>
+          </Tooltip>
+        ) : (
+          <></>
+        )}
       </Stack>
     </Box>
   );

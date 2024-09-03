@@ -294,6 +294,10 @@ const ProjectFormation = () => {
       });
   };
 
+  useEffect(()=> {
+
+  },[currentPrototype])
+
   if (!currentPrototype) return <></>;
   if (!expand)
     return (
