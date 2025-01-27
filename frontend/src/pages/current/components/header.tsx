@@ -3,9 +3,6 @@ import Box from "../../../components/Box";
 import { useAppContext } from "../hooks/app-context";
 import { Drawer, Stack, styled, Tooltip, Typography } from "@mui/material";
 import React from "react";
-import InputWithButton from "../../../components/InputWithButton";
-import axios from "axios";
-import { useMatrixContext } from "../hooks/matrix-context";
 import Button from "../../../components/Button";
 import Prototypes from "./prototypes";
 import { ChevronLeft, Menu } from "@mui/icons-material";
@@ -20,12 +17,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 const Header = () => {
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
-  const {
-    prototypes,
-    updateCurrentPrototype,
-    updateIsLoading,
-    updatePrototypes,
-  } = useAppContext();
+  const { prototypes, updateCurrentPrototype } = useAppContext();
 
   const toggleDrawer = (toggleValue) => (event) => {
     if (
@@ -44,6 +36,7 @@ const Header = () => {
         position: "fixed",
         top: 0,
         left: 0,
+        right: 0,
         width: "100%", // Ensure the header spans the full width
         zIndex: 1300, // Ensure it stays above other content (MUI default zIndex for drawers)
         padding: "10px",
@@ -55,7 +48,8 @@ const Header = () => {
         sx={{
           alignItems: "center",
           justifyContent: "space-between",
-          width: "90%",
+          width: "98%",
+          paddingRight: "10px",
         }}
       >
         <Button
@@ -102,7 +96,7 @@ const Header = () => {
               textAlign: "center",
             }}
           >
-            dynaex
+            dynex
           </Typography>
         </Stack>
         {prototypes?.length !== 0 ? (
@@ -111,13 +105,13 @@ const Header = () => {
               onClick={() => {
                 updateCurrentPrototype(undefined);
               }}
-              sx={{ marginLeft: "auto" }}
+              sx={{ ml: "auto", alignSelf: "right" }}
             >
               +
             </Button>
           </Tooltip>
         ) : (
-          <></>
+          <Box sx={{ backgroundColor: "#9a4e4e" }}> </Box>
         )}
       </Stack>
     </Box>

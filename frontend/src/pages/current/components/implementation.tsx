@@ -282,7 +282,7 @@ const Implementation = () => {
             sx={{
               fontWeight: "bold",
               alignSelf: "center",
-              fontFamily: "monospace",
+              // fontFamily: "monospace",
             }}
           >
             Iteration Versions

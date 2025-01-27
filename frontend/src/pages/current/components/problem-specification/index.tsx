@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Box from "../../../../components/Box";
 import InputWithButton from "../../../../components/InputWithButton";
 import { useAppContext } from "../../hooks/app-context";
 import Category from "./category";
@@ -32,7 +31,7 @@ const getDependencies = (
   matrixCategoryInfo: Record<CategoryType, string>,
 ): CategoryType[] => {
   let dependencies = [];
-  if (category == undefined) return dependencies;
+  if (category === undefined) return dependencies;
   Object.entries(matrixCategoryInfo).forEach(([key, value]) => {
     if (value.length > 0) dependencies.push(key);
   });
@@ -183,7 +182,7 @@ const ProjectSpecification = () => {
     <Stack
       spacing="10px"
       sx={{
-        paddingTop: "120px",
+        paddingY: "120px",
         paddingX: "40px",
       }}
     >
@@ -220,7 +219,7 @@ const ProjectSpecification = () => {
               fontFamily: "Courier New",
             }}
           >
-            dynaex
+            dynex
           </Typography>
         </Stack> */}
       <InputWithButton

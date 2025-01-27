@@ -769,7 +769,7 @@ Make sure to implement all that is specified in the task and do not leave anythi
 - DO NOT LOAD ANYTHING ELSE IN THE CDN. Specifically, DO NOT USE: MaterialUI Icon, Material UI Lab.
 - Do not return separate code files. All the components should be in one code file and returned.
 - Do not type import statements. Assume that MUI and react are already imported libraries, so to use the components simply do so like this: const \{{Button, Container, Typography, TextField \}} = MaterialUI; or const \{{ useState, useEffect \}} = React;
-- Do not use MUI components: Calendar, DatePicker, TimePicker, SwipeableViews, SwipeableViewsVirtualizer, Fade, as they do not exist.
+- DO NOT USE THESE MUI COMPONENTS: Calendar, DatePicker, TimePicker, SwipeableViews, SwipeableViewsVirtualizer, Fade, MopbileStepper as they do not exist.
 """
 
 code_rules_gpt = f"""

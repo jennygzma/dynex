@@ -294,9 +294,11 @@ const ProjectFormation = () => {
       });
   };
 
-  useEffect(()=> {
-
-  },[currentPrototype])
+  useEffect(() => {
+    getToolsRequirement();
+    getFakedData();
+    getSpec();
+  }, [currentPrototype]);
 
   if (!currentPrototype) return <></>;
   if (!expand)
@@ -312,7 +314,7 @@ const ProjectFormation = () => {
           <ExpandMore />
         </Button>
         <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-          PROJECT FORMATION
+          PROJECT REQUIREMENTS
         </Typography>
       </Stack>
     );
@@ -330,12 +332,12 @@ const ProjectFormation = () => {
           <ExpandLess />
         </Button>
         <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-          PROJECT FORMATION
+          PROJECT REQUIREMENTS
         </Typography>
       </Stack>
       <Stack spacing="10px" direction="row">
         <Stack sx={{ width: checkedState.checkedFakedData ? "33%" : "50%" }}>
-          <Button onClick={recommendToolsRequirement}>🧠</Button>
+          <Button onClick={recommendToolsRequirement}>BRAINSTORM</Button>
           <FormGroup>
             <FormControlLabel
               control={
@@ -504,17 +506,6 @@ const ProjectFormation = () => {
                 >
                   Fake Data
                 </Typography> */}
-              <TextField
-                className={"generated-data"}
-                label="Data Input Suggestions"
-                variant="outlined"
-                multiline
-                rows={2}
-                value={dataIteration}
-                onChange={(e) => {
-                  setDataIteration(e.target.value);
-                }}
-              />
               <Button
                 onClick={generateFakeData}
                 disabled={!spec}
@@ -526,6 +517,17 @@ const ProjectFormation = () => {
                   ? "Regenerate Placeholder Data"
                   : "Generate Placeholder Data"}
               </Button>
+              <TextField
+                className={"generated-data"}
+                label="Data Input Suggestions"
+                variant="outlined"
+                multiline
+                rows={1}
+                value={dataIteration}
+                onChange={(e) => {
+                  setDataIteration(e.target.value);
+                }}
+              />
               {dataInput !== "null" && dataInput && (
                 <>
                   <TextField
@@ -534,7 +536,7 @@ const ProjectFormation = () => {
                     label="Data Input"
                     variant="outlined"
                     multiline
-                    rows={13}
+                    rows={10}
                     value={dataInput}
                     onChange={(e) => {
                       setDataInput(e.target.value);

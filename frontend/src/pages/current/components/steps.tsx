@@ -282,7 +282,7 @@ const Steps = () => {
                         </Stack>
                         <Stack direction="row" spacing="10px">
                           <Button onClick={() => setClickedAddStep(true)}>
-                            Add Task Beneath
+                            Add Step Beneath
                           </Button>
                           <Button onClick={removeStep}>Remove Task</Button>
                         </Stack>

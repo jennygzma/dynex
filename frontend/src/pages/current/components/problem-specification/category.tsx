@@ -30,6 +30,33 @@ const mapQuestionsToSpecifications = (
     answer: "",
   }));
 
+const PERSON_IDEA_EXAMPLE = [
+  "Non-native speakers interested in Chinese culture",
+  "Visual learners struggling with language memorization",
+  "Travel enthusiasts planning a trip to China",
+  "Retired adult wanting to expand linguistic skills",
+  "Busy university student wanting to study Chinese in his free time",
+  "Chinese-born American looking to brush up language skills",
+];
+
+const APPROACH_IDEA_EXAMPLE = [
+  "Pictorial spaced repetition learning",
+  "Visual storytelling for language acquisition",
+  "Cognitive load theory for efficient memorization",
+];
+
+const INTERACTION_IDEA_EXAMPLE = [
+  "Simple guess-and-review quiz interface",
+  "Visual dictionary flashcard interface",
+  "Image-based language learning game interface",
+];
+
+const PERSON_GROUNDING_EXAMPLE =
+  "- Confusion arises due to unfamiliarity with Chinese characters and their complex structure, slowing the learning process. \n- Difficulty in linking characters to their corresponding meaning or pronunciation, hindering vocabulary acquisition.\n- Traditional memorization methods offer little aid to visual learners who could better recall information through imagery.";
+const APPROACH_GROUNDING_EXAMPLE =
+  "- Integrate visual aids, such as illustrations or animations, that correlate with each word's meaning to enhance understanding and recall.\n- Develop an algorithm that links related words and images together in a meaningful story, promoting stronger memory associations.\n- Make use of GPT to generate context-rich sentences or mini-stories, helping to create a narrative around each word or character.\n- Ensure design of the learning material caters to visual learners, with a focus on vibrant, engaging, and contextually relevant graphical representations.";
+const INTERACTION_GROUNDING_EXAMPLE =
+  "- The quiz interface should present the Chinese character or word along with its corresponding image. \n- The user then attempts to guess its meaning. If they respond accurately, the item is pushed back into the review cycle based on the SRS algorithm.\n- If the guess is incorrect, the correct meaning is displayed, and the item is scheduled for another review sooner.\n- Users should have a clear view of their progress and a way to navigate to previously learned words for self-study.";
 const Category = ({
   description,
   category,
@@ -44,9 +71,26 @@ const Category = ({
     updateMatrixCategoryInfo,
     matrixCategoryInfo,
   } = useMatrixContext();
-  const [input, setInput] = useState("");
+  let initialInput = "";
+  // if (category==="PersonXGrounding") {
+  //   initialInput= PERSON_GROUNDING_EXAMPLE;
+  // } else if (category==="ApproachXGrounding"){
+  //   initialInput = APPROACH_GROUNDING_EXAMPLE;
+  // } else if (category==="InteractionXGrounding"){
+  //   initialInput = INTERACTION_GROUNDING_EXAMPLE;
+  // }
+  let initialBrainstorm = [];
+  // if (category==="PersonXIdea") {
+  //   initialBrainstorm = PERSON_IDEA_EXAMPLE;
+  // } else if (category==="ApproachXIdea") {
+  //   initialBrainstorm = APPROACH_IDEA_EXAMPLE;
+  // } else if (category==="InteractionXIdea") {
+  //   initialBrainstorm = INTERACTION_IDEA_EXAMPLE;
+  // }
+
+  const [input, setInput] = useState(initialInput);
   // const [needsSpecification, setNeedsSpecification] = useState(false);
-  const [brainstorms, setBrainstorms] = useState([]);
+  const [brainstorms, setBrainstorms] = useState(initialBrainstorm);
   // const [specifications, setSpecifications] = useState([]);
   const [question, setQuestion] = useState("");
   const [iteration, setIteration] = useState("");
@@ -244,13 +288,13 @@ const Category = ({
   //   };
 
   useEffect(() => {
-    getInput();
+    // getInput();
     // getNeedsSpecification();
   }, [submittedProblem]);
 
   useEffect(() => {
-    setBrainstorms([]);
-    getInput();
+    //setBrainstorms([]);
+    // getInput();
   }, [currentPrototype]);
 
   return (
