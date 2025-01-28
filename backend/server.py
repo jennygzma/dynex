@@ -911,4 +911,4 @@ def set_globals_for_uuid(generated_uuid):
 
 # Running app
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
