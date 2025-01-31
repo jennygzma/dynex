@@ -4,7 +4,7 @@ import axios from "axios";
 import { useAppContext } from "../hooks/app-context";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
-import Box from "../../../components/Box";
+import { SERVER_URL } from "..";
 
 const Implementation = () => {
   const {
@@ -40,7 +40,7 @@ const Implementation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_code_per_step",
+      url: `${SERVER_URL}/save_code_per_step`,
       data: {
         task_id: currentTask.taskId,
         code: code,
@@ -63,7 +63,7 @@ const Implementation = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_code_per_step",
+      url: `${SERVER_URL}/get_code_per_step`,
       params: {
         task_id: currentTask.taskId,
       },
@@ -84,7 +84,7 @@ const Implementation = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_code_per_step_per_iteration",
+      url: `${SERVER_URL}/get_code_per_step_per_iteration`,
       params: {
         task_id: currentTask.taskId,
         iteration: iteration,
@@ -112,7 +112,7 @@ const Implementation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/generate_code",
+      url: `${SERVER_URL}/generate_code`,
       data: {
         task_id: currentTask.taskId,
       },
@@ -133,7 +133,7 @@ const Implementation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/iterate_code",
+      url: `${SERVER_URL}/iterate_code`,
       data: {
         task_id: currentTask.taskId,
         problem: problemDescription,
@@ -156,7 +156,7 @@ const Implementation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/delete_code_per_step_per_iteration",
+      url: `${SERVER_URL}/delete_code_per_step_per_iteration`,
       data: {
         task_id: currentTask.taskId,
         iteration: iteration,
@@ -185,7 +185,7 @@ const Implementation = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_iteration_map_per_step",
+      url: `${SERVER_URL}/get_iteration_map_per_step`,
       params: {
         task_id: currentTask.taskId,
       },

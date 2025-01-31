@@ -4,7 +4,7 @@ import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
-import Box from "../../../components/Box";
+import { SERVER_URL } from "..";
 
 const mapPlan = (jsonPlan) => {
   return jsonPlan.map((step) => {
@@ -39,7 +39,7 @@ const Steps = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/generate_plan",
+      url: `${SERVER_URL}/generate_plan`,
     })
       .then((response) => {
         console.log("/generate_plan request successful:", response.data);
@@ -57,7 +57,7 @@ const Steps = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_plan",
+      url: `${SERVER_URL}/get_plan`,
     })
       .then((response) => {
         console.log("/get_plan request successful:", response.data);
@@ -77,7 +77,7 @@ const Steps = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_first_task_id_without_code",
+      url: `${SERVER_URL}/get_first_task_id_without_code`,
     })
       .then((response) => {
         console.log(
@@ -102,7 +102,7 @@ const Steps = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/update_step_in_plan",
+      url: `${SERVER_URL}/update_step_in_plan`,
       data: {
         task_id: currentTask.taskId,
         task_description: newTaskDescription,
@@ -125,7 +125,7 @@ const Steps = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/add_step_in_plan",
+      url: `${SERVER_URL}/add_step_in_plan`,
       data: {
         current_task_id: currentTask.taskId,
         new_task_description: addStepNewTaskDescription,
@@ -149,7 +149,7 @@ const Steps = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/remove_step_in_plan",
+      url: `${SERVER_URL}/remove_step_in_plan`,
       data: {
         task_id: currentTask.taskId,
       },
@@ -170,7 +170,7 @@ const Steps = () => {
   //   updateIsLoading(true);
   //   axios({
   //     method: "GET",
-  //     url: "/get_test_cases_per_lock_step",
+  //     url: `${SERVER_URL}/get_test_cases_per_lock_step`,
   //     params: {
   //       task_id: currentTask.taskId,
   //     },

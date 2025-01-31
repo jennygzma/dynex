@@ -12,8 +12,10 @@ import Button from "../../components/Button";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import Matrix from "./components/matrix";
 
-const local = false;
-export const URL = local ? "" : "https://dynexbackend-nmingl5go-jenny-mas-projects.vercel.app/";
+const local = true;
+export const SERVER_URL = local
+  ? ""
+  : "https://dynexbackend-nmingl5go-jenny-mas-projects.vercel.app/";
 
 // This prototype focuses on planning and getting a fully planned out version with the code ready
 const Home = () => {

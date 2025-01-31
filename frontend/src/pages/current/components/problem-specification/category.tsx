@@ -8,6 +8,7 @@ import InputWithButton from "../../../../components/InputWithButton";
 import { useAppContext } from "../../hooks/app-context";
 import { CategoryType, useMatrixContext } from "../../hooks/matrix-context";
 import Chip from "../../../../components/Chip";
+import { SERVER_URL } from "../..";
 
 interface CategoryProps {
   category: CategoryType;
@@ -124,7 +125,7 @@ const Category = ({
   //   updateIsLoading(true);
   //   axios({
   //     method: "GET",
-  //     url: "/get_needs_specification",
+  //     url: `${SERVER_URL}/get_needs_specification`,
   //     params: {
   //       category: category,
   //     },
@@ -148,7 +149,7 @@ const Category = ({
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_input",
+      url: `${SERVER_URL}/get_input`,
       params: {
         category: category,
       },
@@ -169,7 +170,7 @@ const Category = ({
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/update_input",
+      url: `${SERVER_URL}/update_input`,
       data: {
         category: category,
         input: input,
@@ -192,7 +193,7 @@ const Category = ({
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/brainstorm_inputs",
+      url: `${SERVER_URL}/brainstorm_inputs`,
       params: {
         category: category,
         iteration: iteration,
@@ -219,7 +220,7 @@ const Category = ({
   //   updateIsLoading(true);
   //   axios({
   //     method: "GET",
-  //     url: "/get_question",
+  //     url: `${SERVER_URL}/get_question`,
   //     params: {
   //       category: category,
   //     },
@@ -243,7 +244,7 @@ const Category = ({
   //   updateIsLoading(true);
   //   axios({
   //     method: "GET",
-  //     url: "/get_brainstorms",
+  //     url: `${SERVER_URL}/get_brainstorms`,
   //     params: {
   //       category: category,
   //       question: question,
@@ -265,7 +266,7 @@ const Category = ({
   //     updateIsLoading(true);
   //     axios({
   //       method: "POST",
-  //       url: "/update_specifications",
+  //       url: `${SERVER_URL}/update_specifications`,
   //       data: {
   //         category: category,
   //         specifications: specifications,

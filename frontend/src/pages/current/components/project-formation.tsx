@@ -10,8 +10,8 @@ import axios from "axios";
 import { useAppContext } from "../hooks/app-context";
 import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
-import Box from "../../../components/Box";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import { SERVER_URL } from "..";
 
 const ProjectFormation = () => {
   const { updateIsLoading, spec, updateSpec, currentPrototype } =
@@ -54,7 +54,7 @@ const ProjectFormation = () => {
   //   updateIsLoading(true);
   //   axios({
   //     method: "GET",
-  //     url: "/get_prompt",
+  //     url: `${SERVER_URL}/get_prompt`,
   //   })
   //     .then((response) => {
   //       console.log("/get_prompt request successful:", response.data);
@@ -72,7 +72,7 @@ const ProjectFormation = () => {
   //   updateIsLoading(true);
   //   axios({
   //     method: "POST",
-  //     url: "/save_prompt",
+  //     url: `${SERVER_URL}/save_prompt`,
   //     data: {
   //       prompt: UIPrompt,
   //     },
@@ -94,7 +94,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/generate_fake_data",
+      url: `${SERVER_URL}/generate_fake_data`,
       data: {
         user_iteration: dataIteration,
       },
@@ -115,7 +115,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_faked_data",
+      url: `${SERVER_URL}/save_faked_data`,
       data: {
         faked_data: dataInput,
       },
@@ -136,7 +136,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_faked_data",
+      url: `${SERVER_URL}/get_faked_data`,
     })
       .then((response) => {
         console.log("/get_faked_data request successful:", response.data);
@@ -155,7 +155,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/generate_spec",
+      url: `${SERVER_URL}/generate_spec`,
     })
       .then((response) => {
         console.log("/generate_spec request successful:", response.data);
@@ -174,7 +174,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_spec",
+      url: `${SERVER_URL}/save_spec`,
       data: {
         spec: spec,
       },
@@ -195,7 +195,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_spec",
+      url: `${SERVER_URL}/get_spec`,
     })
       .then((response) => {
         console.log("/get_spec request successful:", response.data);
@@ -214,7 +214,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_tools_requirements",
+      url: `${SERVER_URL}/get_tools_requirements`,
     })
       .then((response) => {
         console.log(
@@ -246,7 +246,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/set_tools_requirements",
+      url: `${SERVER_URL}/set_tools_requirements`,
       data: {
         gpt: checkedState.checkedGPT,
         images: checkedState.checkedImages,
@@ -274,7 +274,7 @@ const ProjectFormation = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/recommend_tools_requirements",
+      url: `${SERVER_URL}/recommend_tools_requirements`,
     })
       .then((response) => {
         console.log(

@@ -14,6 +14,7 @@ import InputWithButton from "../../../../components/InputWithButton";
 import { useAppContext } from "../../hooks/app-context";
 import Category from "./category";
 import { CategoryType, useMatrixContext } from "../../hooks/matrix-context";
+import { SERVER_URL } from "../..";
 
 const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
   PersonXIdea: "Who is the application for?",
@@ -74,7 +75,7 @@ const ProjectSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_problem",
+      url: `${SERVER_URL}/get_problem`,
     })
       .then((response) => {
         console.log("/get_problem request successful:", response.data);
@@ -95,7 +96,7 @@ const ProjectSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_prototype_name",
+      url: `${SERVER_URL}/get_prototype_name`,
     })
       .then((response) => {
         console.log("/get_prototype_name request successful:", response.data);
@@ -113,7 +114,7 @@ const ProjectSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_problem",
+      url: `${SERVER_URL}/save_problem`,
       data: {
         problem: problem,
       },
@@ -134,7 +135,7 @@ const ProjectSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/explore_prototype",
+      url: `${SERVER_URL}/explore_prototype`,
       data: {
         prototype: prototypeName,
       },
@@ -155,7 +156,7 @@ const ProjectSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_prototypes",
+      url: `${SERVER_URL}/get_prototypes`,
     })
       .then((response) => {
         console.log("/get_prototypes request successful:", response.data);

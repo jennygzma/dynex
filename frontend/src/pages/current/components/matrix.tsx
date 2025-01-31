@@ -10,11 +10,11 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Box from "../../../components/Box";
 import { useAppContext } from "../hooks/app-context";
 import { CategoryType, useMatrixContext } from "../hooks/matrix-context";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import Button from "../../../components/Button";
+import { SERVER_URL } from "..";
 
 const MATRIX_CATEGORY_DESCRIPTIONS: Record<CategoryType, string> = {
   PersonXIdea: "Who is the application for?",
@@ -49,7 +49,7 @@ const Matrix = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_problem",
+      url: `${SERVER_URL}/get_problem`,
     })
       .then((response) => {
         console.log("/get_problem request successful:", response.data);
@@ -69,7 +69,7 @@ const Matrix = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_prototype_name",
+      url: `${SERVER_URL}/get_prototype_name`,
     })
       .then((response) => {
         console.log("/get_prototype_name request successful:", response.data);
@@ -87,7 +87,7 @@ const Matrix = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_prototypes",
+      url: `${SERVER_URL}/get_prototypes`,
     })
       .then((response) => {
         console.log("/get_prototypes request successful:", response.data);
@@ -136,7 +136,7 @@ const Matrix = () => {
     try {
       const response = await axios({
         method: "GET",
-        url: "/get_input",
+        url: `${SERVER_URL}/get_input`,
         params: {
           category: category,
         },

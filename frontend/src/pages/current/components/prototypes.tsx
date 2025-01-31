@@ -3,7 +3,7 @@ import { useAppContext } from "../hooks/app-context";
 import axios from "axios";
 import { Card, CardActionArea, Stack, Typography } from "@mui/material";
 import Button from "../../../components/Button";
-import Box from "../../../components/Box";
+import { SERVER_URL } from "..";
 
 const Prototypes = () => {
   const {
@@ -18,7 +18,7 @@ const Prototypes = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/set_current_prototype",
+      url: `${SERVER_URL}/set_current_prototype`,
       data: {
         current_prototype: prototype,
       },

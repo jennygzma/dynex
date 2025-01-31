@@ -6,6 +6,7 @@ import Button from "../../../components/Button";
 import TextField from "../../../components/TextField";
 import Box from "../../../components/Box";
 import Chip from "../../../components/Chip";
+import { SERVER_URL } from "..";
 
 const mapTheories = (jsonTheories) => {
   return jsonTheories.map((jsonTheory) => {
@@ -96,7 +97,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_idea",
+      url: `${SERVER_URL}/get_idea`,
     })
       .then((response) => {
         console.log("/get_idea request successful:", response.data);
@@ -114,7 +115,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_idea",
+      url: `${SERVER_URL}/save_idea`,
       data: {
         idea: idea,
       },
@@ -135,7 +136,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_user",
+      url: `${SERVER_URL}/get_user`,
     })
       .then((response) => {
         console.log("/get_user request successful:", response.data);
@@ -153,7 +154,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_user",
+      url: `${SERVER_URL}/save_user`,
       data: {
         user: user,
       },
@@ -175,7 +176,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/brainstorm_user_examples",
+      url: `${SERVER_URL}/brainstorm_user_examples`,
     })
       .then((response) => {
         console.log(
@@ -199,7 +200,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_goal",
+      url: `${SERVER_URL}/get_goal`,
     })
       .then((response) => {
         console.log("/get_goal request successful:", response.data);
@@ -217,7 +218,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_goal",
+      url: `${SERVER_URL}/save_goal`,
       data: {
         goal: goal,
       },
@@ -239,7 +240,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/brainstorm_goal_examples",
+      url: `${SERVER_URL}/brainstorm_goal_examples`,
     })
       .then((response) => {
         console.log(
@@ -263,7 +264,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/brainstorm_theories",
+      url: `${SERVER_URL}/brainstorm_theories`,
     })
       .then((response) => {
         console.log("/brainstorm_theories request successful:", response.data);
@@ -281,7 +282,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_theories",
+      url: `${SERVER_URL}/get_theories`,
     })
       .then((response) => {
         console.log("/get_theories request successful:", response.data);
@@ -299,7 +300,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/brainstorm_ui_paradigms",
+      url: `${SERVER_URL}/brainstorm_ui_paradigms`,
       params: {
         theory: theory,
       },
@@ -323,7 +324,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_ui_paradigms",
+      url: `${SERVER_URL}/get_ui_paradigms`,
       params: {
         theory: theory,
       },
@@ -344,7 +345,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "GET",
-      url: "/get_theories_and_paradigms",
+      url: `${SERVER_URL}/get_theories_and_paradigms`,
     })
       .then((response) => {
         console.log(
@@ -370,7 +371,7 @@ const UserSpecification = () => {
     updateIsLoading(true);
     axios({
       method: "POST",
-      url: "/save_selected_theory_and_paradigms",
+      url: `${SERVER_URL}/save_selected_theory_and_paradigms`,
       data: {
         theory: theory,
         paradigms: paradigms,
