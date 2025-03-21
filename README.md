@@ -1,4 +1,8 @@
-# Front End <br />
+
+# DynEx: Structured Design Exploration for AI Code Synthesis
+This repository accompanies our research paper: [DynEx: Dynamic Code Synthesis and Structured Design Exploration For Accelerated Exploratory Programming](https://arxiv.org/abs/2410.00400). It contains the code to our core dimensions for Design Matrix exploration, as well as our modular code generation pipeline. Below are the steps to set up DynEx on your local machine. 
+
+## Front End <br />
 In one terminal... <br/> <br/>
 ### Set up <br/>
 Make sure npm, react, and mui are installed<br />
@@ -7,7 +11,7 @@ Make sure npm, react, and mui are installed<br />
 `cd frontend`<br />
 `npm start`<br />
 
-# BackEnd <br />
+## BackEnd <br />
 In another terminal... <br/>
 
 ### Set up <br/>
